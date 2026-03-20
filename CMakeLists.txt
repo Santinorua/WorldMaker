@@ -18,13 +18,20 @@ target_compile_definitions(PRNG PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(PRNG INTERFACE ${CMAKE_SOURCE_DIR}/Core/PRNG)
 
 # -----------------------------------------------------------------------------------------------------
+
+file (GLOB UTILITIES_SRC "${CMAKE_SOURCE_DIR}/Core/Utilities/*.cpp")
+add_library(Utilities STATIC ${UTILITIES_SRC})
+target_compile_definitions(Utilities PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
+target_include_directories(Utilities INTERFACE ${CMAKE_SOURCE_DIR}/Core/Utilities)
+
+# -----------------------------------------------------------------------------------------------------
 #######################################################################################################
 #######################################################################################################
 # -----------------------------------------------------------------------------------------------------
 
 add_library(Core INTERFACE)
 
-target_link_libraries(Core INTERFACE PRNG)
+target_link_libraries(Core INTERFACE PRNG Utilities)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
