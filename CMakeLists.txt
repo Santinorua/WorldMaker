@@ -25,13 +25,20 @@ target_compile_definitions(PerlinNoise PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_D
 target_include_directories(PerlinNoise INTERFACE ${CMAKE_SOURCE_DIR}/Core/PerlinNoise)
 
 # -----------------------------------------------------------------------------------------------------
+
+file (GLOB UTILITIES_SRC "${CMAKE_SOURCE_DIR}/Core/Utilities/*.cpp")
+add_library(Utilities STATIC ${UTILITIES_SRC})
+target_compile_definitions(Utilities PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
+target_include_directories(Utilities INTERFACE ${CMAKE_SOURCE_DIR}/Core/Utilities)
+
+# -----------------------------------------------------------------------------------------------------
 #######################################################################################################
 #######################################################################################################
 # -----------------------------------------------------------------------------------------------------
 
 add_library(Core INTERFACE)
 
-target_link_libraries(Core INTERFACE PRNG PerlinNoise)
+target_link_libraries(Core INTERFACE PRNG Utilities PerlinNoise)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
