@@ -1,9 +1,11 @@
 #pragma once
 #include <cstdint>
+#include <vector>
 
 struct PRNG {
     uint64_t seed;
     uint64_t nextNumber64();
-    int nextNumber32();
+    uint32_t nextNumber32();
+    std::vector<uint64_t> nextMultipleNumbers(int count);
 };
 

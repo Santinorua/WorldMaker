@@ -12,6 +12,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # -----------------------------------------------------------------------------------------------------
 
+file (GLOB PRNG_SRC "${CMAKE_SOURCE_DIR}/Core/PRNG/*.cpp")
+add_library(PRNG STATIC ${PRNG_SRC})
+target_compile_definitions(PRNG PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
+target_include_directories(PRNG INTERFACE ${CMAKE_SOURCE_DIR}/Core/PRNG)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
@@ -19,6 +23,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # -----------------------------------------------------------------------------------------------------
 
 add_library(Core INTERFACE)
+
+target_link_libraries(Core INTERFACE PRNG)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
