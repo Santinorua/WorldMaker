@@ -1,2 +1,4 @@
 #pragma once
-#include "core/PRNG.h"
+#include "PRNG.h"
+#include "PerlinNoise.h"
+#include "Interpolations.h"
