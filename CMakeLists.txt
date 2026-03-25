@@ -133,7 +133,7 @@ file (GLOB PERLINNOISE_SRC "${CMAKE_SOURCE_DIR}/Core/PerlinNoise/*.cpp")
 add_library(PerlinNoise STATIC ${PERLINNOISE_SRC})
 target_compile_definitions(PerlinNoise PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(PerlinNoise INTERFACE ${CMAKE_SOURCE_DIR}/Core/PerlinNoise)
-target_link_libraries(PerlinNoise PUBLIC Math PRNG)
+target_link_libraries(PerlinNoise PUBLIC Math PRNG Utilities)
 
 # -----------------------------------------------------------------------------------------------------
 

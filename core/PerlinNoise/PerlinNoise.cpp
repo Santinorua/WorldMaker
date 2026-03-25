@@ -1,57 +1,39 @@
 #include "PerlinNoise.h"
 
-#include "../Utilities/Interpolations.h"
 
 
 namespace WorldMaker {
-    // std::vector<std::vector<Vec2>> PerlinNoise::getVectors(PRNG &prng) {
-    //     std::vector<std::vector<Vec2>> vectors;
-    //     for (int y = 0; y < m_height + 1; y++) {
-    //         std::vector<Vec2> row;
-    //         for (int x = 0; x < m_width + 1; x++) {
-    //             double a = static_cast<double>(prng.nextNumber32() % 20001) / 10000.0 - 1.0;
-    //             double b = static_cast<double>(prng.nextNumber32() % 20001) / 10000.0 - 1.0;
-    //             Vec2 vec = Vec2(a, b);
-    //             vec = vec.Normalized();
-    //             row.push_back(vec);
-    //         }
-    //         vectors.push_back(row);
-    //     }
-    //     return vectors;
-    // }
-    // std::vector<std::vector<Vec4>> PerlinNoise::getGradients(std::vector<std::vector<Vec2>> &vectors) {
-    //     std::vector<std::vector<Vec4>> gradients;
-    //     for (int y = 0; y < m_height; y++) {
-    //         std::vector<Vec4> row;
-    //         for (int x = 0; x < m_width; x++) {
-    //             double topLeft = vectors[y][x].DotProduct(TopLeft);
-    //             double topRight = vectors[y][x+1].DotProduct(TopRight);
-    //             double bottomLeft = vectors[y+1][x].DotProduct(BottomLeft);
-    //             double bottomRight = vectors[y+1][x+1].DotProduct(BottomRight);
-    //
-    //             row.push_back(Vec4(topLeft, topRight, bottomLeft, bottomRight));
-    //         }
-    //         gradients.push_back(row);
-    //     }
-    //     return gradients;
-    // }
-    //
-    // void PerlinNoise::getPerlinNoise(PRNG &prng) {
-    //     std::vector<std::vector<Vec2>> vectors = getVectors(prng);
-    //     std::vector<std::vector<Vec4>> gradients = getGradients(vectors);
-    //     for (int y = 0; y < m_height; y++) {
-    //         std::vector<double> row;
-    //         row.reserve(m_width);
-    //         for (int x = 0; x < m_width; x++) {
-    //             row.push_back(Bilinear(gradients[y][x]));
-    //         }
-    //         m_perlinNoise.push_back(row);
-    //     }
-    // }
-    // PerlinNoise::PerlinNoise(int width, int height, PRNG &prng) {
-    //     m_height = height;
-    //     m_width = width;
-    //     m_perlinNoise.reserve(m_height);
-    //     getPerlinNoise(prng);
-    // }
+    std::array<Vec2,4> PerlinNoise::getVectors(double x, double y) {
+        std::array<Vec2,4> result;
+        result[0] = PRNG::randomVector2(std::floor(x), std::floor(y), m_seed).Normalized();
+        result[1] = PRNG::randomVector2(std::ceil(x), std::floor(y), m_seed).Normalized();
+        result[2] = PRNG::randomVector2(std::floor(x), std::ceil(y), m_seed).Normalized();
+        result[3] = PRNG::randomVector2(std::ceil(x), std::ceil(y), m_seed).Normalized();
+        return result;
+    }
+    std::array<double,4> PerlinNoise::getGradients(std::array<Vec2, 4> &vectors, double x, double y) {
+        std::array<double,4> gradients;
+        Vec2 pos = Vec2(x, y);
+        for (int i = 0; i < 4; i++) {
+            Vec2 dir = pos - vectors[i];
+            gradients[i] = dir.DotProduct(vectors[i]);
+        }
+        return gradients;
+    }
+
+    double PerlinNoise::getPerlinNoise(int x, int y) {
+        double sampleX = x / m_scale;
+        double sampleY = y / m_scale;
+
+        std::array<Vec2,4> vectors = getVectors(sampleX, sampleY);
+        std::array<double,4> gradients = getGradients(vectors, sampleX, sampleY);
+
+        return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]));
+    }
+    PerlinNoise::PerlinNoise(int width, int height, double scale, uint64_t seed) {
+        m_height = height;
+        m_width = width;
+        m_scale = scale;
+        m_seed = seed;
+    }
 }
