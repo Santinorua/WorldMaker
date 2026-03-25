@@ -9,16 +9,16 @@
 namespace WorldMaker
 {
 	Texture2D::Texture2D(const std::string& relativePath)
-		: m_localBuffer(nullptr)
+		: m_width(0), m_height(0), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
 	    m_filePath = GlobalizePath(relativePath);
 		GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_glName));
 
 		stbi_set_flip_vertically_on_load(1);
 
-		// m_localBuffer = stbi_load(m_filePath.c_str(), &m_Width, &m_Height, &m_BPP, 4);
+		m_unsignedCharLocalBuffer = stbi_load(m_filePath.c_str(), &m_width, &m_height, &m_BPP, 4);
 
-		if (m_localBuffer == NULL)
+		if (m_unsignedCharLocalBuffer == NULL)
 		{
 			const char* reason = stbi_failure_reason();
 			if (reason) {
@@ -32,8 +32,8 @@ namespace WorldMaker
 			std::cout << "Texture2D at path: " << m_filePath << " was loaded succesfully" << "\n";
 		}
 
-		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA8, m_Width, m_Height));
-		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_localBuffer));
+		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA8, m_width, m_height));
+		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, m_unsignedCharLocalBuffer));
 
 		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
@@ -41,19 +41,19 @@ namespace WorldMaker
 		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
 
 
-		if (!m_localBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
-		ASSERT(m_localBuffer);
-		stbi_image_free(m_localBuffer);
+		if (!m_unsignedCharLocalBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
+		ASSERT(m_unsignedCharLocalBuffer);
+		stbi_image_free(m_unsignedCharLocalBuffer);
 	}
 
-	Texture2D::Texture2D(int width, int height, float* data) : m_Width(width), m_Height(height)
+	Texture2D::Texture2D(int width, int height, float* data) : m_width(width), m_height(height), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
-		if (data!=nullptr) m_localBuffer = data;
+		if (data!=nullptr) m_floatLocalBuffer = data;
 		else std::cerr << "Error: the data provided when creating a Texture2D is null!\n";
 		GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_glName));
 
-		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA32F, m_Width, m_Height));
-		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_FLOAT, m_localBuffer));
+		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA32F, m_width, m_height));
+		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_width, m_height, GL_RGBA, GL_FLOAT, m_floatLocalBuffer));
 
 		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MAG_FILTER, GL_NEAREST));

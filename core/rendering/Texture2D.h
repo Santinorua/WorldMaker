@@ -9,10 +9,11 @@ namespace WorldMaker
 	class Texture2D : public Texture
 	{
 	private:
-		int m_Width, m_Height, m_BPP; // Bits per pixel
+		int m_width, m_height, m_BPP; // Bits per pixel
 
 	public:
-		float* m_localBuffer;
+		float* m_floatLocalBuffer;
+		unsigned char* m_unsignedCharLocalBuffer;
 		Texture2D(const std::string& relativePath); // Relative path from the project root directory
 		Texture2D(int width, int height, float* data);
 		~Texture2D();
@@ -22,8 +23,8 @@ namespace WorldMaker
 
 		GLenum texType() const override { return GL_TEXTURE_2D; }
 
-		int GetWidth() const { return m_Width; }
-		int GetHeight() const { return m_Height; }
+		int GetWidth() const { return m_width; }
+		int GetHeight() const { return m_height; }
 	};
 	using Texture2DSPtr = std::shared_ptr<Texture2D>;
 }
