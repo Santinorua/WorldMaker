@@ -1,0 +1,34 @@
+#pragma once
+
+#include "glm/glm.hpp"
+#include <iostream>
+#include <typeinfo>
+
+#if defined(_WIN32)
+#define ASSERT(x) do {if(!(x)) __debugbreak();} while(false)
+#endif
+#ifdef __linux__
+#include <csignal>
+#include <cstdio>
+#define ASSERT(x) do {if(!(x)) { fprintf(stderr, #x " (%s:%d)\n", __FILE__, __LINE__); raise(SIGTRAP);}} while (false)
+#endif
+
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec2& vec) {
+	return os << '(' << vec.x << ", " << vec.y << ')';
+}
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
+	return os << '(' << vec.x << ", " << vec.y << ", " << vec.z << ')';
+}
+inline std::ostream& operator<<(std::ostream& os, const glm::vec4& vec) {
+	return os << '(' << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << ')';
+}
+
+template <typename T>
+void PrintType(T* ptr) {
+    if (!ptr) {
+        std::cout << "nullptr\n";
+        return;
+    }
+    std::cout << typeid(*ptr).name() << '\n';
+}

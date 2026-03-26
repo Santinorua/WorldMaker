@@ -1,0 +1,81 @@
+#define STB_IMAGE_STATIC
+#include "DebugUtils.h"
+#include "OpenGLUtils.h"
+#include "Texture2D.h"
+#include "FileFunctions.h"
+
+#include "stb_image.h"
+
+namespace WorldMaker
+{
+	Texture2D::Texture2D(const std::string& relativePath)
+		: m_width(0), m_height(0), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
+	{
+	    m_filePath = GlobalizePath(relativePath);
+		GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_glName));
+
+		stbi_set_flip_vertically_on_load(1);
+
+		m_unsignedCharLocalBuffer = stbi_load(m_filePath.c_str(), &m_width, &m_height, &m_BPP, 4);
+
+		if (m_unsignedCharLocalBuffer == NULL)
+		{
+			const char* reason = stbi_failure_reason();
+			if (reason) {
+				std::cerr << "Couldn't load texture at path : "<< m_filePath << "\n The reason was: " << reason << "\n";
+			}
+			else {
+				std::cerr << "Couldn't load texture at path :" << m_filePath << "\n There was no apparent reason\n";
+			}
+		}
+		else {
+			std::cout << "Texture2D at path: " << m_filePath << " was loaded succesfully" << "\n";
+		}
+
+		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA8, m_width, m_height));
+		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, m_unsignedCharLocalBuffer));
+
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
+
+
+		if (!m_unsignedCharLocalBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
+		ASSERT(m_unsignedCharLocalBuffer);
+		stbi_image_free(m_unsignedCharLocalBuffer);
+	}
+
+	Texture2D::Texture2D(int width, int height, float* data) : m_width(width), m_height(height), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
+	{
+		if (data!=nullptr) m_floatLocalBuffer = data;
+		else std::cerr << "Error: the data provided when creating a Texture2D is null!\n";
+		GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_glName));
+
+		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA32F, m_width, m_height));
+		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_width, m_height, GL_RGBA, GL_FLOAT, m_floatLocalBuffer));
+
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+	}
+
+	Texture2D::~Texture2D()
+	{
+		std::cout << "Texture2D at path " << m_filePath << " Destroyed!\n";
+		GLCall(glDeleteTextures(1, &m_glName));
+	}
+
+	void Texture2D::bind(unsigned int slot /*= 0*/) const
+	{
+		// OpenGL has slots for textures. "Put this texture into slot 3 please"
+		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_glName));
+	}
+
+	void Texture2D::unbind() const
+	{
+		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+	}
+}
