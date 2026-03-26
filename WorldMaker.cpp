@@ -3,7 +3,7 @@
 
 using namespace WorldMaker;
 
-const int width = 6;
+const int width = 11;
 const int height = 15;
 
 int main() {

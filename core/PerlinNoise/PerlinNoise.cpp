@@ -17,10 +17,16 @@ namespace WorldMaker {
     std::array<double,4> PerlinNoise::getGradients(std::array<Vec2, 4> &vectors, double x, double y) {
         std::array<double,4> gradients;
         Vec2 pos = Vec2(x, y);
-        for (int i = 0; i < 4; i++) {
-            Vec2 dir = vectors[i] - pos;
-            gradients[i] = dir.DotProduct(vectors[i]);
-        }
+        double ceilX = std::floor(x) == x ? std::floor(x) + 1 : std::ceil(x);
+        double ceilY = std::floor(y) == y ? std::floor(y) + 1 : std::ceil(y);
+
+
+
+        gradients[0] = vectors[0].DotProduct(pos - Vec2(std::floor(x), std::floor(y)));
+        gradients[1] = vectors[1].DotProduct(pos - Vec2(ceilX, std::floor(y)));
+        gradients[2] = vectors[2].DotProduct(pos - Vec2(std::floor(x), ceilY));
+        gradients[3] = vectors[3].DotProduct(pos - Vec2(ceilX, ceilY));
+
         return gradients;
     }
 
@@ -31,7 +37,7 @@ namespace WorldMaker {
         std::array<Vec2,4> vectors = getVectors(sampleX, sampleY);
         std::array<double,4> gradients = getGradients(vectors, sampleX, sampleY);
 
-        return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY));
+        return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY)) * 0.5 + 0.5;
     }
     PerlinNoise::PerlinNoise(int width, int height, double scale, uint64_t seed) {
         m_height = height;
