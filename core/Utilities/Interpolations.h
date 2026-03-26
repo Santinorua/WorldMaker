@@ -7,5 +7,5 @@ namespace WorldMaker
         return x * x * 3 - x * x * x * 2;
     }
     double Lerp(double a, double b, double t, bool useSmoothStep);
-    double Bilinear(Vec4 x);
+    double Bilinear(Vec4 a, double x, double y);
 }

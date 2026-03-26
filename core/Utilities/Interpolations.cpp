@@ -9,10 +9,10 @@ namespace WorldMaker
         return a + t * (b-a);
     }
 
-    double Bilinear(Vec4 x) {
-        double top = Lerp(x.x, x.y, 0.5, true);
-        double bottom = Lerp(x.z, x.w, 0.5, true);
-        return Lerp(top, bottom, 0.5, true);
+    double Bilinear(Vec4 a, double x, double y) {
+        double bottom = Lerp(a.x, a.y, x, true);
+        double top = Lerp(a.z, a.w, x, true);
+        return Lerp(bottom, top, y, true);
     }
 
 }
