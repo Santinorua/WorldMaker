@@ -7,10 +7,10 @@ namespace WorldMaker {
         std::array<Vec2,4> result;
         double ceilX = std::floor(x) == x ? std::floor(x) + 1 : std::ceil(x);
         double ceilY = std::floor(y) == y ? std::floor(y) + 1 : std::ceil(y);
-        result[0] = PRNG::randomVector2(std::floor(x), std::floor(y), m_seed).Normalized();
-        result[1] = PRNG::randomVector2(ceilX, std::floor(y), m_seed).Normalized();
-        result[2] = PRNG::randomVector2(std::floor(x), ceilY, m_seed).Normalized();
-        result[3] = PRNG::randomVector2(ceilX, ceilY, m_seed).Normalized();
+        result[0] = PRNG::randomVector2(std::floor(x), std::floor(y), m_seed);
+        result[1] = PRNG::randomVector2(ceilX, std::floor(y), m_seed);
+        result[2] = PRNG::randomVector2(std::floor(x), ceilY, m_seed);
+        result[3] = PRNG::randomVector2(ceilX, ceilY, m_seed);
         // std::cout << "Vectors: " << result[0].x << "," << result[0].y << " | " << result[1].x << "," << result[1].y << " | " << result[2].x << "," << result[2].y << " | " << result[3].x << "," << result[3].y << std::endl;
         return result;
     }
