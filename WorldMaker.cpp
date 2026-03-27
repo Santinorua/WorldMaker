@@ -29,20 +29,20 @@ int main()
 	Renderer::Init();
 	Input::SetUp(Renderer::GetWindow());
 
-	int width = 500;
-	int height = 500;
+	int width = 100;
+	int height = 100;
 
 	std::vector<double> colorVector =
 	{
 
 	};
 
-	PerlinNoise perlinNoise(width, height, 10.0, 42);
+	PerlinNoise perlinNoise(width, height, 20.0, 42);
 	for (int i = 0; i < width*height; i++)
 	{
 		double color = perlinNoise.getPerlinNoise(i%width, i/width);
-		if (i/width == 0 )
-			std::cout << color << std::endl;
+		// if (i/width == 0 )
+		// 	std::cout << color << std::endl;
 		colorVector.push_back(color);
 		colorVector.push_back(color);
 		colorVector.push_back(color);

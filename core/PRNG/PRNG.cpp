@@ -24,4 +24,12 @@ namespace WorldMaker {
         double finalY = static_cast<double>(nextNumber32(r) % 200001) / 100000.0 - 1.0;
         return Vec2(finalX, finalY);
     }
+
+    double PRNG::randomHash(const int x, const int y, const uint64_t seed) {
+        const uint64_t randomNumber = static_cast<uint64_t>(nextNumber32(seed));
+        const uint64_t newSeed = static_cast<uint64_t>(randomNumber) * (((static_cast<uint64_t>(x) + randomNumber) * (static_cast<uint64_t>(y) - randomNumber)) ^ (x * y * randomNumber));
+        const uint64_t r = nextNumber32(newSeed);
+        double finalX = static_cast<double>(r % 200001) / 100000.0 - 1.0;
+        return finalX;
+    }
 }
