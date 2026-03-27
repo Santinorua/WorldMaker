@@ -34,7 +34,10 @@ namespace WorldMaker {
         double ceilX = std::floor(x) == x ? std::floor(x) + 1 : std::ceil(x);
         double ceilY = std::floor(y) == y ? std::floor(y) + 1 : std::ceil(y);
 
-        //gradients[0] = vectors[0].DotProduct(Vec2(0,0) - Vec2(x- std::floor(x), y - std::floor(y)));
+        // gradients[0] = vectors[0].DotProduct(Vec2(0,0) - Vec2(x- std::floor(x), y - std::floor(y)));
+        // gradients[1] = vectors[1].DotProduct(Vec2(1,0) - Vec2(x - ceilX, y - std::floor(y)));
+        // gradients[2] = vectors[2].DotProduct(Vec2(0,1) - Vec2(x - std::floor(x), y - ceilY));
+        // gradients[3] = vectors[3].DotProduct(Vec2(1,1) - Vec2(x - ceilX, y - ceilY));
         gradients[0] = vectors[0].DotProduct(pos - Vec2(std::floor(x), std::floor(y)));
         gradients[1] = vectors[1].DotProduct(pos - Vec2(ceilX, std::floor(y)));
         gradients[2] = vectors[2].DotProduct(pos - Vec2(std::floor(x), ceilY));
@@ -48,12 +51,12 @@ namespace WorldMaker {
         double sampleY = y / m_scale;
 
         std::array<Vec2,4> vectors = getVectors(sampleX, sampleY);
-        if (std::floor(sampleX) == 1 && std::floor(sampleY) == 0) {
-            std::cout << vectors[3] << std::endl;
-        }
-        if (std::floor(sampleX) == 1 && std::floor(sampleY) == 1) {
-            std::cout << vectors[1] << std::endl;
-        }
+        // if (std::floor(sampleX) == 1 && std::floor(sampleY) == 0) {
+        //     std::cout << vectors[3] << std::endl;
+        // }
+        // if (std::floor(sampleX) == 1 && std::floor(sampleY) == 1) {
+        //     std::cout << vectors[1] << std::endl;
+        // }
 
         std::array<double,4> gradients = getGradients(vectors, sampleX, sampleY);
 
