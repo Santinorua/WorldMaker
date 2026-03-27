@@ -1,4 +1,4 @@
-#version 450 core
+#version 440 core
 
 out vec4 final_color;
 

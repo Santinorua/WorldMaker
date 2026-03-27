@@ -1,14 +1,14 @@
-#include "Time.h"
+#include "CoolTime.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 namespace WorldMaker
 {
-	float Time::s_currentFrame = 0.0f;
-	float Time::s_lastFrame = 0.0f;
+	float CoolTime::s_currentFrame = 0.0f;
+	float CoolTime::s_lastFrame = 0.0f;
 
-	void Time::Update()
+	void CoolTime::Update()
 	{
 		s_lastFrame = s_currentFrame;
 		s_currentFrame = glfwGetTime();

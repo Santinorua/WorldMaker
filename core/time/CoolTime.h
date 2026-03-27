@@ -2,7 +2,7 @@
 
 namespace WorldMaker
 {
-	class Time
+	class CoolTime
 	{
 	private:
 		static float s_currentFrame;

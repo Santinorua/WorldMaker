@@ -9,7 +9,7 @@ namespace WorldMaker
     IndexBuffer::IndexBuffer(unsigned int maxCount, unsigned int usage)
     {
         ASSERT(sizeof(unsigned int) == sizeof(GLuint));
-        GLCall(glCreateBuffers(1, &m_id));
+        GLCall(glGenBuffers(1, &m_id));
 	    m_maxBytes = maxCount * sizeof(unsigned int);
         setData(nullptr);
 	    m_usage = usage;

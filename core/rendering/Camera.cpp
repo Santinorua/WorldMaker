@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include "Input.h"
-#include "Time.h"
+#include "CoolTime.h"
 
 #include <algorithm>
 
@@ -47,7 +47,7 @@ namespace WorldMaker
 		if (Input::GetKey(KeyCode::Right_Arrow)) rotation.y -= 1;
 
 
-		s_rot += static_cast<glm::vec3>(rotation * Time::DeltaTime() * s_rotationSpeed);
+		s_rot += static_cast<glm::vec3>(rotation * CoolTime::DeltaTime() * s_rotationSpeed);
 		s_rot.x = std::clamp(s_rot.x, -89.0f, 89.0f);
 
 		Vec3 horizontalDirection = {0, 0, 0};
@@ -59,8 +59,8 @@ namespace WorldMaker
 		Vec3 direction = Vec3::GetDirectionFromEuler(s_rot);
 
 		Vec3 left = Vec3::Up().CrossProduct(direction).Normalized();
-		s_pos += static_cast<glm::vec3>(direction * horizontalDirection.z * Time::DeltaTime() * s_speed);
-		s_pos += static_cast<glm::vec3>(left * -horizontalDirection.x * Time::DeltaTime() * s_speed);
+		s_pos += static_cast<glm::vec3>(direction * horizontalDirection.z * CoolTime::DeltaTime() * s_speed);
+		s_pos += static_cast<glm::vec3>(left * -horizontalDirection.x * CoolTime::DeltaTime() * s_speed);
 
 	}
 }

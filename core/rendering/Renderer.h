@@ -12,8 +12,8 @@ namespace WorldMaker
 {
 	struct RendererConfig
     {
-        int windowWidth = 853;
-        int windowHeight = 640;
+        int windowWidth = 850;
+        int windowHeight = 850;
         const char* windowTitle = "Cool Window";
 
 
