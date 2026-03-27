@@ -34,8 +34,7 @@ namespace WorldMaker {
         double ceilX = std::floor(x) == x ? std::floor(x) + 1 : std::ceil(x);
         double ceilY = std::floor(y) == y ? std::floor(y) + 1 : std::ceil(y);
 
-
-
+        //gradients[0] = vectors[0].DotProduct(Vec2(0,0) - Vec2(x- std::floor(x), y - std::floor(y)));
         gradients[0] = vectors[0].DotProduct(pos - Vec2(std::floor(x), std::floor(y)));
         gradients[1] = vectors[1].DotProduct(pos - Vec2(ceilX, std::floor(y)));
         gradients[2] = vectors[2].DotProduct(pos - Vec2(std::floor(x), ceilY));
