@@ -53,7 +53,8 @@ namespace WorldMaker
 		void submitData()
 		{
 			ASSERT(m_data.size() * sizeof(T) <= m_maxBytes);
-			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, m_data.size()*sizeof(T), m_data.data()));
+			GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_glName));
+			GLCall(glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, m_data.size()*sizeof(T), m_data.data()));
 		}
 
 		// Puts the data from m_data into the actual SSBO

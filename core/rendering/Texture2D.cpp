@@ -12,8 +12,8 @@ namespace WorldMaker
 		: m_width(0), m_height(0), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
 	    m_filePath = GlobalizePath(relativePath);
-		GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_glName));
-
+		GLCall(glGenTextures(1, &m_glName));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_glName));
 		stbi_set_flip_vertically_on_load(1);
 
 		m_unsignedCharLocalBuffer = stbi_load(m_filePath.c_str(), &m_width, &m_height, &m_BPP, 4);
