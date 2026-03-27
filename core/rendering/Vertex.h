@@ -13,6 +13,7 @@ namespace WorldMaker
 		Vec3 m_position;  // x, y, z
 
 		static std::vector<Vertex> CreateQuad(double size);
+		static std::vector<Vertex> CreateUnitQuadWithAspectRatio(double width, double height);
 		operator std::vector<double>() const
 		{
 			return

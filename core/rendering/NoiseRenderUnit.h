@@ -18,7 +18,7 @@ namespace WorldMaker
 		int height = 0;
 		std::vector<double> colorVector = {};
 		Texture2DSPtr noiseTex = nullptr;
-		const std::vector<Vertex> quad = Vertex::CreateQuad(1);
+		std::vector<Vertex> quad = Vertex::CreateUnitQuadWithAspectRatio(1,1);
 		const std::vector<unsigned int> quadIndices=
 		{
 			0,1,2,0,2,3

@@ -39,5 +39,8 @@ void main()
     uint realIndex = indices[gl_VertexID];
     vec4 position = vec4(GetPosition(realIndex), 1.0);
     gl_Position = position;
-    frag_texCoord = vec2(position.x + 0.5, position.y + 0.5);
+    if (realIndex == 0) frag_texCoord = vec2(0.0, 0.0);
+    else if (realIndex == 1) frag_texCoord = vec2(1.0, 0.0);
+    else if (realIndex == 2) frag_texCoord = vec2(1.0, 1.0);
+    else if (realIndex == 3) frag_texCoord = vec2(0.0, 1.0);
 };
