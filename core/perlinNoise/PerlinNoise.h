@@ -10,18 +10,18 @@
 namespace WorldMaker {
 
     class PerlinNoise {
-        double m_scale;
         uint64_t m_seed;
+        double m_scale;
+        double m_amplitude;
         int m_height;
         int m_width;
 
-        const Vec2 TopLeft = Vec2(0.5, -0.5);
-        const Vec2 TopRight = Vec2(-0.5, -0.5);
-        const Vec2 BottomLeft = Vec2(0.5, 0.5);
-        const Vec2 BottomRight = Vec2(-0.5, 0.5);
-        public:
         double dotGradient(int x, int y, double sampleX, double sampleY);
-        PerlinNoise(int width, int height, double frequency, uint64_t seed);
+
+    public:
+        PerlinNoise(int width, int height, double frequency, uint64_t seed, double amplitude = 1.0);
         double getPerlinNoise(int x, int y);
     };
+
+
 }

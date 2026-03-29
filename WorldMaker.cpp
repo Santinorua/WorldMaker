@@ -68,7 +68,7 @@ int main()
         // Renderer::DrawChunk(chunk);
 		Hola += CoolTime::DeltaTime();
 		if (Hola > 1) {
-			PerlinNoise perlinNoise2(width, height, 10, contador++);
+			PerlinNoise perlinNoise2(width, height, 10, contador++, 0.5);
 			colorVector = {};
 			for (int i = 0; i < width*height; i++)
 			{
