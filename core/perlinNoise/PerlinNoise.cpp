@@ -3,7 +3,7 @@
 
 
 namespace WorldMaker {
-
+    
     double PerlinNoise::dotGradient(int x, int y, double sampleX, double sampleY) {
         Vec2 gradient = PRNG::randomVector2(x, y, m_seed);
         double dx = sampleX - x;

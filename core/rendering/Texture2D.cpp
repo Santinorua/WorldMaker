@@ -12,8 +12,8 @@ namespace WorldMaker
 		: m_width(0), m_height(0), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
 	    m_filePath = GlobalizePath(relativePath);
-		GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_glName));
-
+		GLCall(glGenTextures(1, &m_glName));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_glName));
 		stbi_set_flip_vertically_on_load(1);
 
 		m_unsignedCharLocalBuffer = stbi_load(m_filePath.c_str(), &m_width, &m_height, &m_BPP, 4);
@@ -32,13 +32,13 @@ namespace WorldMaker
 			std::cout << "Texture2D at path: " << m_filePath << " was loaded succesfully" << "\n";
 		}
 
-		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA8, m_width, m_height));
-		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, m_unsignedCharLocalBuffer));
+		GLCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, m_width, m_height));
+		GLCall(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, m_unsignedCharLocalBuffer));
 
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT));
 
 
 		if (!m_unsignedCharLocalBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
@@ -50,15 +50,15 @@ namespace WorldMaker
 	{
 		if (data!=nullptr) m_floatLocalBuffer = data;
 		else std::cerr << "Error: the data provided when creating a Texture2D is null!\n";
-		GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_glName));
+		GLCall(glGenTextures(1, &m_glName));
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_glName));
+		GLCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, m_width, m_height));
+		GLCall(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGBA, GL_FLOAT, m_floatLocalBuffer));
 
-		GLCall(glTextureStorage2D(m_glName, 1, GL_RGBA32F, m_width, m_height));
-		GLCall(glTextureSubImage2D(m_glName, 0, 0, 0, m_width, m_height, GL_RGBA, GL_FLOAT, m_floatLocalBuffer));
-
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-		GLCall(glTextureParameteri(m_glName, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 	}
 
 	Texture2D::~Texture2D()
