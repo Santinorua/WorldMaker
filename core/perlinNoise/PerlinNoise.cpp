@@ -35,18 +35,39 @@ namespace WorldMaker {
 
 
         // Perform bilinear interpolation to get the final noise value
-        double result = Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY));
-
-        // Scale the result to the range [0, amplitude]
-        return result * (m_amplitude / 2) + (m_amplitude / 2);
+        return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY));
     }
-    PerlinNoise::PerlinNoise(int width, int height, double frequency, uint64_t seed, double amplitude) {
+    PerlinNoise::PerlinNoise(int width, int height, double frequency, uint64_t seed) {
         m_height = height;
         m_width = width;
         m_scale = width / frequency;
         m_seed = seed;
-        m_amplitude = amplitude;
     }
+
+
+    ComplexNoise::ComplexNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
+        m_persistance = persistence;
+        m_amplitude = amplitude;
+        m_octaves.reserve(numOctaves);
+        uint64_t currentSeed = seed;
+        for (int i = 0; i < numOctaves; i++) {
+            m_octaves.emplace_back(width, height, frequency, currentSeed);
+            frequency *= lacunarity;
+            currentSeed = PRNG::nextNumber64(seed);
+        }
+    }
+
+    double ComplexNoise::getNoise(int x, int y) {
+        double result = 0.0;
+        double amplitude = m_amplitude;
+        for (PerlinNoise& octave : m_octaves) {
+            result += octave.getPerlinNoise(x, y) * amplitude;
+            amplitude *= m_persistance;
+        }
+        return result * 0.5 + 0.5; // Normalize to [0, 1]
+    }
+
+
 
 
 }

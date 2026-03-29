@@ -12,15 +12,26 @@ namespace WorldMaker {
     class PerlinNoise {
         uint64_t m_seed;
         double m_scale;
-        double m_amplitude;
         int m_height;
         int m_width;
 
         double dotGradient(int x, int y, double sampleX, double sampleY);
 
     public:
-        PerlinNoise(int width, int height, double frequency, uint64_t seed, double amplitude = 1.0);
+        PerlinNoise(int width, int height, double frequency, uint64_t seed);
         double getPerlinNoise(int x, int y);
+    };
+
+
+
+    class ComplexNoise {
+        double m_persistance;
+        double m_amplitude;
+        std::vector<PerlinNoise> m_octaves = {};
+
+    public:
+        ComplexNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int octaves, double lacunarity, double persistence);
+        double getNoise(int x, int y);
     };
 
 
