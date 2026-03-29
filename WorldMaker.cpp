@@ -29,15 +29,15 @@ int main()
 	Renderer::Init();
 	Input::SetUp(Renderer::GetWindow());
 
-	int width = 100;
-	int height = 100;
+	int width = 1000;
+	int height = 1000;
 
 	std::vector<double> colorVector =
 	{
 
 	};
 
-	PerlinNoise perlinNoise(width, height, 20.0, 42);
+	PerlinNoise perlinNoise(width, height, 10, 42);
 	for (int i = 0; i < width*height; i++)
 	{
 		double color = perlinNoise.getPerlinNoise(i%width, i/width);
@@ -52,7 +52,8 @@ int main()
 	NoiseRenderUnit noise{width, height, colorVector};
 
     Renderer::PrepareToDrawNoise(noise);
-
+	float Hola = 0;
+	uint64_t contador = 2;
 	while (!Renderer::WindowShouldClose())
 	{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -65,7 +66,24 @@ int main()
 
         Renderer::DrawNoise(noise);
         // Renderer::DrawChunk(chunk);
-
+		Hola += CoolTime::DeltaTime();
+		if (Hola > 1) {
+			PerlinNoise perlinNoise2(width, height, 10, contador++);
+			colorVector = {};
+			for (int i = 0; i < width*height; i++)
+			{
+				double color = perlinNoise2.getPerlinNoise(i%width, i/width);
+				// if (i/width == 0 )
+				// 	std::cout << color << std::endl;
+				colorVector.push_back(color);
+				colorVector.push_back(color);
+				colorVector.push_back(color);
+				colorVector.push_back(1.0);
+			}
+			noise.ChangeNoise(width, height, colorVector);
+			Hola = 0;
+			Renderer::PrepareToDrawNoise(noise);
+		}
         glfwSwapBuffers(Renderer::GetWindow());
 
         glfwPollEvents();
