@@ -8,7 +8,15 @@ namespace WorldMaker {
         x ^= x >> 12;
         x ^= x << 25;
         x ^= x >> 27;
-        return x * 0x2545F4914F6CDD1DULL;
+        uint64_t firstValue = x * 0x2545F4914F6CDD1DULL;
+
+        x = firstValue;
+        x ^= x >> 12;
+        x ^= x << 25;
+        x ^= x >> 27;
+        uint64_t secondValue = x * 0x2545F4914F6CDD1DULL;
+
+        return firstValue & 0xFFFFFFFF00000000ULL | (secondValue >> 32);
     }
 
     uint32_t PRNG::nextNumber32(const uint64_t seed) {

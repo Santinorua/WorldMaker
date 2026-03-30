@@ -45,7 +45,7 @@ namespace WorldMaker {
     }
 
 
-    ComplexNoise::ComplexNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
+    FractalNoise::FractalNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
         m_persistance = persistence;
         m_amplitude = amplitude;
         m_octaves.reserve(numOctaves);
@@ -57,7 +57,7 @@ namespace WorldMaker {
         }
     }
 
-    double ComplexNoise::getNoise(int x, int y) {
+    double FractalNoise::getNoise(int x, int y) {
         double result = 0.0;
         double amplitude = m_amplitude;
         for (PerlinNoise& octave : m_octaves) {
@@ -67,6 +67,9 @@ namespace WorldMaker {
         return result * 0.5 + 0.5; // Normalize to [0, 1]
     }
 
+    ComplexNoise::ComplexNoise(int width, int height, int first, std::vector<double> amplitudes) {
+
+    }
 
 
 
