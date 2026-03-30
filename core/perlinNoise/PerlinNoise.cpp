@@ -37,7 +37,57 @@ namespace WorldMaker {
         // Perform bilinear interpolation to get the final noise value
         return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY));
     }
+
     PerlinNoise::PerlinNoise(int width, int height, double frequency, uint64_t seed) {
+        m_height = height;
+        m_width = width;
+        m_scale = width / frequency;
+        m_seed = seed;
+    }
+
+
+    double PerlinNoise3D::dotGradient3D(int x, int y, int z, double sampleX, double sampleY, double sampleZ) {
+        // Get the random gradient vector for the grid point
+        Vec3 gradient = PRNG::randomVector3(x, y, z, m_seed);
+
+        // Calculate the distance vector from the grid point to the sample point
+        double dx = sampleX - x;
+        double dy = sampleY - y;
+        double dz = sampleZ - z;
+
+        // Return the dot product
+        return dx * gradient.x + dy * gradient.y + dz * gradient.z;
+    }
+
+    double PerlinNoise3D::getPerlinNoise3D(int x, int y, int z) {
+        // Calculate the position of the point asked for in the noise space
+        double sampleX = x / m_scale;
+        double sampleY = y / m_scale;
+        double sampleZ = z / m_scale;
+
+        // Determine the grid cell coordinates surrounding the point
+        int fX = (int)sampleX;
+        int fY = (int)sampleY;
+        int fZ = (int)sampleZ;
+
+        // Calculate the dot product between the random gradients and the distance vectors for each of the four corners
+        double gradients[8] = {
+            dotGradient3D(fX, fY, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX, fY + 1, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY + 1, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX, fY, fZ + 1, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY, fZ + 1, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX, fY + 1, fZ + 1, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY + 1, fZ + 1, sampleX, sampleY, sampleZ)
+        };
+
+
+        // Perform bilinear interpolation to get the final noise value
+        return Trilinear(gradients, sampleX - fX, sampleY - fY, sampleZ - fZ);
+    }
+
+    PerlinNoise3D::PerlinNoise3D(int width, int height, double frequency, uint64_t seed) {
         m_height = height;
         m_width = width;
         m_scale = width / frequency;

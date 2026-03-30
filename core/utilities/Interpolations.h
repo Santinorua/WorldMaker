@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec4.h"
+#include <array>
 
 namespace WorldMaker
 {
@@ -10,4 +11,5 @@ namespace WorldMaker
     }
     double Lerp(double a, double b, double t, bool useSmoothStep);
     double Bilinear(Vec4 a, double x, double y);
+    double Trilinear(double a[8], double x, double y, double z);
 }

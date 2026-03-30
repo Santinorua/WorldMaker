@@ -16,7 +16,6 @@ namespace WorldMaker {
         int m_width;
 
         double dotGradient(int x, int y, double sampleX, double sampleY);
-
     public:
         PerlinNoise(int width, int height, double frequency, uint64_t seed);
         double getPerlinNoise(int x, int y);
@@ -28,8 +27,7 @@ namespace WorldMaker {
         int m_height;
         int m_width;
 
-        double dotGradient(int x, int y, int z, double sampleX, double sampleY, double sampleZ);
-
+        double dotGradient3D(int x, int y, int z, double sampleX, double sampleY, double sampleZ);
     public:
         PerlinNoise3D(int width, int height, double frequency, uint64_t seed);
         double getPerlinNoise3D(int x, int y, int z);

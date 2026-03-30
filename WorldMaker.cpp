@@ -37,13 +37,15 @@ int main()
 
 	};
 
-	PerlinNoise perlinNoise(width, height, 10, 42);
-	FractalNoise complexNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
+	// PerlinNoise perlinNoise(width, height, 10, 1);
+	// FractalNoise complexNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
+	PerlinNoise3D perlinNoise3D(width, height, 10, 1);
 
 	for (int i = 0; i < width*height; i++)
 	{
 		// double color = perlinNoise.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
-		double color = complexNoise.getNoise(i%width, i/width);
+		// double color = complexNoise.getNoise(i%width, i/width);
+		double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, 0) * 0.5 + 0.5;
 		colorVector.push_back(color);
 		colorVector.push_back(color);
 		colorVector.push_back(color);
@@ -69,26 +71,27 @@ int main()
         // Renderer::DrawChunk(chunk);
 
 
-		// Hola += CoolTime::DeltaTime();
-		// if (Hola > 1) {
-		// 	// PerlinNoise perlinNoise2(width, height, 10, contador++);
-		// 	FractalNoise complexNoise2(width, height, 5, 1, contador++, 4, 2.0, 0.5);
-		// 	colorVector = {};
-		// 	for (int i = 0; i < width*height; i++)
-		// 	{
-		// 		// double color = perlinNoise2.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
-		// 		double color = complexNoise2.getNoise(i%width, i/width);
-		// 		// if (i/width == 0 )
-		// 		// 	std::cout << color << std::endl;
-		// 		colorVector.push_back(color);
-		// 		colorVector.push_back(color);
-		// 		colorVector.push_back(color);
-		// 		colorVector.push_back(1.0);
-		// 	}
-		// 	noise.ChangeNoise(width, height, colorVector);
-		// 	Hola = 0;
-		// 	Renderer::PrepareToDrawNoise(noise);
-		// }
+		Hola += CoolTime::DeltaTime();
+		if (Hola > 1) {
+			// PerlinNoise perlinNoise2(width, height, 10, contador++);
+			// FractalNoise complexNoise2(width, height, 5, 1, contador++, 4, 2.0, 0.5);
+			colorVector = {};
+			for (int i = 0; i < width*height; i++)
+			{
+				// double color = perlinNoise2.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
+				// double color = complexNoise2.getNoise(i%width, i/width);
+				double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, contador++) * 0.5 + 0.5;
+				// if (i/width == 0 )
+				// 	std::cout << color << std::endl;
+				colorVector.push_back(color);
+				colorVector.push_back(color);
+				colorVector.push_back(color);
+				colorVector.push_back(1.0);
+			}
+			noise.ChangeNoise(width, height, colorVector);
+			Hola = 0;
+			Renderer::PrepareToDrawNoise(noise);
+		}
         glfwSwapBuffers(Renderer::GetWindow());
 
         glfwPollEvents();
