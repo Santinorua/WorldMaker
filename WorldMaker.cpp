@@ -39,7 +39,7 @@ int main()
 
 	// PerlinNoise perlinNoise(width, height, 10, 1);
 	// FractalNoise complexNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
-	PerlinNoise3D perlinNoise3D(width, height, 10, 1);
+	PerlinNoise3D perlinNoise3D(width, height, 10, 10 , 1);
 
 	for (int i = 0; i < width*height; i++)
 	{
@@ -56,7 +56,7 @@ int main()
 
     Renderer::PrepareToDrawNoise(noise);
 	float Hola = 0;
-	uint64_t contador = 2;
+	int contador = 2;
 	while (!Renderer::WindowShouldClose())
 	{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -72,7 +72,7 @@ int main()
 
 
 		Hola += CoolTime::DeltaTime();
-		if (Hola > 1) {
+		if (true) {
 			// PerlinNoise perlinNoise2(width, height, 10, contador++);
 			// FractalNoise complexNoise2(width, height, 5, 1, contador++, 4, 2.0, 0.5);
 			colorVector = {};
@@ -80,7 +80,7 @@ int main()
 			{
 				// double color = perlinNoise2.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
 				// double color = complexNoise2.getNoise(i%width, i/width);
-				double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, contador++) * 0.5 + 0.5;
+				double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, contador) * 0.5 + 0.5;
 				// if (i/width == 0 )
 				// 	std::cout << color << std::endl;
 				colorVector.push_back(color);
@@ -88,9 +88,10 @@ int main()
 				colorVector.push_back(color);
 				colorVector.push_back(1.0);
 			}
+			contador++;
 			noise.ChangeNoise(width, height, colorVector);
 			Hola = 0;
-			Renderer::PrepareToDrawNoise(noise);
+			// Renderer::PrepareToDrawNoise(noise);
 		}
         glfwSwapBuffers(Renderer::GetWindow());
 

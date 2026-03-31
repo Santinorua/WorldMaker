@@ -63,7 +63,7 @@ namespace WorldMaker {
         // Calculate the position of the point asked for in the noise space
         double sampleX = x / m_scale;
         double sampleY = y / m_scale;
-        double sampleZ = z / m_scale;
+        double sampleZ = z / m_heightScale;
 
         // Determine the grid cell coordinates surrounding the point
         int fX = (int)sampleX;
@@ -87,10 +87,11 @@ namespace WorldMaker {
         return Trilinear(gradients, sampleX - fX, sampleY - fY, sampleZ - fZ);
     }
 
-    PerlinNoise3D::PerlinNoise3D(int width, int height, double frequency, uint64_t seed) {
+    PerlinNoise3D::PerlinNoise3D(int width, int height, double frequency, double heightScale, uint64_t seed) {
         m_height = height;
         m_width = width;
         m_scale = width / frequency;
+        m_heightScale = heightScale;
         m_seed = seed;
     }
 
