@@ -1,5 +1,6 @@
 #include "PerlinNoise.h"
 
+#include "../rendering/DebugUtils.h"
 
 
 namespace WorldMaker {
@@ -115,11 +116,34 @@ namespace WorldMaker {
             result += octave.getPerlinNoise(x, y) * amplitude;
             amplitude *= m_persistance;
         }
-        return result * 0.5 + 0.5; // Normalize to [0, 1]
+        return result;
     }
 
-    ComplexNoise::ComplexNoise(int width, int height, int first, std::vector<double> amplitudes) {
+    ComplexNoise::ComplexNoise(int width, int height, int first, const std::vector<double>& amplitudes, uint64_t seed) {
+            assert(first < 0);
+            assert(!amplitudes.empty());
+            m_amplitudes = amplitudes;
+            m_octaves.reserve(amplitudes.size() * 2);
+            uint64_t currentSeed = seed;
+            for (int i = 0; i < amplitudes.size(); i++) {
+                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                currentSeed = PRNG::nextNumber64(seed);
+                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                currentSeed = PRNG::nextNumber64(seed);
+            }
+    }
 
+    double ComplexNoise::getNoise(int x, int y) {
+        double result = 0.0;
+        for (int i = 0; i < m_octaves.size(); i = i+2) {
+            double h = m_octaves[i].getPerlinNoise(x, y) * m_amplitudes[i/2];
+            double l = m_octaves[i+1].getPerlinNoise(x, y) * m_amplitudes[i/2];
+            double combined = (h + l) * 0.5;
+            // result += combined * std::pow(2.0, -(i/2) - 1) / (std::pow(2.0, m_amplitudes.size()) - 1);
+            result += combined;
+        }
+        return result;
+        // double totalAmplitude = m_amplitudes.size()
     }
 
 

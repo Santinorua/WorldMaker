@@ -48,8 +48,10 @@ namespace WorldMaker {
 
     class ComplexNoise {
         std::vector<PerlinNoise> m_octaves = {};
+        std::vector<double> m_amplitudes = {};
     public:
-        ComplexNoise(int width, int height, int first, std::vector<double> amplitudes);
+        ComplexNoise(int width, int height, int first, const std::vector<double>& amplitudes, uint64_t seed);
+        double getNoise(int x, int y);
     };
 
 }
