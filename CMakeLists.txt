@@ -170,7 +170,6 @@ target_include_directories(Time PUBLIC ${CMAKE_SOURCE_DIR}/core/time)
 
 file (GLOB PRNG_SRC "${CMAKE_SOURCE_DIR}/core/PRNG/*.cpp")
 add_library(PRNG STATIC ${PRNG_SRC})
-target_compile_definitions(PRNG PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(PRNG INTERFACE ${CMAKE_SOURCE_DIR}/core/PRNG)
 target_link_libraries(PRNG PUBLIC Math)
 
@@ -180,7 +179,6 @@ target_link_libraries(PRNG PUBLIC Math)
 
 file (GLOB PERLINNOISE_SRC "${CMAKE_SOURCE_DIR}/core/perlinNoise/*.cpp")
 add_library(PerlinNoise STATIC ${PERLINNOISE_SRC})
-target_compile_definitions(PerlinNoise PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(PerlinNoise INTERFACE ${CMAKE_SOURCE_DIR}/core/perlinNoise)
 target_link_libraries(PerlinNoise PUBLIC Math PRNG Utilities)
 
@@ -190,9 +188,17 @@ target_link_libraries(PerlinNoise PUBLIC Math PRNG Utilities)
 
 file (GLOB UTILITIES_SRC "${CMAKE_SOURCE_DIR}/core/utilities/*.cpp")
 add_library(Utilities STATIC ${UTILITIES_SRC})
-target_compile_definitions(Utilities PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(Utilities INTERFACE ${CMAKE_SOURCE_DIR}/core/utilities)
 target_link_libraries(Utilities PUBLIC Math)
+
+# -----------------------------------------------------------------------------------------------------
+
+# biomeGenerator
+
+file (GLOB BIOMEGENERATOR_SRC "${CMAKE_SOURCE_DIR}/core/biomeGenerator/*.cpp")
+add_library(BiomeGenerator STATIC ${BIOMEGENERATOR_SRC})
+target_include_directories(BiomeGenerator INTERFACE ${CMAKE_SOURCE_DIR}/core/biomeGenerator)
+target_link_libraries(BiomeGenerator PUBLIC Math PerlinNoise)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
@@ -202,7 +208,7 @@ target_link_libraries(Utilities PUBLIC Math)
 # Core
 
 add_library(Core INTERFACE)
-target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise)
+target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise BiomeGenerator)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################

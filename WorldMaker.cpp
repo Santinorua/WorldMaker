@@ -21,6 +21,8 @@
 
 #include <iostream>
 #include <memory>
+#include "BiomeGenerator.h"
+#include "core/biomeGenerator/BiomeGenerator.h"
 
 using namespace WorldMaker;
 
@@ -37,6 +39,7 @@ int main()
 
 	};
 
+	BiomeGenerator biomeGenerator(width, height, 42);
 	PerlinNoise perlinNoise(width, height, 10, 1);
 	// FractalNoise fractalNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
 	// PerlinNoise3D perlinNoise3D(width, height, 10, 10 , 1);

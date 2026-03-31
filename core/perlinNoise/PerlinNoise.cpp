@@ -71,7 +71,7 @@ namespace WorldMaker {
         int fY = (int)sampleY;
         int fZ = (int)sampleZ;
 
-        // Calculate the dot product between the random gradients and the distance vectors for each of the four corners
+        // Calculate the dot product between the random gradients and the distance vectors for each of the eight corners
         double gradients[8] = {
             dotGradient3D(fX, fY, fZ, sampleX, sampleY, sampleZ),
             dotGradient3D(fX + 1, fY, fZ, sampleX, sampleY, sampleZ),
