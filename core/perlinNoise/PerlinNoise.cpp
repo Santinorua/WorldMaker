@@ -127,9 +127,9 @@ namespace WorldMaker {
             uint64_t currentSeed = seed;
             for (int i = 0; i < amplitudes.size(); i++) {
                 m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
-                currentSeed = PRNG::nextNumber64(seed);
+                currentSeed = PRNG::nextNumber64(currentSeed);
                 m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
-                currentSeed = PRNG::nextNumber64(seed);
+                currentSeed = PRNG::nextNumber64(currentSeed);
             }
     }
 
