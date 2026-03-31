@@ -105,7 +105,7 @@ namespace WorldMaker {
         for (int i = 0; i < numOctaves; i++) {
             m_octaves.emplace_back(width, height, frequency, currentSeed);
             frequency *= lacunarity;
-            currentSeed = PRNG::nextNumber64(seed);
+            currentSeed = PRNG::nextNumber64(currentSeed);
         }
     }
 
