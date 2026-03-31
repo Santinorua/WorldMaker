@@ -1,5 +1,7 @@
 #include "PRNG.h"
 
+
+
 namespace WorldMaker {
     PRNG prng;
     uint64_t PRNG::nextNumber64(const uint64_t seed) {
@@ -8,7 +10,15 @@ namespace WorldMaker {
         x ^= x >> 12;
         x ^= x << 25;
         x ^= x >> 27;
-        return x * 0x2545F4914F6CDD1DULL;
+        uint64_t firstValue = x * 0x2545F4914F6CDD1DULL;
+
+        x = firstValue;
+        x ^= x >> 12;
+        x ^= x << 25;
+        x ^= x >> 27;
+        uint64_t secondValue = x * 0x2545F4914F6CDD1DULL;
+
+        return firstValue & 0xFFFFFFFF00000000ULL | (secondValue >> 32);
     }
 
     uint32_t PRNG::nextNumber32(const uint64_t seed) {
@@ -25,11 +35,16 @@ namespace WorldMaker {
         return Vec2(finalX, finalY);
     }
 
-    double PRNG::randomHash(const int x, const int y, const uint64_t seed) {
+    Vec3 PRNG::randomVector3(const int x, const int y, const int z, const uint64_t seed) {
         const uint64_t randomNumber = static_cast<uint64_t>(nextNumber32(seed));
-        const uint64_t newSeed = static_cast<uint64_t>(randomNumber) * (((static_cast<uint64_t>(x) + randomNumber) * (static_cast<uint64_t>(y) - randomNumber)) ^ (x * y * randomNumber));
+        const uint64_t newSeed = static_cast<uint64_t>(randomNumber) * (((static_cast<uint64_t>(x) + randomNumber) * (static_cast<uint64_t>(y) - randomNumber) * (static_cast<uint64_t>(z) ^ randomNumber)) ^ (x * y * z * randomNumber)) ;
         const uint64_t r = nextNumber32(newSeed);
         double finalX = static_cast<double>(r % 200001) / 100000.0 - 1.0;
-        return finalX;
+        uint64_t t = nextNumber32(r);
+        double finalY = static_cast<double>(t % 200001) / 100000.0 - 1.0;
+        double finalZ = static_cast<double>(nextNumber32(t) % 200001) / 100000.0 - 1.0;
+        return Vec3(finalX, finalY, finalZ);
     }
+
+
 }

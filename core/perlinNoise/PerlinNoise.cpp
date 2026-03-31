@@ -1,72 +1,151 @@
 #include "PerlinNoise.h"
 
+#include "../rendering/DebugUtils.h"
 
 
 namespace WorldMaker {
-    const double PI = 3.14159265358979323846;
-    std::array<Vec2,4> PerlinNoise::getVectors(double x, double y) {
-        std::array<Vec2,4> result;
-        double u = std::floor(x);
-        double v = std::floor(y);
-        result[0] = PRNG::randomVector2(u, v, m_seed).Normalized();
-        result[1] = PRNG::randomVector2(u+1, v, m_seed).Normalized();
-        result[2] = PRNG::randomVector2(u, v+1, m_seed).Normalized();
-        result[3] = PRNG::randomVector2(u+1, v+1, m_seed).Normalized();
 
-        // double angle = PRNG::randomHash(std::floor(x), std::floor(y), m_seed) * 2.0 * PI;
-        // result[0] = Vec2(std::cos(angle), std::sin(angle));
-        // angle = PRNG::randomHash(ceilX, std::floor(y), m_seed) * 2.0 * PI;
-        // result[1] = Vec2(std::cos(angle), std::sin(angle));
-        // angle = PRNG::randomHash(std::floor(x), ceilY, m_seed) * 2.0 * PI;
-        // result[2] = Vec2(std::cos(angle), std::sin(angle));
-        // angle = PRNG::randomHash(ceilX, ceilY, m_seed) * 2.0 * PI;
-        // result[3] = Vec2(std::cos(angle), std::sin(angle));
+    double PerlinNoise::dotGradient(int x, int y, double sampleX, double sampleY) {
+        // Get the random gradient vector for the grid point
+        Vec2 gradient = PRNG::randomVector2(x, y, m_seed);
 
-        // for (int i = 0; i < result.size(); i++) {
-        //     result[i] = Vec2(1.0, 0.0);
-        // }
-        // std::cout << "Vectors: " << result[0].x << "," << result[0].y << " | " << result[1].x << "," << result[1].y << " | " << result[2].x << "," << result[2].y << " | " << result[3].x << "," << result[3].y << std::endl;
-        return result;
-    }
-    std::array<double,4> PerlinNoise::getGradients(std::array<Vec2, 4> &vectors, double x, double y) {
-        std::array<double,4> gradients;
-        Vec2 pos = Vec2(x, y);
-        double ceilX = std::floor(x) == x ? std::floor(x) + 1 : std::ceil(x);
-        double ceilY = std::floor(y) == y ? std::floor(y) + 1 : std::ceil(y);
+        // Calculate the distance vector from the grid point to the sample point
+        double dx = sampleX - x;
+        double dy = sampleY - y;
 
-        // gradients[0] = vectors[0].DotProduct(Vec2(0,0) - Vec2(x- std::floor(x), y - std::floor(y)));
-        // gradients[1] = vectors[1].DotProduct(Vec2(1,0) - Vec2(x - ceilX, y - std::floor(y)));
-        // gradients[2] = vectors[2].DotProduct(Vec2(0,1) - Vec2(x - std::floor(x), y - ceilY));
-        // gradients[3] = vectors[3].DotProduct(Vec2(1,1) - Vec2(x - ceilX, y - ceilY));
-        gradients[0] = vectors[0].DotProduct(pos - Vec2(std::floor(x), std::floor(y)));
-        gradients[1] = vectors[1].DotProduct(pos - Vec2(ceilX, std::floor(y)));
-        gradients[2] = vectors[2].DotProduct(pos - Vec2(std::floor(x), ceilY));
-        gradients[3] = vectors[3].DotProduct(pos - Vec2(ceilX, ceilY));
-
-        return gradients;
+        // Return the dot product
+        return dx * gradient.x + dy * gradient.y;
     }
 
     double PerlinNoise::getPerlinNoise(int x, int y) {
+        // Calculate the position of the point asked for in the noise space
         double sampleX = x / m_scale;
         double sampleY = y / m_scale;
 
-        std::array<Vec2,4> vectors = getVectors(sampleX, sampleY);
-        // if (std::floor(sampleX) == 1 && std::floor(sampleY) == 0) {
-        //     std::cout << vectors[3] << std::endl;
-        // }
-        // if (std::floor(sampleX) == 1 && std::floor(sampleY) == 1) {
-        //     std::cout << vectors[1] << std::endl;
-        // }
+        // Determine the grid cell coordinates surrounding the point
+        int fX = (int)sampleX;
+        int fY = (int)sampleY;
 
-        std::array<double,4> gradients = getGradients(vectors, sampleX, sampleY);
+        // Calculate the dot product between the random gradients and the distance vectors for each of the four corners
+        double gradients[4] = {
+            dotGradient(fX, fY, sampleX, sampleY),
+            dotGradient(fX + 1, fY, sampleX, sampleY),
+            dotGradient(fX, fY + 1, sampleX, sampleY),
+            dotGradient(fX + 1, fY + 1, sampleX, sampleY)
+        };
 
-        return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY)) * 0.5 + 0.5;
-        // return std::lerp(std::lerp(gradients[0], gradients[1], sampleX - std::floor(sampleX)), std::lerp(gradients[2], gradients[3], sampleX - std::floor(sampleX)) , sampleY - std::floor(sampleY)) * 0.5 + 0.5;
+
+        // Perform bilinear interpolation to get the final noise value
+        return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY));
     }
-    PerlinNoise::PerlinNoise(int width, int height, double scale, uint64_t seed) {
+
+    PerlinNoise::PerlinNoise(int width, int height, double frequency, uint64_t seed) {
         m_height = height;
         m_width = width;
-        m_scale = scale;
+        m_scale = width / frequency;
         m_seed = seed;
     }
+
+
+    double PerlinNoise3D::dotGradient3D(int x, int y, int z, double sampleX, double sampleY, double sampleZ) {
+        // Get the random gradient vector for the grid point
+        Vec3 gradient = PRNG::randomVector3(x, y, z, m_seed);
+
+        // Calculate the distance vector from the grid point to the sample point
+        double dx = sampleX - x;
+        double dy = sampleY - y;
+        double dz = sampleZ - z;
+
+        // Return the dot product
+        return dx * gradient.x + dy * gradient.y + dz * gradient.z;
+    }
+
+    double PerlinNoise3D::getPerlinNoise3D(int x, int y, int z) {
+        // Calculate the position of the point asked for in the noise space
+        double sampleX = x / m_scale;
+        double sampleY = y / m_scale;
+        double sampleZ = z / m_heightScale;
+
+        // Determine the grid cell coordinates surrounding the point
+        int fX = (int)sampleX;
+        int fY = (int)sampleY;
+        int fZ = (int)sampleZ;
+
+        // Calculate the dot product between the random gradients and the distance vectors for each of the four corners
+        double gradients[8] = {
+            dotGradient3D(fX, fY, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX, fY + 1, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY + 1, fZ, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX, fY, fZ + 1, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY, fZ + 1, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX, fY + 1, fZ + 1, sampleX, sampleY, sampleZ),
+            dotGradient3D(fX + 1, fY + 1, fZ + 1, sampleX, sampleY, sampleZ)
+        };
+
+
+        // Perform bilinear interpolation to get the final noise value
+        return Trilinear(gradients, sampleX - fX, sampleY - fY, sampleZ - fZ);
+    }
+
+    PerlinNoise3D::PerlinNoise3D(int width, int height, double frequency, double heightScale, uint64_t seed) {
+        m_height = height;
+        m_width = width;
+        m_scale = width / frequency;
+        m_heightScale = heightScale;
+        m_seed = seed;
+    }
+
+
+    FractalNoise::FractalNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
+        m_persistance = persistence;
+        m_amplitude = amplitude;
+        m_octaves.reserve(numOctaves);
+        uint64_t currentSeed = seed;
+        for (int i = 0; i < numOctaves; i++) {
+            m_octaves.emplace_back(width, height, frequency, currentSeed);
+            frequency *= lacunarity;
+            currentSeed = PRNG::nextNumber64(currentSeed);
+        }
+    }
+
+    double FractalNoise::getNoise(int x, int y) {
+        double result = 0.0;
+        double amplitude = m_amplitude;
+        for (PerlinNoise& octave : m_octaves) {
+            result += octave.getPerlinNoise(x, y) * amplitude;
+            amplitude *= m_persistance;
+        }
+        return result;
+    }
+
+    ComplexNoise::ComplexNoise(int width, int height, int first, const std::vector<double>& amplitudes, uint64_t seed) {
+            assert(first < 0);
+            assert(!amplitudes.empty());
+            m_amplitudes = amplitudes;
+            m_octaves.reserve(amplitudes.size() * 2);
+            uint64_t currentSeed = seed;
+            for (int i = 0; i < amplitudes.size(); i++) {
+                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                currentSeed = PRNG::nextNumber64(currentSeed);
+                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                currentSeed = PRNG::nextNumber64(currentSeed);
+            }
+    }
+
+    double ComplexNoise::getNoise(int x, int y) {
+        double result = 0.0;
+        for (int i = 0; i < m_octaves.size(); i = i+2) {
+            double h = m_octaves[i].getPerlinNoise(x, y) * m_amplitudes[i/2];
+            double l = m_octaves[i+1].getPerlinNoise(x, y) * m_amplitudes[i/2];
+            double combined = (h + l) * 0.5;
+            // result += combined * std::pow(2.0, -(i/2) - 1) / (std::pow(2.0, m_amplitudes.size()) - 1);
+            result += combined;
+        }
+        return result;
+        // double totalAmplitude = m_amplitudes.size()
+    }
+
+
+
 }
