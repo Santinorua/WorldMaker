@@ -9,6 +9,7 @@ const int SSBOType_indices = 1;
 struct VertexData
 {
     double position[3];
+    double normal[3];
 };
 
 layout(binding = SSBOType_vertices, std430) readonly buffer ssbo0
@@ -31,6 +32,15 @@ vec3 GetPosition(uint index)
         data[index].position[0],
         data[index].position[1],
         data[index].position[2]
+    );
+}
+
+vec3 GetNormal(uint index)
+{
+    return vec3(
+        data[index].normal[0],
+        data[index].normal[1],
+        data[index].normal[2]
     );
 }
 
