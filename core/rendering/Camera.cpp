@@ -39,28 +39,46 @@ namespace WorldMaker
 
 	void Camera::UpdateCameraTransform()
 	{
-		Vec2 rotation = Vec2(0.0f, 0.0f);
+	    static bool firstClick = true;
 
-		if (Input::GetKey(KeyCode::Down_Arrow)) rotation.x -= 1;
-		if (Input::GetKey(KeyCode::Up_Arrow)) rotation.x += 1;
-		if (Input::GetKey(KeyCode::Left_Arrow)) rotation.y += 1;
-		if (Input::GetKey(KeyCode::Right_Arrow)) rotation.y -= 1;
+        if (!Input::GetMouseButtonDown(MouseCode::Mouse_Right))
+        {
+            if (Input::GetCursorMode()==CursorMode::MouseDisabled)
+            {
+                Input::SetCursorMode(CursorMode::MouseNormal);
+            }
+            firstClick = true;
+            return;
+        }
 
+        if (Input::GetCursorMode() != CursorMode::MouseDisabled)
+        {
+            Input::SetCursorMode(CursorMode::MouseDisabled);
+        }
+        Vec2 mouseRotation = Vec2(0.0f, 0.0f);
+        Vec2 mouseTranslation = Input::GetMouseDeltaPix();
+        std::cout << "Mouse translation: " << mouseTranslation << "\n";
+        if (firstClick)
+        {
+            mouseTranslation = {0,0};
+            firstClick = false;
+        }
+        mouseRotation.x -= mouseTranslation.y;
+        mouseRotation.y -= mouseTranslation.x;
 
-		s_rot += static_cast<glm::vec3>(rotation * CoolTime::DeltaTime() * s_rotationSpeed);
-		s_rot.x = std::clamp(s_rot.x, -89.0f, 89.0f);
+        s_rot += static_cast<glm::vec3>(mouseRotation * s_rotationSpeed);
+       	s_rot.x = std::clamp(s_rot.x, -89.0f, 89.0f);
 
-		Vec3 horizontalDirection = {0, 0, 0};
-		if (Input::GetKey(KeyCode::W_Key)) horizontalDirection.z += 1;
-		if (Input::GetKey(KeyCode::S_Key)) horizontalDirection.z -= 1;
-		if (Input::GetKey(KeyCode::A_Key)) horizontalDirection.x -= 1;
-		if (Input::GetKey(KeyCode::D_Key)) horizontalDirection.x += 1;
+       	Vec3 horizontalDirection = {0, 0, 0};
+       	if (Input::GetKey(KeyCode::W_Key)) horizontalDirection.z += 1;
+       	if (Input::GetKey(KeyCode::S_Key)) horizontalDirection.z -= 1;
+       	if (Input::GetKey(KeyCode::A_Key)) horizontalDirection.x -= 1;
+       	if (Input::GetKey(KeyCode::D_Key)) horizontalDirection.x += 1;
 
-		Vec3 direction = Vec3::GetDirectionFromEuler(s_rot);
+       	Vec3 direction = Vec3::GetDirectionFromEuler(s_rot);
 
-		Vec3 left = Vec3::Up().CrossProduct(direction).Normalized();
-		s_pos += static_cast<glm::vec3>(direction * horizontalDirection.z * CoolTime::DeltaTime() * s_speed);
-		s_pos += static_cast<glm::vec3>(left * -horizontalDirection.x * CoolTime::DeltaTime() * s_speed);
-
-	}
+       	Vec3 left = Vec3::Up().CrossProduct(direction).Normalized();
+       	s_pos += static_cast<glm::vec3>(direction * horizontalDirection.z * CoolTime::DeltaTime() * s_speed);
+       	s_pos += static_cast<glm::vec3>(left * -horizontalDirection.x * CoolTime::DeltaTime() * s_speed);
+    }
 }
