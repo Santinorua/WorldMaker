@@ -33,7 +33,6 @@ namespace WorldMaker
 		{
 			for (int x = 0; x < chunkWidth-1; x++)
 			{
-				std::cout << "called\n";
 				unsigned int bottomLeft = y * chunkWidth + x;
 				unsigned int bottomRight = y * chunkWidth + (x + 1);
 				unsigned int topLeft = (y+1) * chunkWidth + x;
@@ -46,10 +45,6 @@ namespace WorldMaker
 				indices.push_back(bottomLeft);
 				indices.push_back(topRight);
 				indices.push_back(topLeft);
-				for (unsigned int i : indices)
-				{
-					std::cout << i << " - \n";
-				}
 			}
 		}
 		return indices;
