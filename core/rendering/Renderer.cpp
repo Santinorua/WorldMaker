@@ -27,7 +27,7 @@ namespace WorldMaker
 
         glfwMakeContextCurrent(s_window);
 
-        glfwSwapInterval(0);
+        glfwSwapInterval(1);
 
         ASSERT(glewInit() == GLEW_OK);
 

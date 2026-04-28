@@ -14,7 +14,7 @@ namespace WorldMaker
 	glm::vec3 Camera::s_pos = glm::vec3(0,0,0);
 	glm::vec3 Camera::s_rot = glm::vec3(0,0,0);
 	float Camera::s_speed = 50.0f;
-	float Camera::s_rotationSpeed = 100.0f;
+	float Camera::s_rotationSpeed = 0.1f;
 
 	glm::mat4 Camera::ProjectionMatrix()
 	{
@@ -57,7 +57,6 @@ namespace WorldMaker
         }
         Vec2 mouseRotation = Vec2(0.0f, 0.0f);
         Vec2 mouseTranslation = Input::GetMouseDeltaPix();
-        std::cout << "Mouse translation: " << mouseTranslation << "\n";
         if (firstClick)
         {
             mouseTranslation = {0,0};
