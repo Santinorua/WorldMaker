@@ -9,6 +9,7 @@
 
 namespace WorldMaker
 {
+    struct Vertex;
 	struct ChunkRenderUnit
 	{
 		static const int chunkWidth; // Amount of pixels per chunk

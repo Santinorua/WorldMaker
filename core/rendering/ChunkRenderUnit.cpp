@@ -1,4 +1,5 @@
 #include "ChunkRenderUnit.h"
+#include "Vertex.h"
 
 namespace WorldMaker
 {
@@ -7,21 +8,21 @@ namespace WorldMaker
 
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& p_vertices)
 	{
-		vertices->addBatchData(p_vertices);
+		vertices->pushBatchData(p_vertices);
 		vertices->submitData();
 
-		indices->addBatchData(GetIndicesForChunk());
+		indices->pushBatchData(GetIndicesForChunk());
 		indices->submitData();
 	}
 
 	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& p_vertices)
 	{
 		vertices->flush();
-		vertices->addBatchData(p_vertices);
+		vertices->pushBatchData(p_vertices);
 		vertices->submitData();
 
 		indices->flush();
-		indices->addBatchData(GetIndicesForChunk());
+		indices->pushBatchData(GetIndicesForChunk());
 		indices->submitData();
 	}
 
