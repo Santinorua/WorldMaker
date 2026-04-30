@@ -9,14 +9,14 @@ namespace WorldMaker
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices)
 	{
 	    std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
-       	if (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true);
-       	if (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true);
+       	if (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
+       	if (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
 
-        if (!m_vertices->checkIfEnoughSpaceForPush(vertices.size())) m_vertices->pushBatchData(vertices);
+        if (!m_vertices->checkIfEnoughSpaceForPush(vertices.size())) resizeSSBO(m_vertices, false, vertices.size());
 		m_vertices->pushBatchData(vertices);
 		m_vertices->submitData();
 
-		if (!m_indices->checkIfEnoughSpaceForPush(indices.size())) resizeSSBO(m_indices, false);
+		if (!m_indices->checkIfEnoughSpaceForPush(indices.size())) resizeSSBO(m_indices, false, indices.size());
 		m_indices->pushBatchData(indices);
 		m_indices->submitData();
 	}
