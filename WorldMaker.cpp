@@ -1,5 +1,6 @@
 #include "WorldMaker.h"
 #include "Camera.h"
+#include "PerlinNoise.h"
 #include "RenderingConstants.h"
 #include "Renderer.h"
 #include "ShaderProgram.h"
@@ -29,8 +30,8 @@ int main()
 	Renderer::Init();
 	Input::SetUp(Renderer::GetWindow());
 
-	int gridWidth = 10;
-    int gridDepth = 10;
+	int gridWidth = 100;
+    int gridDepth = 100;
 
     double planeSizeX = 10.0;
     double planeSizeZ = 10.0;
@@ -41,37 +42,29 @@ int main()
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(gridWidth * gridDepth);
 
-    auto getHeight = [](double x, double z) -> double {
-        double y = std::sin(x * 0.8) * std::cos(z * 0.8) * 1.5;
-        y += std::sin(x * 2.5) * 0.3;
-        return y;
-    };
 
-    const double EPSILON = 0.01;
-
+    FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
     for (int z = 0; z < gridDepth; ++z)
     {
         for (int x = 0; x < gridWidth; ++x)
         {
-            double posX = - (planeSizeX / 2.0) + (x * stepX);
-            double posZ = - (planeSizeZ / 2.0) + (z * stepZ);
 
-            double posY = getHeight(posX, posZ);
+            double posY = fractal.getNoise(x, z);
 
-            double hL = getHeight(posX - EPSILON, posZ);
-            double hR = getHeight(posX + EPSILON, posZ);
-            double hD = getHeight(posX, posZ - EPSILON);
-            double hU = getHeight(posX, posZ + EPSILON);
+            double hL = fractal.getNoise(x - 1, z);
+            double hR = fractal.getNoise(x + 1, z);
+            double hD = fractal.getNoise(x, z - 1);
+            double hU = fractal.getNoise(x, z + 1);
 
             glm::vec3 normal;
             normal.x = static_cast<float>(hL - hR);
-            normal.y = static_cast<float>(2.0 * EPSILON);
+            normal.y = static_cast<float>(2.0 * 1);
             normal.z = static_cast<float>(hD - hU);
 
             normal = glm::normalize(normal);
 
             Vertex v;
-            v.m_position = { static_cast<float>(posX), static_cast<float>(posY), static_cast<float>(posZ) };
+            v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
             v.m_normal = normal;
 
             chunkVertices.push_back(v);
