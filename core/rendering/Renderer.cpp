@@ -64,14 +64,14 @@ namespace WorldMaker
 
 	void Renderer::PrepareToDrawChunk(ChunkRenderUnit& chunk)
 	{
-		chunk.vertexArray->bind();
+		chunk.m_vertexArray->bind();
 		Renderer::s_shaderProgramsByType[chunk.shaderProgramType]->bind();
 
-		chunk.vertices->bindBufferBase(SSBOType::vertices);
-		chunk.indices->bindBufferBase(SSBOType::indices);
+		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
+		chunk.m_indices->bindBufferBase(SSBOType::indices);
 	}
 	void Renderer::DrawChunk(ChunkRenderUnit& chunk)
 	{
-		glDrawArrays(GL_TRIANGLES, 0, chunk.indices->m_data.size());
+		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices->m_data.size());
 	}
 }

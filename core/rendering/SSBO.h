@@ -79,13 +79,13 @@ namespace WorldMaker
 		}
 		bool checkIfPushIsBiggerThanMaxSize(unsigned int elementsToAddAmount) // Think of a better name
 		{
-		    return elementsToAddAmount * sizeof(T) <= maxSize();
+		    return elementsToAddAmount * sizeof(T) > maxSize();
 		}
 		unsigned int glName() const { return m_glName; }
 		unsigned int currentSize() const { return m_currentBytes; }
 		unsigned int maxSize() const { return m_maxBytes; }
 
-		friend class RenderUnit;
+		friend class ChunkRenderUnit;
 	};
 	template<typename T>
 	using SSBOUPtr = std::unique_ptr<SSBO<T>>;
