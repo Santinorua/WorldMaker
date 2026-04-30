@@ -5,7 +5,6 @@
 #include "GLFW/glfw3.h"
 #include "NoiseRenderUnit.h"
 #include "ShaderProgram.h"
-#include "glm/glm.hpp"
 #include <map>
 
 namespace WorldMaker

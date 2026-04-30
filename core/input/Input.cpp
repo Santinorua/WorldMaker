@@ -1,6 +1,8 @@
 #include "Input.h"
-
+#include "Vec2.h"
+#include "Vec3.h"
 #include "EventManager.h"
+
 namespace WorldMaker
 {
     GLFWwindow* Input::s_window = nullptr;
@@ -140,13 +142,17 @@ namespace WorldMaker
         glfwSetInputMode(s_window, GLFW_CURSOR, mode);
     }
 
+    void Input::SetCursorPosPix(const Vec2& newPos)
+    {
+        glfwSetCursorPos(s_window, newPos.x, newPos.y);
+    }
+
     CursorMode Input::GetCursorMode() {
         return static_cast<CursorMode>(glfwGetInputMode(s_window, GLFW_CURSOR));
     }
 
     bool Input::GetMouseButtonDown(MouseCode button) {
         // Return True if the mouse button is down
-
         return glfwGetMouseButton(s_window, button) == GLFW_PRESS;
     }
 

@@ -88,7 +88,6 @@ int main()
 
         Renderer::DrawChunk(chunk);
 
-
 		// Hola += CoolTime::DeltaTime();
 		// if (Hola > 1) {
 		// 	PerlinNoise perlinNoise2(width, height, 10, contador++);
