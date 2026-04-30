@@ -18,7 +18,7 @@ std::string RelativeFileToString(const std::string& relativeFilePath)
 	return FileToString(GlobalizePath(relativeFilePath));
 }
 
-// Relative from the RuamEngine root directory
+// Relative from the WorldMaker root directory
 std::string GlobalizePath(const std::string& relativeFilePath)
 {
 	return std::string(PROJECT_ROOT_DIR) + "/" + relativeFilePath;

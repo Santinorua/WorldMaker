@@ -21,7 +21,7 @@ namespace WorldMaker
 	{
 	public:
 		static ShaderProgram* s_boundShader;
-		// Los paths son relativos a la carpeta RuamEngine
+		// Los paths son relativos a la carpeta WorldMaker
 		ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath);
 		~ShaderProgram();
 

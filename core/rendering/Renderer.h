@@ -30,12 +30,6 @@ namespace WorldMaker
 		GLenum blendDFactor = GL_ONE_MINUS_SRC_ALPHA;
     };
 
-    enum SSBOType
-    {
-        vertices = 0,
-        indices = 1,
-    };
-
 	class Renderer
 	{
 	public:

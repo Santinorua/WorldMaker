@@ -5,6 +5,7 @@
 #include "Texture2D.h"
 #include "VertexArray.h"
 #include "SSBO.h"
+#include "Vertex.h"
 
 namespace WorldMaker
 {
