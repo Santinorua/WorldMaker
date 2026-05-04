@@ -108,6 +108,24 @@ add_library(Math STATIC ${MATH_SRC})
 target_link_libraries(Math PUBLIC glm)
 target_include_directories(Math PUBLIC ${CMAKE_SOURCE_DIR}/core/math)
 
+# -----------------------------------------------------------------------------------------------------
+
+# Assimp
+
+set(ASSIMP_BUILD_MINIZIP ON)
+set(ASSIMP_BUILD_ZLIB ON)
+
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG v6.0.2
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13)
+  add_compile_options(-Wno-error=dangling-reference)
+endif()
+
+FetchContent_MakeAvailable(assimp)
 
 # -----------------------------------------------------------------------------------------------------
 
@@ -134,7 +152,7 @@ target_compile_definitions(Utils PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
 file (GLOB RENDERING_SRC "${CMAKE_SOURCE_DIR}/core/rendering/*.cpp")
 add_library(Rendering STATIC ${RENDERING_SRC})
-target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time)
+target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp)
 target_include_directories(Rendering PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering)
 
 # -----------------------------------------------------------------------------------------------------

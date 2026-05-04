@@ -30,14 +30,8 @@ int main()
 	Renderer::Init();
 	Input::SetUp(Renderer::GetWindow());
 
-	int gridWidth = 100;
-    int gridDepth = 100;
-
-    double planeSizeX = 10.0;
-    double planeSizeZ = 10.0;
-
-    double stepX = planeSizeX / (gridWidth - 1);
-    double stepZ = planeSizeZ / (gridDepth - 1);
+	int gridWidth = ChunkRenderUnit::chunkWidth;
+    int gridDepth = ChunkRenderUnit::chunkHeight;
 
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(gridWidth * gridDepth);
