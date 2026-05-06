@@ -6,6 +6,7 @@
 #include "RenderingConstants.h"
 #include "SSBO.h"
 
+#include <memory>
 #include <vector>
 
 namespace WorldMaker

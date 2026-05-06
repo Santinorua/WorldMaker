@@ -23,6 +23,10 @@
 #include <iostream>
 #include <memory>
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
 using namespace WorldMaker;
 
 int main()
@@ -35,7 +39,6 @@ int main()
 
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(gridWidth * gridDepth);
-
 
     FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
     for (int z = 0; z < gridDepth; ++z)
@@ -69,6 +72,12 @@ int main()
 
     Renderer::PrepareToDrawChunk(chunk);
 
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui_ImplGlfw_InitForOpenGL(Renderer::GetWindow(), true);
+    ImGui_ImplOpenGL3_Init();
+    ImGui::StyleColorsDark();
+
 	while (!Renderer::WindowShouldClose())
 	{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -76,36 +85,25 @@ int main()
         CoolTime::Update();
         Input::Update();
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Text("FPS: %.1f",
+                    ImGui::GetIO().Framerate);
+
         Camera::UpdateCameraTransform();
         ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
         Renderer::DrawChunk(chunk);
-
-		// Hola += CoolTime::DeltaTime();
-		// if (Hola > 1) {
-		// 	PerlinNoise perlinNoise2(width, height, 10, contador++);
-		// 	// FractalNoise fractalNoise2(width, height, 5, 1, contador++, 4, 2.0, 0.5);
-		// 	colorVector = {};
-		// 	for (int i = 0; i < width*height; i++)
-		// 	{
-		// 		double color = perlinNoise2.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
-		// 		// double color = fractalNoise2.getNoise(i%width, i/width) * 0.5 + 0.5;
-		// 		// double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, contador) * 0.5 + 0.5;
-		// 		// if (i/width == 0 )
-		// 		// 	std::cout << color << std::endl;
-		// 		colorVector.push_back(color);
-		// 		colorVector.push_back(color);
-		// 		colorVector.push_back(color);
-		// 		colorVector.push_back(1.0);
-		// 	}
-		// 	// contador++;
-		// 	noise.ChangeNoise(width, height, colorVector);
-		// 	Hola = 0;
-		// 	// Renderer::PrepareToDrawNoise(noise);
-		// }
+		ImGui::Render();
+       	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(Renderer::GetWindow());
 
         glfwPollEvents();
 	}
+	ImGui_ImplOpenGL3_Shutdown();
+   	ImGui_ImplGlfw_Shutdown();
+   	ImGui::DestroyContext();
 }

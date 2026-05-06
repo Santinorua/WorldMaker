@@ -36,6 +36,8 @@ target_include_directories(Vendor INTERFACE
 target_compile_definitions(Vendor INTERFACE STB_IMAGE_IMPLEMENTATION)
 target_compile_definitions(Vendor INTERFACE GLEW_STATIC)
 
+target_link_libraries(Vendor INTERFACE ImGui)
+
 # -----------------------------------------------------------------------------------------------------
 
 # GLEW
@@ -97,7 +99,6 @@ target_link_libraries(ImGui PUBLIC glfw glew_s)
 target_include_directories(ImGui PUBLIC "${imgui_SOURCE_DIR}")
 # Lastly, add this new library to the function target_link_directories and also provice the path to
 # the h files to the target_include_directories function
-
 
 # -----------------------------------------------------------------------------------------------------
 
