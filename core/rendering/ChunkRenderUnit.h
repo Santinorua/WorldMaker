@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Material.h"
 #include "ShaderProgram.h"
 #include "VertexArray.h"
 #include "Texture2D.h"
@@ -23,6 +24,7 @@ namespace WorldMaker
 		VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
 		SSBOUPtr<Vertex> m_vertices = std::make_unique<SSBO<Vertex>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
 		SSBOUPtr<unsigned int> m_indices = std::make_unique<SSBO<unsigned int>>(maxIndexCount, GL_DYNAMIC_STORAGE_BIT);
+		MaterialSPtr m_material = std::make_shared<Material>();
 
 		template<typename T>
         void resizeSSBO(SSBOUPtr<T>& ssbo, bool batchExceedsCapacity, unsigned int elementsToSupport)

@@ -151,6 +151,16 @@ namespace WorldMaker
 		GLCall(glUniform1iv(loc, maxTextureSlots, samplers.data()));
 	}
 
+	void ShaderProgram::loadMaterial(const Material& material)
+	{
+		bind();
+		setUniform4f("u_baseColor", material.baseColor.x, material.baseColor.y, material.baseColor.z, material.baseColor.w);
+		setUniform1f("u_diffuse", material.m_diffuseIndex);
+		setUniform1f("u_specular", material.m_specularIndex);
+		setUniform1f("u_shininess", material.m_shininess);
+		setUniform1f("u_cubemap", material.m_cubemap);
+	}
+
 	void ShaderProgram::updateCameraMatrices()
 	{
 		bind();

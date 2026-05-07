@@ -6,6 +6,7 @@ const int SSBOType_indices = 1;
 struct VertexData
 {
     double position[3];
+    double uv[2];
     double normal[3];
 };
 
@@ -31,6 +32,14 @@ vec3 GetPosition(uint index)
     );
 }
 
+vec2 GetUV(uint index)
+{
+    return vec2(
+        data[index].uv[0],
+        data[index].uv[1]
+    );
+}
+
 vec3 GetNormal(uint index)
 {
     return vec3(
@@ -42,6 +51,7 @@ vec3 GetNormal(uint index)
 
 smooth out vec3 frag_normal;
 smooth out vec4 frag_pos;
+smooth out vec2 frag_uv;
 
 void main()
 {
@@ -50,5 +60,6 @@ void main()
     vec4 position = vec4(GetPosition(realIndex), 1.0);
     frag_pos = position;
     frag_normal = normalize(GetNormal(realIndex));
+    frag_uv = GetUV(realIndex);
     gl_Position = vp * position;
 };

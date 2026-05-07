@@ -11,7 +11,7 @@ namespace WorldMaker
     protected:
         std::string m_filePath;
         GLuint m_glName = 0;
-        unsigned int m_rendererIndex = 0; // Index in the handle vector
+        unsigned int m_rendererIndex = 0;
         GLuint64 m_handle = 0;
 
     public:

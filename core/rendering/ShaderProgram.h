@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "Material.h"
+
 #include <string>
 #include <unordered_map>
 #include "glm/glm.hpp"
@@ -35,6 +37,7 @@ namespace WorldMaker
 		void setUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 		void setUniformMat4f(const std::string& name, glm::mat4 matrix);
 		void setUniformTextureSlots(const std::string& name);
+		void loadMaterial(const Material& material);
 		void updateCameraMatrices();
 		unsigned int maxTexturesCapacity() { return  maxTextureSlots; }
 		unsigned int instanceId() const { return m_instanceId; }

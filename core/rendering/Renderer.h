@@ -37,7 +37,15 @@ namespace WorldMaker
 		static GLFWwindow* s_window;
 		static std::map<ShaderProgramType, ShaderProgramSPtr> s_shaderProgramsByType;
 
+		static std::unordered_map<GLenum, std::vector<unsigned int>> s_handlesFreeIndexesByType;
+
+        static std::unordered_map<GLenum, std::vector<GLuint64>> s_handlesByType;
+        static std::unordered_map<GLenum, GLuint> s_buffersByType;
+        static std::unordered_map<GLenum, int> s_bindingsByType;
+        static bool s_texturesUploaded;
+
 		static void Init();
+
 		// Getters for RendererConfig
         static int GetWindowWidth() { return s_config.windowWidth; }
         static int GetWindowHeight()  { return s_config.windowHeight; }
@@ -52,6 +60,18 @@ namespace WorldMaker
         static GLenum GetBlendDFactor()  { return s_config.blendDFactor; }
 		static GLFWwindow* GetWindow() { return s_window; }
 		static int WindowShouldClose() { return glfwWindowShouldClose(s_window); }
+
+		// Updaters
+		static void UpdateTextures();
+        static void UpdateTextureType(GLenum type);
+
+        // Registrators
+		static unsigned int RegisterTexture(const TextureSPtr& texture);
+        static void UnregisterTexture(unsigned int textureIndex, GLenum type);
+
+        // Allocators
+        static void AllocateTextureTypes();
+        static void AllocateTextureType(GLenum type);
 
 		static void PrepareToDrawNoise(NoiseRenderUnit& noise);
 		static void DrawNoise(const NoiseRenderUnit& noise);
