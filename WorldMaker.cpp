@@ -39,16 +39,16 @@ int main()
 
 	};
 
-	BiomeGenerator biomeGenerator(width, height, 42);
-	PerlinNoise perlinNoise(width, height, 10, 1);
-	// FractalNoise fractalNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
+	// BiomeGenerator biomeGenerator(width, height, 42);
+	// PerlinNoise perlinNoise(width, height, 10, 1);
+	FractalNoise fractalNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
 	// PerlinNoise3D perlinNoise3D(width, height, 10, 10 , 1);
 	// ComplexNoise complexNoise(width, height, -6, {1, 1, 1}, 42);
 
 	for (int i = 0; i < width*height; i++)
 	{
-		double color = perlinNoise.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
-		// double color = fractalNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
+		// double color = perlinNoise.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
+		double color = fractalNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
 		// double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, 0) * 0.5 + 0.5;
 		// double color = complexNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
 		colorVector.push_back(color);

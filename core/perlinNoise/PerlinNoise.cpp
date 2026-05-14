@@ -17,7 +17,7 @@ namespace WorldMaker {
         return dx * gradient.x + dy * gradient.y;
     }
 
-    double PerlinNoise::getPerlinNoise(int x, int y) {
+    double PerlinNoise::getPerlinNoise(float x, float y) {
         // Calculate the position of the point asked for in the noise space
         double sampleX = x / m_scale;
         double sampleY = y / m_scale;
@@ -60,7 +60,7 @@ namespace WorldMaker {
         return dx * gradient.x + dy * gradient.y + dz * gradient.z;
     }
 
-    double PerlinNoise3D::getPerlinNoise3D(int x, int y, int z) {
+    double PerlinNoise3D::getPerlinNoise3D(float x, float y, float z) {
         // Calculate the position of the point asked for in the noise space
         double sampleX = x / m_scale;
         double sampleY = y / m_scale;
@@ -109,7 +109,7 @@ namespace WorldMaker {
         }
     }
 
-    double FractalNoise::getNoise(int x, int y) {
+    double FractalNoise::getNoise(float x, float y) {
         double result = 0.0;
         double amplitude = m_amplitude;
         for (PerlinNoise& octave : m_octaves) {
@@ -133,7 +133,7 @@ namespace WorldMaker {
             }
     }
 
-    double ComplexNoise::getNoise(int x, int y) {
+    double ComplexNoise::getNoise(float x, float y) {
         double result = 0.0;
         for (int i = 0; i < m_octaves.size(); i = i+2) {
             double h = m_octaves[i].getPerlinNoise(x, y) * m_amplitudes[i/2];
