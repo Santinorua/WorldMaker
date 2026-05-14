@@ -3,8 +3,8 @@
 
 namespace WorldMaker
 {
-	const int ChunkRenderUnit::chunkWidth = 2; // Amount of pixels per chunk
-	const int ChunkRenderUnit::chunkHeight = 2; // Amount of pixels per chunk
+	int ChunkRenderUnit::chunkWidth = 64; // Amount of pixels per chunk
+	int ChunkRenderUnit::chunkHeight = 64; // Amount of pixels per chunk
 
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices)
 	{

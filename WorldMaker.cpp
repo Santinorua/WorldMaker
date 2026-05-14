@@ -29,6 +29,42 @@
 
 using namespace WorldMaker;
 
+void generate_mesh(ChunkRenderUnit& render_unit, FractalNoise& noise) {
+    std::vector<Vertex> chunkVertices;
+    chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
+
+    for (int z = 0; z < ChunkRenderUnit::chunkHeight; ++z)
+    {
+        for (int x = 0; x < ChunkRenderUnit::chunkWidth; ++x)
+        {
+
+            double posY = noise.getNoise(x, z);
+
+            double hL = noise.getNoise(x - 1, z);
+            double hR = noise.getNoise(x + 1, z);
+            double hD = noise.getNoise(x, z - 1);
+            double hU = noise.getNoise(x, z + 1);
+
+            glm::vec3 normal;
+            normal.x = static_cast<float>(hL - hR);
+            normal.y = static_cast<float>(2.0 * 1);
+            normal.z = static_cast<float>(hD - hU);
+
+            normal = glm::normalize(normal);
+
+            Vertex v;
+            v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
+            v.m_normal = normal;
+
+            chunkVertices.push_back(v);
+        }
+    }
+
+	render_unit.ChangeVertices(chunkVertices);
+
+    Renderer::PrepareToDrawChunk(render_unit);
+}
+
 int main()
 {
 	Renderer::Init();
@@ -78,6 +114,7 @@ int main()
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
 
+	int chunk_size = ChunkRenderUnit::chunkHeight;
 	while (!Renderer::WindowShouldClose())
 	{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -91,6 +128,18 @@ int main()
 
         ImGui::Text("FPS: %.1f",
                     ImGui::GetIO().Framerate);
+
+		ImGui::Begin("Hola");
+		ImGui::Text("Mesh Size: ");
+		ImGui::InputInt("##mesh_size", &chunk_size);
+		if (ImGui::Button("Generate mesh")) {
+			ChunkRenderUnit::chunkWidth = chunk_size;
+			ChunkRenderUnit::chunkHeight = chunk_size;
+
+			FractalNoise fractal(ChunkRenderUnit::chunkWidth, ChunkRenderUnit::chunkHeight, 5, 2, 1, 4, 2.0, 0.75);
+			generate_mesh(chunk, fractal);
+		}
+		ImGui::End();
 
         Camera::UpdateCameraTransform();
         ShaderProgram::s_boundShader->updateCameraMatrices();
