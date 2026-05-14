@@ -54,4 +54,11 @@ namespace WorldMaker {
         double getNoise(float x, float y);
     };
 
+    class RidgesFolded {
+        FractalNoise m_fractalNoise;
+    public:
+        RidgesFolded();
+        double getNoise(float x, float y);
+    };
+
 }

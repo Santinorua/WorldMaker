@@ -146,6 +146,12 @@ namespace WorldMaker {
         // double totalAmplitude = m_amplitudes.size()
     }
 
+    RidgesFolded::RidgesFolded() : m_fractalNoise(1000, 1000, 5, 1, 42, 5, 2.0, 0.5) {
 
+    }
 
+    double RidgesFolded::getNoise(float x, float y) {
+        double fractalValue = m_fractalNoise.getNoise(x, y) * 0.5 + 0.5;
+        return 1 - std::abs(std::abs(fractalValue * 3) - 2);
+    }
 }
