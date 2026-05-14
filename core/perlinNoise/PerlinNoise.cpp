@@ -42,7 +42,7 @@ namespace WorldMaker {
     PerlinNoise::PerlinNoise(int width, int height, double frequency, uint64_t seed) {
         m_height = height;
         m_width = width;
-        m_scale = width / frequency;
+        m_scale = 60 / frequency;
         m_seed = seed;
     }
 

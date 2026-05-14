@@ -9,28 +9,28 @@ namespace WorldMaker
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices)
 	{
 	    std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
-       	if (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
-       	if (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
+       	while (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
+       	while (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
 
-        if (!m_vertices->checkIfEnoughSpaceForPush(vertices.size())) resizeSSBO(m_vertices, false, vertices.size());
+        while (!m_vertices->checkIfEnoughSpaceForPush(vertices.size())) resizeSSBO(m_vertices, false, vertices.size());
 		m_vertices->pushBatchData(vertices);
 		m_vertices->submitData();
 
-		if (!m_indices->checkIfEnoughSpaceForPush(indices.size())) resizeSSBO(m_indices, false, indices.size());
+		while (!m_indices->checkIfEnoughSpaceForPush(indices.size())) resizeSSBO(m_indices, false, indices.size());
 		m_indices->pushBatchData(indices);
 		m_indices->submitData();
 	}
 
 	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& vertices)
 	{
-	    if (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
+	    while (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
 		m_vertices->flush();
 		m_vertices->pushBatchData(vertices);
 		m_vertices->submitData();
 
 		std::vector<unsigned int> indices = ChunkRenderUnit::GetIndicesForChunk();
 
-		if (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
+		while (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
 		m_indices->flush();
 		m_indices->pushBatchData(indices);
 		m_indices->submitData();
