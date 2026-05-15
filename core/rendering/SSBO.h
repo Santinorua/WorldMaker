@@ -12,8 +12,7 @@ namespace WorldMaker
         vertices = 0,
         indices = 1,
         modelMatrices = 2,
-        textures2D = 3,
-        cubemaps = 4
+        cubemaps = 3
     };
 
     template<typename T>

@@ -10,6 +10,10 @@
 
 namespace WorldMaker
 {
+    inline std::string diffuseTexDefaultPath = "core/rendering/assets/textures/defaultGrass.png";
+    inline std::string specularTexDefaultPath = "core/rendering/assets/textures/defaultSpecular.png";
+    inline std::string reflectionTexDefaultPath = "core/rendering/assets/textures/defaultReflection.png";
+
     class ResourceManager
     {
     public:
@@ -29,15 +33,12 @@ namespace WorldMaker
             }
 
             TextureSPtr newTexture = std::make_shared<T>(relativePath);
-            unsigned int rendererIndex = Renderer::RegisterTexture(newTexture);
-            newTexture->setRendererIndex(rendererIndex);
 
             TextureEntry newEntry;
-            newEntry.rendererIndex = rendererIndex; //
             newEntry.texture = newTexture;
             newEntry.refCount = 1;
 
-            m_textureCache[newTexture->path()] = newEntry;
+            m_textureCache[relativePath] = newEntry;
             return newTexture;
         }
         template <typename T>
@@ -81,7 +82,7 @@ namespace WorldMaker
         static TextureWPtr GetTexture(const std::string& relativePath);
         static TextureWPtr GetTexture(const std::vector<std::string>& relativePaths);
 
-        static MaterialWPtr CreateMaterial();
+        static MaterialWPtr CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath, const std::string& reflectionTexPath = reflectionTexDefaultPath);
         static void DestroyMaterial(unsigned int materialId);
         static MaterialWPtr GetMaterial(unsigned int materialId);
 

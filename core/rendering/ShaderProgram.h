@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include "Material.h"
-
 #include <string>
 #include <unordered_map>
 #include "glm/glm.hpp"
@@ -13,6 +11,8 @@
 
 namespace WorldMaker
 {
+    class Material;
+
 	enum ShaderProgramType
 	{
 		noise = 0,

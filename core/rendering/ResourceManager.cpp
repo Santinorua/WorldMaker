@@ -2,9 +2,11 @@
 #include "FileFunctions.h"
 #include "RenderUnit.h"
 #include "Renderer.h"
+#include "Material.h"
+#include "Texture2D.h"
+
 #include <memory>
 #include <set>
-#include "Material.h"
 
 namespace WorldMaker
 {
@@ -13,7 +15,7 @@ namespace WorldMaker
 
     void ResourceManager::Init()
     {
-        LoadTexture<Texture2D>("core/rendering/assets/textures/defaultGrass.png");
+
     }
 
     // Texture handling ---------------------------------------------------------------------------------
@@ -37,9 +39,13 @@ namespace WorldMaker
 
     // Material handling ---------------------------------------------------------------------------------
 
-    MaterialWPtr ResourceManager::CreateMaterial()
+    MaterialWPtr ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath, const std::string& reflectionTexPath)
     {
    		MaterialSPtr newMaterial = std::make_shared<Material>();
+        newMaterial->m_diffuseTexture = LoadTexture<Texture2D>(diffuseTexPath);
+        newMaterial->m_specularTexture = LoadTexture<Texture2D>(specularTexPath);
+        newMaterial->m_reflectionTexture = LoadTexture<Texture2D>(reflectionTexPath);
+
      	MaterialEntry newEntry;
      	newEntry.material = newMaterial;
      	newEntry.refCount++;
