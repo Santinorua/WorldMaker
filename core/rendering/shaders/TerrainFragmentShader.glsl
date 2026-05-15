@@ -6,8 +6,6 @@ layout(binding = 2) uniform sampler2D u_reflection;
 
 out vec4 final_color;
 
-in vec2 frag_texCoord;
-
 smooth in vec4 frag_pos;
 smooth in vec3 frag_normal;
 smooth in vec2 frag_uv;
