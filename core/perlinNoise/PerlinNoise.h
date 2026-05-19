@@ -40,6 +40,10 @@ namespace WorldMaker {
         std::vector<PerlinNoise> m_octaves = {};
 
     public:
+        FractalNoise() {
+            m_persistance = 0.5;
+            m_amplitude = 1.0;
+        }
         FractalNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int octaves, double lacunarity, double persistence);
         double getNoise(float x, float y);
     };
