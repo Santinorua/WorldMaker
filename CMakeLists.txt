@@ -194,12 +194,12 @@ target_link_libraries(Utilities PUBLIC Math)
 
 # -----------------------------------------------------------------------------------------------------
 
-# biomeGenerator
+# WorldGenerator
 
-file (GLOB BIOMEGENERATOR_SRC "${CMAKE_SOURCE_DIR}/core/biomeGenerator/*.cpp")
-add_library(BiomeGenerator STATIC ${BIOMEGENERATOR_SRC})
-target_include_directories(BiomeGenerator INTERFACE ${CMAKE_SOURCE_DIR}/core/biomeGenerator)
-target_link_libraries(BiomeGenerator PUBLIC Math PerlinNoise)
+file (GLOB WORLDGENERATOR_SRC "${CMAKE_SOURCE_DIR}/core/worldGenerator/*.cpp")
+add_library(WorldGenerator STATIC ${WORLDGENERATOR_SRC})
+target_include_directories(WorldGenerator INTERFACE ${CMAKE_SOURCE_DIR}/core/worldGenerator)
+target_link_libraries(WorldGenerator PUBLIC Math PerlinNoise)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
@@ -209,7 +209,7 @@ target_link_libraries(BiomeGenerator PUBLIC Math PerlinNoise)
 # Core
 
 add_library(Core INTERFACE)
-target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise BiomeGenerator)
+target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################

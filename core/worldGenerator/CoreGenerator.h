@@ -1,9 +1,10 @@
 #pragma once
+
 #include <cstdint>
 #include "PerlinNoise.h"
 
 namespace WorldMaker {
-    class BiomeGenerator {
+    class WorldGenerator {
     public:
         uint64_t m_seed;
         FractalNoise m_erosion;
@@ -11,6 +12,6 @@ namespace WorldMaker {
         FractalNoise m_temperature;
         FractalNoise m_humidity;
     public:
-        BiomeGenerator(int width, int height, uint64_t seed);
+        WorldGenerator(int width, int height, uint64_t seed);
     };
 }

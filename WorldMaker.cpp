@@ -21,8 +21,7 @@
 
 #include <iostream>
 #include <memory>
-#include "BiomeGenerator.h"
-#include "core/biomeGenerator/BiomeGenerator.h"
+#include "CoreGenerator.h"
 
 using namespace WorldMaker;
 
@@ -56,9 +55,9 @@ int main()
 		double red = biomeGenerator.m_erosion.getNoise(i%width, i/width) * 0.5 + 0.5;
 		double blue = biomeGenerator.m_continentalness.getNoise(i%width, i/width) * 0.5 + 0.5;
 		double color = biomeGenerator.m_humidity.getNoise(i%width, i/width) * 0.5 + 0.5;
-		colorVector.push_back(color);
-		colorVector.push_back(color);
-		colorVector.push_back(color);
+		colorVector.push_back(blue);
+		colorVector.push_back(blue);
+		colorVector.push_back(blue);
 		colorVector.push_back(1.0);
 	}
 
