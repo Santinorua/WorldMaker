@@ -53,11 +53,12 @@ int main()
 		// double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, 0) * 0.5 + 0.5;
 		// double color = complexNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
 		// double color = ridgesFolded.getNoise(i%width, i/width);
-		double red = biomeGenerator.m_erosion.getNoise(i%width, i/width) * 0.25 + 0.33;
+		double red = biomeGenerator.m_erosion.getNoise(i%width, i/width) * 0.5 + 0.5;
 		double blue = biomeGenerator.m_continentalness.getNoise(i%width, i/width) * 0.5 + 0.5;
-		colorVector.push_back(red);
-		colorVector.push_back(0);
-		colorVector.push_back(blue);
+		double color = biomeGenerator.m_humidity.getNoise(i%width, i/width) * 0.5 + 0.5;
+		colorVector.push_back(color);
+		colorVector.push_back(color);
+		colorVector.push_back(color);
 		colorVector.push_back(1.0);
 	}
 
