@@ -199,7 +199,7 @@ target_link_libraries(Utilities PUBLIC Math)
 file (GLOB WORLDGENERATOR_SRC "${CMAKE_SOURCE_DIR}/core/worldGenerator/*.cpp")
 add_library(WorldGenerator STATIC ${WORLDGENERATOR_SRC})
 target_include_directories(WorldGenerator INTERFACE ${CMAKE_SOURCE_DIR}/core/worldGenerator)
-target_link_libraries(WorldGenerator PUBLIC Math PerlinNoise)
+target_link_libraries(WorldGenerator PUBLIC Math PerlinNoise Rendering)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################

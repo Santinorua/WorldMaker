@@ -38,7 +38,7 @@ int main()
 
 	};
 
-	BiomeGenerator biomeGenerator(width, height, 42);
+	WorldGenerator worldGenerator(width, height, 42);
 	// PerlinNoise perlinNoise(width, height, 10, 1);
 	// FractalNoise fractalNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
 	// PerlinNoise3D perlinNoise3D(width, height, 10, 10 , 1);
@@ -52,9 +52,9 @@ int main()
 		// double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, 0) * 0.5 + 0.5;
 		// double color = complexNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
 		// double color = ridgesFolded.getNoise(i%width, i/width);
-		double red = biomeGenerator.m_erosion.getNoise(i%width, i/width) * 0.5 + 0.5;
-		double blue = biomeGenerator.m_continentalness.getNoise(i%width, i/width) * 0.5 + 0.5;
-		double color = biomeGenerator.m_humidity.getNoise(i%width, i/width) * 0.5 + 0.5;
+		double red = worldGenerator.m_erosion.getNoise(i%width, i/width) * 0.5 + 0.5;
+		double blue = worldGenerator.m_continentalness.getNoise(i%width, i/width) * 0.5 + 0.5;
+		double color = worldGenerator.m_humidity.getNoise(i%width, i/width) * 0.5 + 0.5;
 		colorVector.push_back(blue);
 		colorVector.push_back(blue);
 		colorVector.push_back(blue);
