@@ -52,6 +52,14 @@ namespace WorldMaker {
         }
     };
 
+    class Modifier {
+        std::function<double(const double &value)> m_modifierFunction;
+
+        double getValue(const double &value) {
+            return m_modifierFunction(value);
+        }
+    };
+
     // template<typename T>
     class Biome {
         std::vector<ConditionGroup> m_conditionGroups;
