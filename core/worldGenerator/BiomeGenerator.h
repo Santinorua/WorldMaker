@@ -67,7 +67,7 @@ namespace WorldMaker {
         std::vector<double> m_featureProbabilities;
         std::vector<Texture2D> m_featureTextures;
         double m_featureProbability = 0.1;
-
+        std::vector<Modifier> m_modifiers;
 
     };
 
