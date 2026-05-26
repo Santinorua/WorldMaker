@@ -56,7 +56,7 @@ namespace WorldMaker
 	std::vector<double> Vertex::FlattenVertices(const std::vector<Vertex>& vertices)
 	{
 		std::vector<double> result;
-		result.reserve(vertices.size() * (3 + 3 + 2));  // pos + uv + normal
+		result.reserve(vertices.size() * (3 + 4 + 3 + 2));  // pos + uv + normal
 
 		for (const auto& vertex : vertices)
 		{

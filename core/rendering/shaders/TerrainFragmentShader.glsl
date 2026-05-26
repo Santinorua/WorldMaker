@@ -7,6 +7,7 @@ layout(binding = 2) uniform sampler2D u_reflection;
 out vec4 final_color;
 
 smooth in vec4 frag_pos;
+smooth in vec4 frag_color;
 smooth in vec3 frag_normal;
 smooth in vec2 frag_uv;
 
@@ -31,5 +32,6 @@ void main()
     float similarity = -dot(lightDir, frag_normal);
     float intensity = min(((similarity + 1.0) * 0.5) * u_shininess, 1);
     vec4 intensityVec = vec4(intensity, intensity, intensity, 1.0);
-    final_color = (u_baseColor * diffuse * 0.8 + specular * 0.2) * reflection * lightColor * intensityVec;
+    final_color = frag_color * lightColor * intensityVec;
+    // final_color = (u_baseColor * diffuse * 0.8 + specular * 0.2) * reflection * lightColor * intensityVec;
 }
