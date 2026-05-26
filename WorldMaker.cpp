@@ -61,6 +61,8 @@ int main()
             normal = glm::normalize(normal);
 
             Vertex v;
+            v.m_color = {1,1,1,1};
+            v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
             v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
             v.m_normal = normal;
 

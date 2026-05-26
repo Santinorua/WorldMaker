@@ -115,6 +115,7 @@ target_include_directories(Math PUBLIC ${CMAKE_SOURCE_DIR}/core/math)
 
 set(ASSIMP_BUILD_MINIZIP ON)
 set(ASSIMP_BUILD_ZLIB ON)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF) # Add this to prevent Assimp from treating warnings as errors
 
 FetchContent_Declare(
     assimp
@@ -153,7 +154,7 @@ target_compile_definitions(Utils PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
 file (GLOB RENDERING_SRC "${CMAKE_SOURCE_DIR}/core/rendering/*.cpp")
 add_library(Rendering STATIC ${RENDERING_SRC})
-target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp)
+target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities)
 target_include_directories(Rendering PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering)
 
 # -----------------------------------------------------------------------------------------------------

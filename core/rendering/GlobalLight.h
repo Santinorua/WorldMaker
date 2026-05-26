@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "Vec4.h"
+#include "Vec3.h"
 
 namespace WorldMaker
 {

@@ -7,12 +7,16 @@ namespace WorldMaker
 		double half = size / 2;
 		Vertex v0;
 		v0.m_position = { -half, -half, 0.0f };
+		v0.m_uv = {0.0f, 0.0f};
 		Vertex v1;
 		v1.m_position = { half, -half, 0.0f };
+		v1.m_uv = {1.0f,0.0f};
 		Vertex v2;
 		v2.m_position = { half, half, 0.0f };
+		v2.m_uv = {1.0f,1.0f};
 		Vertex v3;
 		v3.m_position = { -half, half, 0.0f };
+		v3.m_uv = {0.0f, 1.0f};
 		return { v0, v1, v2, v3 };
 	}
 
@@ -34,13 +38,17 @@ namespace WorldMaker
 	    }
 
 		Vertex v0;
-		v0.m_position = { -halfWidth, -halfHeight, 0.0f };
+		v0.m_position = { -halfWidth, -halfWidth, 0.0f };
+		v0.m_uv = {0.0f, 0.0f};
 		Vertex v1;
-		v1.m_position = { halfWidth, -halfHeight, 0.0f };
+		v1.m_position = { halfWidth, -halfWidth, 0.0f };
+		v1.m_uv = {1.0f,0.0f};
 		Vertex v2;
-		v2.m_position = { halfWidth, halfHeight, 0.0f };
+		v2.m_position = { halfWidth, halfWidth, 0.0f };
+		v2.m_uv = {1.0f,1.0f};
 		Vertex v3;
-		v3.m_position = { -halfWidth, halfHeight, 0.0f };
+		v3.m_position = { -halfWidth, halfWidth, 0.0f };
+		v3.m_uv = {0.0f, 1.0f};
 
 		return { v0, v1, v2, v3 };
 	}
@@ -48,7 +56,7 @@ namespace WorldMaker
 	std::vector<double> Vertex::FlattenVertices(const std::vector<Vertex>& vertices)
 	{
 		std::vector<double> result;
-		result.reserve(vertices.size() * (3 + 3));  // pos + uv + normal
+		result.reserve(vertices.size() * (3 + 4 + 3 + 2));  // pos + uv + normal
 
 		for (const auto& vertex : vertices)
 		{

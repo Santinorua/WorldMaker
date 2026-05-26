@@ -1,10 +1,12 @@
 #pragma once
 
+#include "ResourceManager.h"
 #include "ShaderProgram.h"
 #include "VertexArray.h"
 #include "Texture2D.h"
 #include "RenderingConstants.h"
 #include "SSBO.h"
+#include "Material.h"
 
 #include <memory>
 #include <vector>
@@ -12,6 +14,7 @@
 namespace WorldMaker
 {
     struct Vertex;
+    class Material;
 	struct ChunkRenderUnit
 	{
 		static const int chunkWidth; // Amount of pixels per chunk
@@ -23,6 +26,7 @@ namespace WorldMaker
 		VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
 		SSBOUPtr<Vertex> m_vertices = std::make_unique<SSBO<Vertex>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
 		SSBOUPtr<unsigned int> m_indices = std::make_unique<SSBO<unsigned int>>(maxIndexCount, GL_DYNAMIC_STORAGE_BIT);
+		MaterialWPtr m_material = ResourceManager::CreateMaterial("core/rendering/assets/textures/defaultGrass.png");
 
 		template<typename T>
         void resizeSSBO(SSBOUPtr<T>& ssbo, bool batchExceedsCapacity, unsigned int elementsToSupport)
