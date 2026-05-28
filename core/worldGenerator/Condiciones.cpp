@@ -2,32 +2,32 @@
 #include <functional>
 
 namespace WorldMaker {
-    std::function<bool> MayorQue(double threshold) {
+    std::function<bool(double)> MayorQue(double threshold) {
         return [threshold](const double &value) {
             return value > threshold;
         };
     }
-    std::function<bool> MayorOIgualQue(double threshold) {
+    std::function<bool(double)> MayorOIgualQue(double threshold) {
         return [threshold](const double &value) {
             return value >= threshold;
         };
     }
-    std::function<bool> MenorQue(double threshold) {
+    std::function<bool(double)> MenorQue(double threshold) {
         return [threshold](const double &value) {
             return value < threshold;
         };
     }
-    std::function<bool> MenorOIgualQue(double threshold) {
+    std::function<bool(double)> MenorOIgualQue(double threshold) {
         return [threshold](const double &value) {
             return value <= threshold;
         };
     }
-    std::function<bool> Igual(double threshold) {
+    std::function<bool(double)> Igual(double threshold) {
         return [threshold](const double &value) {
             return value == threshold;
         };
     }
-    std::function<bool> Distinto(double threshold) {
+    std::function<bool(double)> Distinto(double threshold) {
         return [threshold](const double &value) {
             return value != threshold;
         };
