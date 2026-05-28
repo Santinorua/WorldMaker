@@ -17,9 +17,6 @@ namespace WorldMaker {
         void removeCondition(int index);
 
         ConditionGroup() = default;
-        ~ConditionGroup() {
-            m_conditions.clear();
-        }
     };
 
     class Modifier {
