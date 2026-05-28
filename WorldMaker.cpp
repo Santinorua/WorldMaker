@@ -49,7 +49,7 @@ int main()
 
             double posY = fractal.getNoise(x, z);
 
-	WorldGenerator worldGenerator(width, height, 42);
+	// WorldGenerator worldGenerator(width, height, 42);
 	// PerlinNoise perlinNoise(width, height, 10, 1);
 	// FractalNoise fractalNoise(width, height, 5, 1, 1, 4, 2.0, 0.5);
 	// PerlinNoise3D perlinNoise3D(width, height, 10, 10 , 1);
@@ -60,21 +60,21 @@ int main()
             double hD = fractal.getNoise(x, z - 1);
             double hU = fractal.getNoise(x, z + 1);
 
-	for (int i = 0; i < width*height; i++)
-	{
-		// double color = perlinNoise.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
-		// double color = fractalNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
-		// double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, 0) * 0.5 + 0.5;
-		// double color = complexNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
-		// double color = ridgesFolded.getNoise(i%width, i/width);
-		double red = worldGenerator.m_erosion.getNoise(i%width, i/width) * 0.5 + 0.5;
-		double blue = worldGenerator.m_continentalness.getNoise(i%width, i/width) * 0.5 + 0.5;
-		double color = worldGenerator.m_humidity.getNoise(i%width, i/width) * 0.5 + 0.5;
-		colorVector.push_back(blue);
-		colorVector.push_back(blue);
-		colorVector.push_back(blue);
-		colorVector.push_back(1.0);
-	}
+	// for (int i = 0; i < width*height; i++)
+	// {
+	// 	// double color = perlinNoise.getPerlinNoise(i%width, i/width) * 0.5 + 0.5;
+	// 	// double color = fractalNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
+	// 	// double color = perlinNoise3D.getPerlinNoise3D(i%width, i/width, 0) * 0.5 + 0.5;
+	// 	// double color = complexNoise.getNoise(i%width, i/width) * 0.5 + 0.5;
+	// 	// double color = ridgesFolded.getNoise(i%width, i/width);
+	// 	double red = worldGenerator.m_erosion.getNoise(i%width, i/width) * 0.5 + 0.5;
+	// 	double blue = worldGenerator.m_continentalness.getNoise(i%width, i/width) * 0.5 + 0.5;
+	// 	double color = worldGenerator.m_humidity.getNoise(i%width, i/width) * 0.5 + 0.5;
+	// 	colorVector.push_back(blue);
+	// 	colorVector.push_back(blue);
+	// 	colorVector.push_back(blue);
+	// 	colorVector.push_back(1.0);
+	// }
             glm::vec3 normal;
             normal.x = static_cast<float>(hL - hR);
             normal.y = static_cast<float>(2.0 * 1);
