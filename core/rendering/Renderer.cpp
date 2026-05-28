@@ -7,6 +7,9 @@
 #include "NoiseRenderUnit.h"
 #include "OpenGLUtils.h"
 #include "ShaderProgram.h"
+#include "ResourceManager.h"
+#include "Pointers.h"
+
 #include <memory>
 
 namespace WorldMaker
@@ -27,7 +30,7 @@ namespace WorldMaker
 
         glfwMakeContextCurrent(s_window);
 
-        glfwSwapInterval(0);
+        glfwSwapInterval(1);
 
         ASSERT(glewInit() == GLEW_OK);
 
@@ -43,6 +46,8 @@ namespace WorldMaker
         }
         s_shaderProgramsByType[ShaderProgramType::noise] = std::make_shared<ShaderProgram>("core/rendering/shaders/NoiseVertexShader.glsl", "core/rendering/shaders/NoiseFragmentShader.glsl");
         s_shaderProgramsByType[ShaderProgramType::terrain] = std::make_shared<ShaderProgram>("core/rendering/shaders/TerrainVertexShader.glsl", "core/rendering/shaders/TerrainFragmentShader.glsl");
+
+        ResourceManager::Init();
 	}
 
 	void Renderer::PrepareToDrawNoise(NoiseRenderUnit& noise)
@@ -64,14 +69,14 @@ namespace WorldMaker
 
 	void Renderer::PrepareToDrawChunk(ChunkRenderUnit& chunk)
 	{
-		chunk.vertexArray->bind();
+		chunk.m_vertexArray->bind();
 		Renderer::s_shaderProgramsByType[chunk.shaderProgramType]->bind();
-
-		chunk.vertices->bindBufferBase(SSBOType::vertices);
-		chunk.indices->bindBufferBase(SSBOType::indices);
+		Renderer::s_shaderProgramsByType[chunk.shaderProgramType]->loadMaterial(*GetShared(chunk.m_material));
+		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
+		chunk.m_indices->bindBufferBase(SSBOType::indices);
 	}
 	void Renderer::DrawChunk(ChunkRenderUnit& chunk)
 	{
-		glDrawArrays(GL_TRIANGLES, 0, chunk.indices->m_data.size());
+		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices->m_data.size());
 	}
 }

@@ -1,14 +1,20 @@
 #pragma once
 
+#include "ResourceManager.h"
 #include "ShaderProgram.h"
 #include "VertexArray.h"
 #include "Texture2D.h"
 #include "RenderingConstants.h"
+#include "SSBO.h"
+#include "Material.h"
 
+#include <memory>
 #include <vector>
 
 namespace WorldMaker
 {
+    struct Vertex;
+    class Material;
 	struct ChunkRenderUnit
 	{
 		static const int chunkWidth; // Amount of pixels per chunk
@@ -17,8 +23,32 @@ namespace WorldMaker
 		void ChangeVertices(std::vector<Vertex>& p_vertices);
 		static std::vector<unsigned int> GetIndicesForChunk();
 		const ShaderProgramType shaderProgramType = ShaderProgramType::terrain;
-		VertexArrayUPtr vertexArray = std::make_unique<VertexArray>();
-		SSBOUPtr<Vertex> vertices = std::make_unique<SSBO<Vertex>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
-		SSBOUPtr<unsigned int> indices = std::make_unique<SSBO<unsigned int>>(maxIndexCount, GL_DYNAMIC_STORAGE_BIT);
+		VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
+		SSBOUPtr<Vertex> m_vertices = std::make_unique<SSBO<Vertex>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
+		SSBOUPtr<unsigned int> m_indices = std::make_unique<SSBO<unsigned int>>(maxIndexCount, GL_DYNAMIC_STORAGE_BIT);
+		MaterialWPtr m_material = ResourceManager::CreateMaterial("core/rendering/assets/textures/defaultGrass.png");
+
+		template<typename T>
+        void resizeSSBO(SSBOUPtr<T>& ssbo, bool batchExceedsCapacity, unsigned int elementsToSupport)
+        {
+            unsigned int amplifier = batchExceedsCapacity ? ssboOversizeMultiplier : ssboAmplifier;
+            for (unsigned int amplifyTry = 1; amplifyTry <=amplificationTries; amplifyTry++)
+            {
+                if ((ssbo->maxSize())*amplifier*amplifyTry<elementsToSupport) continue;
+                SSBOUPtr<T> newSSBO = std::make_unique<SSBO<T>>((ssbo->maxElements())*amplifier*amplifyTry, GL_DYNAMIC_STORAGE_BIT);
+                newSSBO.get()->m_data = ssbo.get()->m_data;
+                newSSBO.get()->m_currentBytes = ssbo.get()->m_currentBytes;
+
+                GLCall(glBindBuffer(GL_COPY_WRITE_BUFFER, newSSBO.get()->glName()));
+                GLCall(glBindBuffer(GL_COPY_READ_BUFFER, ssbo.get()->glName()));
+
+                GLCall(glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, ssbo->maxSize()));
+                ssbo = std::move(newSSBO);
+                std::cout << "SSBO resized!\n";
+                return;
+            }
+            std::cerr << "SSBO was resized " << amplificationTries << " times and still it can't support the elements requiered: " << elementsToSupport << " bytes\n";
+            return;
+        }
 	};
 }

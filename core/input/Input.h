@@ -2,14 +2,15 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "Vec2.h"
-#include "Vec3.h"
 #include "KeyCode.h"
 #include "Cursor.h"
 #include <map>
 
 namespace WorldMaker
 {
+    class Vec2;
+    class Vec3;
+
     class Input {
     public:
 
@@ -40,13 +41,16 @@ namespace WorldMaker
         static Vec2 GetCursorPosNorm();
         static Vec2 GetMouseDeltaPix();
         static Vec2 GetMouseDeltaNorm();
-        static void SetCursorPosPix(const Vec2& newPos) { glfwSetCursorPos(s_window, newPos.x, newPos.y); }
+        static void SetCursorPosPix(const Vec2& newPos);
         static void SetCursorPosNorm(const Vec2& newPos);
 
     private:
         static GLFWwindow* s_window;
         static Vec2 s_lastMousePosPix;
         static Vec2 s_lastMousePosNorm;
+        static Vec2 s_mouseDeltaPix;
+        static Vec2 s_mouseDeltaNorm;
+
 
         static const KeyCode s_supportedKeys[];
         static std::map<KeyCode, bool> s_previousKeys;
@@ -57,7 +61,6 @@ namespace WorldMaker
         static void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
         static void ScrollEvent(GLFWwindow* window, double xoffset, double yoffset);
         static void CursorEnterEvent(GLFWwindow* window, int entered);
-
 
         static bool NullWindow();
     };

@@ -1,15 +1,22 @@
 #pragma once
 
-#include "Vertex.h"
-#include "DebugUtils.h"
 #include "OpenGLUtils.h"
-#include "GL/glew.h"
-
+#include "DebugUtils.h"
+#include "Renderer.h"
+#include <vector>
 #include <memory>
 
 namespace WorldMaker
 {
-	template<typename T>
+    enum SSBOType
+    {
+        vertices = 0,
+        indices = 1,
+        modelMatrices = 2,
+        cubemaps = 3
+    };
+
+    template<typename T>
 	class SSBO
 	{
 	private:
@@ -22,14 +29,12 @@ namespace WorldMaker
 
 		SSBO(unsigned int maxCount, unsigned int usage)
 		{
-
-
 			GLCall(glGenBuffers(1, &m_glName));
-			GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_glName));
+			bind();
 			GLCall(
 				glBufferStorage
 				(
-					GL_ARRAY_BUFFER,
+					GL_SHADER_STORAGE_BUFFER,
 					sizeof(T) * maxCount,
 					0,
 					usage
@@ -42,8 +47,13 @@ namespace WorldMaker
 			GLCall(glDeleteBuffers(1, &m_glName));
 		}
 
+		void bind()
+		{
+		    GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_glName));
+		}
+
 		// Should be used for buffers from the renderer batch
-		void addBatchData(const std::vector<T>& data)
+		void pushBatchData(const std::vector<T>& data)
 		{
 			m_data.insert(m_data.end(), data.begin(), data.end());
 			m_currentBytes += data.size() * sizeof(T);
@@ -53,7 +63,7 @@ namespace WorldMaker
 		void submitData()
 		{
 			ASSERT(m_data.size() * sizeof(T) <= m_maxBytes);
-			GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_glName));
+			bind();
 			GLCall(glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, m_data.size()*sizeof(T), m_data.data()));
 		}
 
@@ -69,10 +79,22 @@ namespace WorldMaker
 			m_currentBytes = 0;
 		}
 
+		bool checkIfEnoughSpaceForPush(unsigned int elementsToPushAmount)
+		{
+		    if (currentSize() + elementsToPushAmount * sizeof(T) > maxSize()) return false;
+			return true;
+		}
+		bool checkIfPushIsBiggerThanMaxSize(unsigned int elementsToAddAmount) // Think of a better name
+		{
+		    return elementsToAddAmount * sizeof(T) > maxSize();
+		}
 		unsigned int glName() const { return m_glName; }
 		unsigned int currentSize() const { return m_currentBytes; }
 		unsigned int maxSize() const { return m_maxBytes; }
+		unsigned int maxElements() const { return m_maxBytes/sizeof(T); }
+		unsigned int currentElements() const { return m_data.size(); }
 
+		friend class ChunkRenderUnit;
 	};
 	template<typename T>
 	using SSBOUPtr = std::unique_ptr<SSBO<T>>;

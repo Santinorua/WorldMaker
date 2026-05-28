@@ -1,4 +1,5 @@
 .idea
 build
-.cache
+.cache/
 cmake-build-debug
+compile_commands.json

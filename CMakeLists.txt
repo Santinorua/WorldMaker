@@ -37,6 +37,8 @@ target_include_directories(Vendor INTERFACE
 target_compile_definitions(Vendor INTERFACE STB_IMAGE_IMPLEMENTATION)
 target_compile_definitions(Vendor INTERFACE GLEW_STATIC)
 
+target_link_libraries(Vendor INTERFACE ImGui)
+
 # -----------------------------------------------------------------------------------------------------
 
 # GLEW
@@ -99,7 +101,6 @@ target_include_directories(ImGui PUBLIC "${imgui_SOURCE_DIR}")
 # Lastly, add this new library to the function target_link_directories and also provice the path to
 # the h files to the target_include_directories function
 
-
 # -----------------------------------------------------------------------------------------------------
 
 # Math
@@ -109,6 +110,25 @@ add_library(Math STATIC ${MATH_SRC})
 target_link_libraries(Math PUBLIC glm)
 target_include_directories(Math PUBLIC ${CMAKE_SOURCE_DIR}/core/math)
 
+# -----------------------------------------------------------------------------------------------------
+
+# Assimp
+
+set(ASSIMP_BUILD_MINIZIP ON)
+set(ASSIMP_BUILD_ZLIB ON)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF) # Add this to prevent Assimp from treating warnings as errors
+
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG v6.0.2
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13)
+  add_compile_options(-Wno-error=dangling-reference)
+endif()
+
+FetchContent_MakeAvailable(assimp)
 
 # -----------------------------------------------------------------------------------------------------
 
@@ -135,7 +155,7 @@ target_compile_definitions(Utils PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
 file (GLOB RENDERING_SRC "${CMAKE_SOURCE_DIR}/core/rendering/*.cpp")
 add_library(Rendering STATIC ${RENDERING_SRC})
-target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time)
+target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities)
 target_include_directories(Rendering PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering)
 
 # -----------------------------------------------------------------------------------------------------

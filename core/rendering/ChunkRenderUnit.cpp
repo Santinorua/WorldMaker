@@ -1,28 +1,39 @@
 #include "ChunkRenderUnit.h"
+#include "Vertex.h"
 
 namespace WorldMaker
 {
-	const int ChunkRenderUnit::chunkWidth = 2; // Amount of pixels per chunk
-	const int ChunkRenderUnit::chunkHeight = 2; // Amount of pixels per chunk
+	const int ChunkRenderUnit::chunkWidth = 100; // Amount of pixels per chunk
+	const int ChunkRenderUnit::chunkHeight = 100; // Amount of pixels per chunk
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& p_vertices)
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices)
 	{
-		vertices->addBatchData(p_vertices);
-		vertices->submitData();
+	    std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
+       	if (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
+       	if (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
 
-		indices->addBatchData(GetIndicesForChunk());
-		indices->submitData();
+        if (!m_vertices->checkIfEnoughSpaceForPush(vertices.size())) resizeSSBO(m_vertices, false, vertices.size());
+		m_vertices->pushBatchData(vertices);
+		m_vertices->submitData();
+
+		if (!m_indices->checkIfEnoughSpaceForPush(indices.size())) resizeSSBO(m_indices, false, indices.size());
+		m_indices->pushBatchData(indices);
+		m_indices->submitData();
 	}
 
-	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& p_vertices)
+	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& vertices)
 	{
-		vertices->flush();
-		vertices->addBatchData(p_vertices);
-		vertices->submitData();
+	    if (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
+		m_vertices->flush();
+		m_vertices->pushBatchData(vertices);
+		m_vertices->submitData();
 
-		indices->flush();
-		indices->addBatchData(GetIndicesForChunk());
-		indices->submitData();
+		std::vector<unsigned int> indices = ChunkRenderUnit::GetIndicesForChunk();
+
+		if (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
+		m_indices->flush();
+		m_indices->pushBatchData(indices);
+		m_indices->submitData();
 	}
 
 	std::vector<unsigned int> ChunkRenderUnit::GetIndicesForChunk()
@@ -33,7 +44,6 @@ namespace WorldMaker
 		{
 			for (int x = 0; x < chunkWidth-1; x++)
 			{
-				std::cout << "called\n";
 				unsigned int bottomLeft = y * chunkWidth + x;
 				unsigned int bottomRight = y * chunkWidth + (x + 1);
 				unsigned int topLeft = (y+1) * chunkWidth + x;
@@ -46,10 +56,6 @@ namespace WorldMaker
 				indices.push_back(bottomLeft);
 				indices.push_back(topRight);
 				indices.push_back(topLeft);
-				for (unsigned int i : indices)
-				{
-					std::cout << i << " - \n";
-				}
 			}
 		}
 		return indices;

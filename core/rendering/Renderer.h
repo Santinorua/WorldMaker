@@ -1,15 +1,16 @@
 #pragma once
 
-#include "ChunkRenderUnit.h"
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "NoiseRenderUnit.h"
 #include "ShaderProgram.h"
-#include "glm/glm.hpp"
 #include <map>
+#include <vector>
+#include "Texture.h"
 
 namespace WorldMaker
 {
+    class ChunkRenderUnit;
+    class NoiseRenderUnit;
 	struct RendererConfig
     {
         int windowWidth = 850;
@@ -31,12 +32,6 @@ namespace WorldMaker
 		GLenum blendDFactor = GL_ONE_MINUS_SRC_ALPHA;
     };
 
-    enum SSBOType
-    {
-        vertices = 0,
-        indices = 1,
-    };
-
 	class Renderer
 	{
 	public:
@@ -45,6 +40,7 @@ namespace WorldMaker
 		static std::map<ShaderProgramType, ShaderProgramSPtr> s_shaderProgramsByType;
 
 		static void Init();
+
 		// Getters for RendererConfig
         static int GetWindowWidth() { return s_config.windowWidth; }
         static int GetWindowHeight()  { return s_config.windowHeight; }
