@@ -10,43 +10,13 @@ namespace WorldMaker {
         std::vector<std::function<bool(const double &value)>> m_conditions;
         bool m_isAnd = false;
 
-        void addCondition(std::function<bool(const double &value)> condition) {;
-            m_conditions.push_back(condition);
-        }
-
-        void setIsAnd(bool isAnd) {
-            m_isAnd = isAnd;
-        }
-
-        bool evaluate(const double &value) {
-            if (m_isAnd) {
-                for (const std::function<bool(const double &value)> &condition : m_conditions) {
-                    if (!condition(value)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            for (const std::function<bool(const double &value)> &condition : m_conditions) {
-                if (condition(value)) {
-                    return true;
-                }
-            }
-            return false;
-
-        }
-
-        void clearConditions() {
-            m_conditions.clear();
-        }
-
-        void removeCondition(int index) {
-            m_conditions.erase(m_conditions.begin() + index);
-        }
+        void addCondition(std::function<bool(const double &value)> condition);
+        void setIsAnd(bool isAnd);
+        bool evaluate(const double &value);
+        void clearConditions();
+        void removeCondition(int index);
 
         ConditionGroup() = default;
-
         ~ConditionGroup() {
             m_conditions.clear();
         }
@@ -68,6 +38,13 @@ namespace WorldMaker {
         std::vector<Texture2D> m_featureTextures;
         double m_featureProbability = 0.1;
         std::vector<Modifier> m_modifiers;
+
+        void addConditionGroup(const ConditionGroup &conditionGroup);
+        void removeConditionGroup(int index);
+        void addFeature(const Feature &feature, double probability, const Texture2D &texture);
+        void removeFeature(int index);
+        void moveModifierUp(int idx);
+        void moveModifierDown(int idx);
 
     };
 
