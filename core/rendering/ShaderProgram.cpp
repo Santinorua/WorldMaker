@@ -4,6 +4,8 @@
 #include "DebugUtils.h"
 #include "OpenGLUtils.h"
 #include "Camera.h"
+#include "Material.h"
+#include "Pointers.h"
 
 namespace WorldMaker
 {
@@ -149,6 +151,23 @@ namespace WorldMaker
 		bind();
 		auto loc = getUniformLocation(name);
 		GLCall(glUniform1iv(loc, maxTextureSlots, samplers.data()));
+	}
+
+	void ShaderProgram::loadMaterial(const Material& material)
+	{
+		bind();
+		setUniform4f("u_baseColor", material.baseColor.x, material.baseColor.y, material.baseColor.z, material.baseColor.w);
+		GLCall(glActiveTexture(GL_TEXTURE0));
+		GLCall(glBindTexture(GL_TEXTURE_2D, GetShared(material.m_diffuseTexture)->glName()));
+
+		GLCall(glActiveTexture(GL_TEXTURE1));
+		GLCall(glBindTexture(GL_TEXTURE_2D, GetShared(material.m_specularTexture)->glName()));
+
+		GLCall(glActiveTexture(GL_TEXTURE2));
+		GLCall(glBindTexture(GL_TEXTURE_2D, GetShared(material.m_reflectionTexture)->glName()));
+
+		setUniform1f("u_shininess", material.m_shininess);
+		setUniform1i("u_cubemap", material.m_cubemap);
 	}
 
 	void ShaderProgram::updateCameraMatrices()

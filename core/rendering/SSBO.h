@@ -2,18 +2,18 @@
 
 #include "OpenGLUtils.h"
 #include "DebugUtils.h"
+#include "Renderer.h"
 #include <vector>
 #include <memory>
 
 namespace WorldMaker
 {
-	enum SSBOType
+    enum SSBOType
     {
         vertices = 0,
         indices = 1,
         modelMatrices = 2,
-        textures2D = 3,
-        cubemaps = 4
+        cubemaps = 3
     };
 
     template<typename T>
@@ -29,11 +29,12 @@ namespace WorldMaker
 
 		SSBO(unsigned int maxCount, unsigned int usage)
 		{
-			GLCall(glCreateBuffers(1, &m_glName));
+			GLCall(glGenBuffers(1, &m_glName));
+			bind();
 			GLCall(
-				glNamedBufferStorage
+				glBufferStorage
 				(
-					m_glName,
+					GL_SHADER_STORAGE_BUFFER,
 					sizeof(T) * maxCount,
 					0,
 					usage
@@ -44,6 +45,11 @@ namespace WorldMaker
 		~SSBO()
 		{
 			GLCall(glDeleteBuffers(1, &m_glName));
+		}
+
+		void bind()
+		{
+		    GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_glName));
 		}
 
 		// Should be used for buffers from the renderer batch
@@ -57,7 +63,8 @@ namespace WorldMaker
 		void submitData()
 		{
 			ASSERT(m_data.size() * sizeof(T) <= m_maxBytes);
-			GLCall(glNamedBufferSubData(m_glName, 0, m_data.size()*sizeof(T), m_data.data()));
+			bind();
+			GLCall(glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, m_data.size()*sizeof(T), m_data.data()));
 		}
 
 		// Puts the data from m_data into the actual SSBO
