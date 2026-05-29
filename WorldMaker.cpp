@@ -29,15 +29,14 @@
 
 using namespace WorldMaker;
 
-ChunkRenderUnit* generate_chunk(float x_offset, float z_offset)
+ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
 
-    FractalNoise fractal(ChunkRenderUnit::chunkWidth, ChunkRenderUnit::chunkHeight, 5, 2, 1, 4, 2.0, 0.75);
-    for (int z = 0; z < ChunkRenderUnit::chunkHeight; ++z)
+    for (int z = z_offset * ChunkRenderUnit::chunkHeight - (z_offset != 0); z < ChunkRenderUnit::chunkHeight * (z_offset + 1) - (z_offset != 0); ++z)
     {
-        for (int x = 0; x < ChunkRenderUnit::chunkWidth; ++x)
+        for (int x = x_offset * ChunkRenderUnit::chunkWidth - (x_offset != 0); x < ChunkRenderUnit::chunkWidth * (x_offset + 1) - (x_offset != 0); ++x)
         {
 
             double posY = fractal.getNoise(x, z);
@@ -47,20 +46,29 @@ ChunkRenderUnit* generate_chunk(float x_offset, float z_offset)
             double hD = fractal.getNoise(x, z - 1);
             double hU = fractal.getNoise(x, z + 1);
 
-            glm::vec3 normal;
-            normal.x = static_cast<float>(hL - hR);
-            normal.y = static_cast<float>(2.0 * 1);
-            normal.z = static_cast<float>(hD - hU);
+			glm::vec3 normal;
+			normal.x = static_cast<float>(hL - hR);
+			normal.y = static_cast<float>(2.0 * 1);
+			normal.z = static_cast<float>(hD - hU);
 
-            normal = glm::normalize(normal);
+			normal = glm::normalize(normal);
 
             Vertex v;
-            v.m_color = {1,1,1,1};
+            v.m_color = {0.5,0.5,0.5,1};
             v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
-            v.m_position = { static_cast<float>(x) + x_offset * ChunkRenderUnit::chunkWidth, static_cast<float>(posY), static_cast<float>(z) + z_offset * ChunkRenderUnit::chunkHeight };
-            v.m_normal = normal;
+			v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z)};
+			v.m_normal = normal;
 
-            chunkVertices.push_back(v);
+
+			if (x % ChunkRenderUnit::chunkWidth == 0 || x % ChunkRenderUnit::chunkWidth == ChunkRenderUnit::chunkWidth - 1) {
+				v.m_color.x = 1;
+			}
+
+			if (z % ChunkRenderUnit::chunkHeight == 0 || z % ChunkRenderUnit::chunkHeight == ChunkRenderUnit::chunkHeight - 1) {
+				v.m_color.y = 1;
+			}
+
+			chunkVertices.push_back(v);
         }
     }
 
@@ -75,12 +83,14 @@ int main()
 	int gridWidth = ChunkRenderUnit::chunkWidth;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
+    FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 10, 1, 4, 2.0, 0.75);
+
 	std::vector<ChunkRenderUnit*> chunks;
 
-	chunks.push_back(generate_chunk(0, 0));
-	chunks.push_back(generate_chunk(1, 0));
-	chunks.push_back(generate_chunk(0, 1));
-	chunks.push_back(generate_chunk(1, 1));
+	chunks.push_back(generate_chunk(fractal, 0, 0));
+	chunks.push_back(generate_chunk(fractal, 1, 0));
+	chunks.push_back(generate_chunk(fractal, 0, 1));
+	chunks.push_back(generate_chunk(fractal, 1, 1));
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
