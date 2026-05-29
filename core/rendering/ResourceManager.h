@@ -23,13 +23,13 @@ namespace WorldMaker
 
         // Textures handling ---------------------------------------------------------------------------------
         template <typename T>
-        static Texture* LoadTexture(const std::string& relativePath)
+        static TextureWPtr LoadTexture(const std::string& relativePath)
         {
             auto it = m_textureCache.find(relativePath);
             if (it != m_textureCache.end())
             {
                 it->second.refCount++;
-                return it->second.texture.get();
+                return it->second.texture;
             }
 
             TextureSPtr newTexture = std::make_shared<T>(relativePath);
@@ -39,7 +39,7 @@ namespace WorldMaker
             newEntry.refCount = 1;
 
             m_textureCache[relativePath] = newEntry;
-            return newTexture.get();
+            return newTexture;
         }
         template <typename T>
         static Texture* LoadTexture(const std::vector<std::string>& relativePaths)

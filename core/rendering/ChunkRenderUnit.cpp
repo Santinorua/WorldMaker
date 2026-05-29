@@ -19,6 +19,7 @@ namespace WorldMaker
 		if (!m_indices->checkIfEnoughSpaceForPush(indices.size())) resizeSSBO(m_indices, false, indices.size());
 		m_indices->pushBatchData(indices);
 		m_indices->submitData();
+		m_material = ResourceManager::CreateMaterial("core/rendering/assets/textures/defaultGrass.png");
 	}
 
 	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& vertices)
