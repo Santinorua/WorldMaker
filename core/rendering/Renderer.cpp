@@ -70,7 +70,6 @@ namespace WorldMaker
 	void Renderer::PrepareToDrawChunk(ChunkRenderUnit& chunk)
 	{
 		chunk.m_vertexArray->bind();
-		Renderer::s_shaderProgramsByType[chunk.shaderProgramType]->bind();
 		Renderer::s_shaderProgramsByType[chunk.shaderProgramType]->loadMaterial(*GetShared(chunk.m_material));
 		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
 		chunk.m_indices->bindBufferBase(SSBOType::indices);

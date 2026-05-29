@@ -23,13 +23,13 @@ namespace WorldMaker
 
         // Textures handling ---------------------------------------------------------------------------------
         template <typename T>
-        static TextureWPtr LoadTexture(const std::string& relativePath)
+        static Texture* LoadTexture(const std::string& relativePath)
         {
             auto it = m_textureCache.find(relativePath);
             if (it != m_textureCache.end())
             {
                 it->second.refCount++;
-                return it->second.texture;
+                return it->second.texture.get();
             }
 
             TextureSPtr newTexture = std::make_shared<T>(relativePath);
@@ -39,17 +39,17 @@ namespace WorldMaker
             newEntry.refCount = 1;
 
             m_textureCache[relativePath] = newEntry;
-            return newTexture;
+            return newTexture.get();
         }
         template <typename T>
-        static TextureWPtr LoadTexture(const std::vector<std::string>& relativePaths)
+        static Texture* LoadTexture(const std::vector<std::string>& relativePaths)
         {
             std::string unifiedPath = UnifyPaths(relativePaths);
             auto it = m_textureCache.find(unifiedPath);
             if (it != m_textureCache.end())
             {
                 it->second.refCount++;
-                return it->second.texture;
+                return it->second.texture.get();
             }
 
             TextureSPtr newTexture = std::make_shared<T>(relativePaths);
@@ -59,7 +59,7 @@ namespace WorldMaker
             newEntry.refCount = 1;
 
             m_textureCache[unifiedPath] = newEntry;
-            return newTexture;
+            return newTexture.get();
         }
 
         template<typename T>
@@ -82,7 +82,7 @@ namespace WorldMaker
         static TextureWPtr GetTexture(const std::string& relativePath);
         static TextureWPtr GetTexture(const std::vector<std::string>& relativePaths);
 
-        static MaterialWPtr CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath, const std::string& reflectionTexPath = reflectionTexDefaultPath);
+        static Material* CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath, const std::string& reflectionTexPath = reflectionTexDefaultPath);
         static void DestroyMaterial(unsigned int materialId);
         static MaterialWPtr GetMaterial(unsigned int materialId);
 

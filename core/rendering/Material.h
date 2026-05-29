@@ -17,9 +17,9 @@ namespace WorldMaker
         float m_shininess = 1.0f;
         float m_cubemap = 0.0f;
 
-        TextureWPtr m_diffuseTexture = {};
-        TextureWPtr m_specularTexture = {};
-        TextureWPtr m_reflectionTexture = {};
+        Texture* m_diffuseTexture = {};
+        Texture* m_specularTexture = {};
+        Texture* m_reflectionTexture = {};
 
 	    unsigned int id() const { return m_id; } // Is the instance id
     private:

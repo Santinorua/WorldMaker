@@ -11,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Para que no se traten las warnings como errores
-add_compile_options(-Wno-error=array-bounds)
+add_compile_options(-ggdb -Og)
 
 include(FetchContent)
 include(FindOpenGL)

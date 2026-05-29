@@ -39,7 +39,7 @@ namespace WorldMaker
 
     // Material handling ---------------------------------------------------------------------------------
 
-    MaterialWPtr ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath, const std::string& reflectionTexPath)
+    Material* ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath, const std::string& reflectionTexPath)
     {
    		MaterialSPtr newMaterial = std::make_shared<Material>();
         newMaterial->m_diffuseTexture = LoadTexture<Texture2D>(diffuseTexPath);
@@ -50,7 +50,7 @@ namespace WorldMaker
      	newEntry.material = newMaterial;
      	newEntry.refCount++;
 		m_materialCache[newMaterial->id()] = newEntry;
-		return newMaterial;
+		return newMaterial.get();
     }
     void ResourceManager::DestroyMaterial(unsigned int materialId)
     {

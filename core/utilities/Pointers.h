@@ -12,3 +12,13 @@ std::shared_ptr<T> GetShared(std::weak_ptr<T> ptr) {
     }
     return ptr.lock();
 }
+
+template <typename T>
+T* GetShared(T* ptr) {
+    if (ptr == nullptr)
+    {
+        std::cout << "Pointer of type " << typeid(T).name() << " is null\n";
+        return nullptr;
+    }
+    return ptr;
+}

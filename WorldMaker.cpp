@@ -29,21 +29,15 @@
 
 using namespace WorldMaker;
 
-int main()
+ChunkRenderUnit* generate_chunk(float x_offset, float z_offset)
 {
-	Renderer::Init();
-	Input::SetUp(Renderer::GetWindow());
-
-	int gridWidth = ChunkRenderUnit::chunkWidth;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
-
     std::vector<Vertex> chunkVertices;
-    chunkVertices.reserve(gridWidth * gridDepth);
+    chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
 
-    FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
-    for (int z = 0; z < gridDepth; ++z)
+    FractalNoise fractal(ChunkRenderUnit::chunkWidth, ChunkRenderUnit::chunkHeight, 5, 2, 1, 4, 2.0, 0.75);
+    for (int z = 0; z < ChunkRenderUnit::chunkHeight; ++z)
     {
-        for (int x = 0; x < gridWidth; ++x)
+        for (int x = 0; x < ChunkRenderUnit::chunkWidth; ++x)
         {
 
             double posY = fractal.getNoise(x, z);
@@ -63,16 +57,30 @@ int main()
             Vertex v;
             v.m_color = {1,1,1,1};
             v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
-            v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
+            v.m_position = { static_cast<float>(x) + x_offset * ChunkRenderUnit::chunkWidth, static_cast<float>(posY), static_cast<float>(z) + z_offset * ChunkRenderUnit::chunkHeight };
             v.m_normal = normal;
 
             chunkVertices.push_back(v);
         }
     }
 
-    ChunkRenderUnit chunk{chunkVertices};
+    return new ChunkRenderUnit{chunkVertices};
+}
 
-    Renderer::PrepareToDrawChunk(chunk);
+int main()
+{
+	Renderer::Init();
+	Input::SetUp(Renderer::GetWindow());
+
+	int gridWidth = ChunkRenderUnit::chunkWidth;
+    int gridDepth = ChunkRenderUnit::chunkHeight;
+
+	std::vector<ChunkRenderUnit*> chunks;
+
+	chunks.push_back(generate_chunk(0, 0));
+	chunks.push_back(generate_chunk(1, 0));
+	chunks.push_back(generate_chunk(0, 1));
+	chunks.push_back(generate_chunk(1, 1));
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -94,11 +102,17 @@ int main()
         ImGui::Text("FPS: %.1f",
                     ImGui::GetIO().Framerate);
 
+		Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
+
         Camera::UpdateCameraTransform();
         ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
-        Renderer::DrawChunk(chunk);
+		for (ChunkRenderUnit* ck : chunks) {
+			Renderer::PrepareToDrawChunk(*ck);
+			Renderer::DrawChunk(*ck);
+		}
+
 		ImGui::Render();
        	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(Renderer::GetWindow());
