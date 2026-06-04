@@ -38,10 +38,17 @@ int main()
 	int gridWidth = ChunkRenderUnit::chunkWidth;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
-    // std::vector<Vertex> chunkVertices;
-    // chunkVertices.reserve(gridWidth * gridDepth);
+	bool doRender2D = true;
+
+    std::vector<Vertex> chunkVertices;
 	std::vector<double> colors;
-	colors.reserve(gridWidth * gridDepth);
+
+	if (doRender2D) {
+		colors.reserve(gridWidth * gridDepth);
+	} else {
+		chunkVertices.reserve(gridWidth * gridDepth);
+	}
+
 
     // FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
 	WorldGenerator generator(1, 42);
@@ -51,42 +58,52 @@ int main()
         for (int x = 0; x < gridWidth; ++x)
         {
 
-            // double posY = generator.m_continentalness.getNoise(x, z);
-            //
-            //
-            // double hL = generator.m_continentalness.getNoise(x - 1, z);
-            // double hR = generator.m_continentalness.getNoise(x + 1, z);
-            // double hD = generator.m_continentalness.getNoise(x, z - 1);
-            // double hU = generator.m_continentalness.getNoise(x, z + 1);
-            //
-            // glm::vec3 normal;
-            // normal.x = static_cast<float>(hL - hR);
-            // normal.y = static_cast<float>(2.0 * 1);
-            // normal.z = static_cast<float>(hD - hU);
-            //
-            // normal = glm::normalize(normal);
-            //
-            // Vertex v;
-            // v.m_color = {1,1.0,1.0,1};
-            // v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
-            // v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
-            // v.m_normal = normal;
-            //
-            // chunkVertices.push_back(v);
-			double color = generator.m_base.getNoise(x, z) * 0.5 + 0.5;
-        	colors.push_back(color);
-        	colors.push_back(color);
-        	colors.push_back(color);
-        	colors.push_back(1.0);
 
+			if (doRender2D) {
+				double color = generator.getHeight(x, z);
+				colors.push_back(color);
+				colors.push_back(color);
+				colors.push_back(color);
+				colors.push_back(1.0);
+			} else {
+				double posY = generator.m_continentalness.getNoise(x, z);
+
+
+				double hL = generator.m_continentalness.getNoise(x - 1, z);
+				double hR = generator.m_continentalness.getNoise(x + 1, z);
+				double hD = generator.m_continentalness.getNoise(x, z - 1);
+				double hU = generator.m_continentalness.getNoise(x, z + 1);
+
+				glm::vec3 normal;
+				normal.x = static_cast<float>(hL - hR);
+				normal.y = static_cast<float>(2.0 * 1);
+				normal.z = static_cast<float>(hD - hU);
+
+				normal = glm::normalize(normal);
+
+				Vertex v;
+				v.m_color = {1,1.0,1.0,1};
+				v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
+				v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
+				v.m_normal = normal;
+
+				chunkVertices.push_back(v);
+			}
 
         }
     }
 
-    // ChunkRenderUnit chunk{chunkVertices};
-	// Renderer::PrepareToDrawChunk(chunk);
+	ChunkRenderUnit chunk{chunkVertices};
+
 	NoiseRenderUnit noise1 = NoiseRenderUnit(gridWidth, gridDepth, colors);
-	Renderer::PrepareToDrawNoise(noise1);
+
+
+	if (doRender2D) {
+		Renderer::PrepareToDrawNoise(noise1);
+	} else {
+		Renderer::PrepareToDrawChunk(chunk);
+	}
+
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -112,8 +129,12 @@ int main()
         ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
-        // Renderer::DrawChunk(chunk);
-		Renderer::DrawNoise(noise1);
+		if (doRender2D) {
+			Renderer::DrawNoise(noise1);
+		} else {
+			Renderer::DrawChunk(chunk);
+		}
+
 		ImGui::Render();
        	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(Renderer::GetWindow());
