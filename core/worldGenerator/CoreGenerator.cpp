@@ -1,21 +1,35 @@
 #include "CoreGenerator.h"
+
+#include "DebugUtils.h"
 #include "PRNG.h"
 
 namespace WorldMaker {
 
-    WorldGenerator::WorldGenerator(uint64_t seed) {
+    WorldGenerator::WorldGenerator(double yScale, uint64_t seed) {
         m_seed = seed;
+        m_yScale = yScale;
         m_continentalness = FractalNoise(40.0, 1.0, m_seed, 3, 1.66, 0.33);
         uint64_t nextSeed = PRNG::nextNumber64(m_seed);
         m_erosion = FractalNoise(70.0, 1.0, nextSeed, 4, 2.0, 0.4);
-        nextSeed = PRNG::nextNumber64(seed);
+        nextSeed = PRNG::nextNumber64(nextSeed);
         m_temperature = FractalNoise(20.0, 1.0, nextSeed, 3, 3, 0.3);
-        nextSeed = PRNG::nextNumber64(seed);
+        nextSeed = PRNG::nextNumber64(nextSeed);
         m_humidity = FractalNoise(20.0, 1.0, nextSeed, 4, 2.5, 0.25);
+        nextSeed = PRNG::nextNumber64(nextSeed);
+        m_base = FractalNoise(40.0, 1.0, nextSeed, 4, 2.0, 0.5);
     }
 
     double WorldGenerator::getHeight(float x, float z) {
+        double continentalness = m_continentalness.getNoise(x, z);
+        double erosion = m_erosion.getNoise(x, z);
+        double base = m_base.getNoise(x, z);
+        assert(erosion >= -1.0 && erosion <= 1.0);
+        assert(continentalness >= -1.0 && continentalness <= 1.0);
+        assert(base >= -1.0 && base <= 1.0);
 
+
+        double final = (base * erosion * 0.5 + 0.5)  * continentalness;
+        return final * m_yScale;
     }
 
 

@@ -44,7 +44,7 @@ int main()
 	colors.reserve(gridWidth * gridDepth);
 
     // FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
-	WorldGenerator generator(42);
+	WorldGenerator generator(1, 42);
 	// PerlinNoise perlin = PerlinNoise(40, 42);
 	for (int z = 0; z < gridDepth; ++z)
     {
@@ -73,7 +73,7 @@ int main()
             // v.m_normal = normal;
             //
             // chunkVertices.push_back(v);
-			double color = generator.getHeight(x, z) * 0.5 + 0.5;
+			double color = generator.m_base.getNoise(x, z) * 0.5 + 0.5;
         	colors.push_back(color);
         	colors.push_back(color);
         	colors.push_back(color);
