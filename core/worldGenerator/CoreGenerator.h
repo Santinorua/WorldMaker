@@ -12,6 +12,7 @@ namespace WorldMaker {
         FractalNoise m_temperature;
         FractalNoise m_humidity;
     public:
-        WorldGenerator(int width, int height, uint64_t seed);
+        double getHeight(float x, float z);
+        WorldGenerator(uint64_t seed);
     };
 }
