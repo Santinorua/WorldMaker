@@ -24,6 +24,7 @@ namespace WorldMaker
         virtual std::string path() const { return m_filePath; }
     };
 
+    using TextureUPtr = std::unique_ptr<Texture>;
     using TextureSPtr = std::shared_ptr<Texture>;
     using TextureWPtr = std::weak_ptr<Texture>;
 }
