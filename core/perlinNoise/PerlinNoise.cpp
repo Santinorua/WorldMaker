@@ -39,10 +39,8 @@ namespace WorldMaker {
         return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY));
     }
 
-    PerlinNoise::PerlinNoise(int width, int height, double frequency, uint64_t seed) {
-        m_height = height;
-        m_width = width;
-        m_scale = width / frequency;
+    PerlinNoise::PerlinNoise(double frequency, uint64_t seed) {
+        m_scale = 10000 / frequency;
         m_seed = seed;
     }
 
@@ -88,22 +86,20 @@ namespace WorldMaker {
         return Trilinear(gradients, sampleX - fX, sampleY - fY, sampleZ - fZ);
     }
 
-    PerlinNoise3D::PerlinNoise3D(int width, int height, double frequency, double heightScale, uint64_t seed) {
-        m_height = height;
-        m_width = width;
-        m_scale = width / frequency;
+    PerlinNoise3D::PerlinNoise3D(double frequency, double heightScale, uint64_t seed) {
+        m_scale = 10000 / frequency;
         m_heightScale = heightScale;
         m_seed = seed;
     }
 
 
-    FractalNoise::FractalNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
+    FractalNoise::FractalNoise(double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
         m_persistance = persistence;
         m_amplitude = amplitude;
         m_octaves.reserve(numOctaves);
         uint64_t currentSeed = seed;
         for (int i = 0; i < numOctaves; i++) {
-            m_octaves.emplace_back(width, height, frequency, currentSeed);
+            m_octaves.emplace_back(frequency, currentSeed);
             frequency *= lacunarity;
             currentSeed = PRNG::nextNumber64(currentSeed);
         }
@@ -119,16 +115,16 @@ namespace WorldMaker {
         return result;
     }
 
-    ComplexNoise::ComplexNoise(int width, int height, int first, const std::vector<double>& amplitudes, uint64_t seed) {
+    ComplexNoise::ComplexNoise(int first, const std::vector<double>& amplitudes, uint64_t seed) {
             assert(first < 0);
             assert(!amplitudes.empty());
             m_amplitudes = amplitudes;
             m_octaves.reserve(amplitudes.size() * 2);
             uint64_t currentSeed = seed;
             for (int i = 0; i < amplitudes.size(); i++) {
-                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                m_octaves.emplace_back(std::pow(2.0, (i - first)), currentSeed);
                 currentSeed = PRNG::nextNumber64(currentSeed);
-                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                m_octaves.emplace_back(std::pow(2.0, (i - first)), currentSeed);
                 currentSeed = PRNG::nextNumber64(currentSeed);
             }
     }
@@ -146,7 +142,7 @@ namespace WorldMaker {
         // double totalAmplitude = m_amplitudes.size()
     }
 
-    RidgesFolded::RidgesFolded() : m_fractalNoise(1000, 1000, 5, 1, 42, 5, 2.0, 0.5) {
+    RidgesFolded::RidgesFolded() : m_fractalNoise(50, 1, 42, 5, 2.0, 0.5) {
 
     }
 
