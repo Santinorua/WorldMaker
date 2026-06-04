@@ -1,5 +1,6 @@
 #include "ResourceManager.h"
 #include "FileFunctions.h"
+#include "GPUResourceManager.h"
 #include "RenderUnit.h"
 #include "Renderer.h"
 #include "Material.h"
@@ -41,16 +42,14 @@ namespace WorldMaker
 
     MaterialWPtr ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath, const std::string& reflectionTexPath)
     {
-   		MaterialSPtr newMaterial = std::make_shared<Material>();
-        newMaterial->m_diffuseTexture = LoadTexture<Texture2D>(diffuseTexPath);
-        newMaterial->m_specularTexture = LoadTexture<Texture2D>(specularTexPath);
-        newMaterial->m_reflectionTexture = LoadTexture<Texture2D>(reflectionTexPath);
+   		MaterialSPtr newMat = std::make_shared<Material>();
+        newMat->m_diffuseTexture = std::static_cast<Texture2DWPtr>(LoadTexture<Texture2D>(diffuseTexPath));
+        newMat->m_specularTexture = LoadTexture<Texture2D>(specularTexPath);
 
-     	MaterialEntry newEntry;
-     	newEntry.material = newMaterial;
-     	newEntry.refCount++;
-		m_materialCache[newMaterial->id()] = newEntry;
-		return newMaterial;
+        GPUResourceManager::CreateMaterial(newMat.get())
+
+		s_materialCache.push_back(newMat);
+		return newMat;
     }
     void ResourceManager::DestroyMaterial(unsigned int materialId)
     {

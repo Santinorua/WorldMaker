@@ -25,8 +25,8 @@ namespace WorldMaker
         template <typename T>
         static TextureWPtr LoadTexture(const std::string& relativePath)
         {
-            auto it = m_textureCache.find(relativePath);
-            if (it != m_textureCache.end())
+            auto it = s_textureCache.find(relativePath);
+            if (it != s_textureCache.end())
             {
                 it->second.refCount++;
                 return it->second.texture;
@@ -38,15 +38,15 @@ namespace WorldMaker
             newEntry.texture = newTexture;
             newEntry.refCount = 1;
 
-            m_textureCache[relativePath] = newEntry;
+            s_textureCache[relativePath] = newEntry;
             return newTexture;
         }
         template <typename T>
         static TextureWPtr LoadTexture(const std::vector<std::string>& relativePaths)
         {
             std::string unifiedPath = UnifyPaths(relativePaths);
-            auto it = m_textureCache.find(unifiedPath);
-            if (it != m_textureCache.end())
+            auto it = s_textureCache.find(unifiedPath);
+            if (it != s_textureCache.end())
             {
                 it->second.refCount++;
                 return it->second.texture;
@@ -58,15 +58,15 @@ namespace WorldMaker
             newEntry.texture = newTexture;
             newEntry.refCount = 1;
 
-            m_textureCache[unifiedPath] = newEntry;
+            s_textureCache[unifiedPath] = newEntry;
             return newTexture;
         }
 
         template<typename T>
         static void UnloadTexture(const std::string& relativePath)
         {
-            auto it = m_textureCache.find(relativePath);
-            if (it == m_textureCache.end())
+            auto it = s_textureCache.find(relativePath);
+            if (it == s_textureCache.end())
             {
                 std::cout << "Warning: There is not such a texture with path " << relativePath << " to unload\n";
                 return;
@@ -75,7 +75,7 @@ namespace WorldMaker
 
             if (it->second.refCount <=0)
             {
-                m_textureCache.erase(it);
+                s_textureCache.erase(it);
             }
 
         }
@@ -95,13 +95,8 @@ namespace WorldMaker
             int refCount = 0;
         };
 
-        struct MaterialEntry
-        {
-        	MaterialSPtr material;
-         	int refCount = 0;
-        };
 public:
-        static std::unordered_map<std::string, TextureEntry> m_textureCache;
-        static std::unordered_map<unsigned int, MaterialEntry> m_materialCache;
+        static std::unordered_map<std::string, TextureEntry> s_textureCache;
+        static std::vector<MaterialSPtr> s_materialCache;
     };
 }

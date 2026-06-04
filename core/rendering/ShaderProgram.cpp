@@ -167,7 +167,6 @@ namespace WorldMaker
 		GLCall(glBindTexture(GL_TEXTURE_2D, GetShared(material.m_reflectionTexture)->glName()));
 
 		setUniform1f("u_shininess", material.m_shininess);
-		setUniform1i("u_cubemap", material.m_cubemap);
 	}
 
 	void ShaderProgram::updateCameraMatrices()
