@@ -9,6 +9,8 @@ const int SSBOType_indices = 1;
 struct VertexData
 {
     double position[3];
+    double color[4];
+    double uv[2];
     double normal[3];
 };
 

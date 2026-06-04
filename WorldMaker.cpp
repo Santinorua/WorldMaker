@@ -1,5 +1,6 @@
 #include "WorldMaker.h"
 #include "Camera.h"
+#include "PerlinNoise.h"
 #include "RenderingConstants.h"
 #include "Renderer.h"
 #include "ShaderProgram.h"
@@ -7,7 +8,6 @@
 #include "Vertex.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
-
 
 #include "Texture2D.h"
 #include "NoiseRenderUnit.h"
