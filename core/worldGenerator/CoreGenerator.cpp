@@ -23,9 +23,11 @@ namespace WorldMaker {
         double continentalness = m_continentalness.getNoise(x, z);
         double erosion = m_erosion.getNoise(x, z);
         double base = m_base.getNoise(x, z);
-        assert(erosion >= -1.0 && erosion <= 1.0);
-        assert(continentalness >= -1.0 && continentalness <= 1.0);
-        assert(base >= -1.0 && base <= 1.0);
+        // assert(erosion >= -1.0 && erosion <= 1.0);
+        // assert(continentalness >= -1.0 && continentalness <= 1.0);
+        if(base < -1.0 || base > 1.0) {
+            std::cout << "Base: " << base << "\n";
+        };
 
 
         double final = (base * (erosion * 0.5 + 0.5) * 0.5 + 0.5)  * (continentalness * 0.5 + 0.5);

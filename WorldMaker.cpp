@@ -51,7 +51,7 @@ int main()
 
 
     // FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
-	WorldGenerator generator(10, 42);
+	WorldGenerator generator(500, 42);
 	// PerlinNoise perlin = PerlinNoise(40, 42);
 	for (int z = 0; z < gridDepth; ++z)
     {
@@ -68,13 +68,13 @@ int main()
 			} else {
 				double epsilon = 0.00001;
 
-				double posY = generator.m_continentalness.getNoise(x, z);
+				double posY = generator.getHeight(x, z);
 
 
-				double hL = generator.m_continentalness.getNoise(x - 1, z);
-				double hR = generator.m_continentalness.getNoise(x + 1, z);
-				double hD = generator.m_continentalness.getNoise(x, z - 1);
-				double hU = generator.m_continentalness.getNoise(x, z + 1);
+				double hL = generator.getHeight(x - 1, z);
+				double hR = generator.getHeight(x + 1, z);
+				double hD = generator.getHeight(x, z - 1);
+				double hU = generator.getHeight(x, z + 1);
 
 				glm::vec3 normal;
 				normal.x = static_cast<float>(hL - hR);
