@@ -28,7 +28,8 @@ namespace WorldMaker {
         assert(base >= -1.0 && base <= 1.0);
 
 
-        double final = (base * erosion * 0.5 + 0.5)  * continentalness;
+        double final = (base * (erosion * 0.5 + 0.5) * 0.5 + 0.5)  * (continentalness * 0.5 + 0.5);
+        assert(final >= 0.0 && final <= 1.0);
         return final * m_yScale;
     }
 

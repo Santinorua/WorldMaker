@@ -38,7 +38,7 @@ int main()
 	int gridWidth = ChunkRenderUnit::chunkWidth;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
-	bool doRender2D = true;
+	bool doRender2D = false;
 
     std::vector<Vertex> chunkVertices;
 	std::vector<double> colors;
@@ -51,7 +51,7 @@ int main()
 
 
     // FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
-	WorldGenerator generator(1, 42);
+	WorldGenerator generator(10, 42);
 	// PerlinNoise perlin = PerlinNoise(40, 42);
 	for (int z = 0; z < gridDepth; ++z)
     {
@@ -66,6 +66,8 @@ int main()
 				colors.push_back(color);
 				colors.push_back(1.0);
 			} else {
+				double epsilon = 0.00001;
+
 				double posY = generator.m_continentalness.getNoise(x, z);
 
 
