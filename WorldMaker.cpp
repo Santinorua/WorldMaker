@@ -66,8 +66,6 @@ int main()
 				colors.push_back(color);
 				colors.push_back(1.0);
 			} else {
-				double epsilon = 0.00001;
-
 				double posY = generator.getHeight(x, z);
 
 
