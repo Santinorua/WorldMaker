@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "Texture.h"
 #include "Material.h"
+#include <algorithm>
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -23,80 +24,82 @@ namespace WorldMaker
 
         // Textures handling ---------------------------------------------------------------------------------
         template <typename T>
-        static TextureWPtr LoadTexture(const std::string& relativePath)
+        static Texture* LoadTexture(const std::string& relativePath)
         {
-            auto it = s_textureCache.find(relativePath);
-            if (it != s_textureCache.end())
+            Texture* texture = GetTexture(relativePath);
+            if (texture)
             {
-                it->second.refCount++;
-                return it->second.texture;
+                s_textureCache[relativePath].refCount++;
+                return texture;
             }
 
-            TextureSPtr newTexture = std::make_shared<T>(relativePath);
-
             TextureEntry newEntry;
-            newEntry.texture = newTexture;
+            newEntry.texture = std::make_unique<T>(relativePath);
             newEntry.refCount = 1;
 
-            s_textureCache[relativePath] = newEntry;
-            return newTexture;
+            s_textureCache[relativePath] = std::move(newEntry);
+            return s_textureCache[relativePath].texture.get();
         }
         template <typename T>
-        static TextureWPtr LoadTexture(const std::vector<std::string>& relativePaths)
+        static Texture* LoadTexture(const std::vector<std::string>& relativePaths)
         {
             std::string unifiedPath = UnifyPaths(relativePaths);
-            auto it = s_textureCache.find(unifiedPath);
-            if (it != s_textureCache.end())
+            Texture* texture = GetTexture(unifiedPath);
+            if (texture)
             {
-                it->second.refCount++;
-                return it->second.texture;
+                s_textureCache[unifiedPath].refCount++;
+                return texture;
             }
 
-            TextureSPtr newTexture = std::make_shared<T>(relativePaths);
-
             TextureEntry newEntry;
-            newEntry.texture = newTexture;
+            newEntry.texture = std::make_unique<T>(relativePaths);
             newEntry.refCount = 1;
 
-            s_textureCache[unifiedPath] = newEntry;
-            return newTexture;
+            s_textureCache[unifiedPath] = std::move(newEntry);
+            return s_textureCache[unifiedPath].texture.get();
         }
 
         template<typename T>
         static void UnloadTexture(const std::string& relativePath)
         {
-            auto it = s_textureCache.find(relativePath);
-            if (it == s_textureCache.end())
+            Texture* texture = GetTexture(relativePath);
+            if (!texture)
             {
                 std::cout << "Warning: There is not such a texture with path " << relativePath << " to unload\n";
                 return;
             }
-            it->second.refCount--;
 
-            if (it->second.refCount <=0)
+            TextureEntry& entry = s_textureCache[relativePath];
+            entry.refCount--;
+
+            if (entry.refCount <=0)
             {
-                s_textureCache.erase(it);
+                s_textureCache.erase(relativePath);
             }
 
         }
-        static TextureWPtr GetTexture(const std::string& relativePath);
-        static TextureWPtr GetTexture(const std::vector<std::string>& relativePaths);
+        static Texture* GetTexture(const std::string& relativePath);
+        static Texture* GetTexture(const std::vector<std::string>& relativePaths);
 
-        static MaterialWPtr CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath, const std::string& reflectionTexPath = reflectionTexDefaultPath);
+        static Material* CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath, const std::string& reflectionTexPath = reflectionTexDefaultPath);
         static void DestroyMaterial(unsigned int materialId);
-        static MaterialWPtr GetMaterial(unsigned int materialId);
+        static Material* GetMaterial(unsigned int materialIndex);
 
     private:
 
         struct TextureEntry
         {
-            TextureSPtr texture;
-            unsigned int rendererIndex = 0; // No the OpenGL ID, but the index in the Renderer vector
+            TextureUPtr texture;
             int refCount = 0;
         };
 
+        // struct MaterialEntry
+        // {
+        // 	MaterialUPtr material;
+        //  	int refCount = 0;
+        // };
 public:
         static std::unordered_map<std::string, TextureEntry> s_textureCache;
-        static std::vector<MaterialSPtr> s_materialCache;
+        static std::vector<MaterialUPtr> s_materialCache;
     };
 }

@@ -11,8 +11,8 @@
 
 namespace WorldMaker
 {
-    std::unordered_map<unsigned int, ResourceManager::MaterialEntry> ResourceManager::m_materialCache;
-    std::unordered_map<std::string, ResourceManager::TextureEntry> ResourceManager::m_textureCache;
+    std::vector<MaterialUPtr> ResourceManager::s_materialCache = {};
+    std::unordered_map<std::string, ResourceManager::TextureEntry> ResourceManager::s_textureCache;
 
     void ResourceManager::Init()
     {
@@ -22,37 +22,36 @@ namespace WorldMaker
     // Texture handling ---------------------------------------------------------------------------------
 
     // Returns nullptr if the texture is not found
-    TextureWPtr ResourceManager::GetTexture(const std::string &relativePath)
+    Texture* ResourceManager::GetTexture(const std::string &relativePath)
     {
-        auto it = m_textureCache.find(relativePath);
-        if (it != m_textureCache.end()) return it->second.texture;
-        return {};
+        auto it = s_textureCache.find(relativePath);
+        if (it != s_textureCache.end()) return it->second.texture.get();
+        return nullptr;
     }
 
     // Returns nullptr if the texture is not found
-    TextureWPtr ResourceManager::GetTexture(const std::vector<std::string>& relativePaths)
+    Texture* ResourceManager::GetTexture(const std::vector<std::string>& relativePaths)
     {
         std::string unifiedPath = UnifyPaths(relativePaths);
-        auto it = m_textureCache.find(unifiedPath);
-        if (it != m_textureCache.end()) return it->second.texture;
+        auto it = s_textureCache.find(unifiedPath);
+        if (it != s_textureCache.end()) return it->second.texture.get();
         return {};
     }
 
     // Material handling ---------------------------------------------------------------------------------
 
-    MaterialWPtr ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath, const std::string& reflectionTexPath)
+    Material* ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath, const std::string& reflectionTexPath)
     {
-   		MaterialSPtr newMat = std::make_shared<Material>();
-        newMat->m_diffuseTexture = std::static_cast<Texture2DWPtr>(LoadTexture<Texture2D>(diffuseTexPath));
-        newMat->m_specularTexture = LoadTexture<Texture2D>(specularTexPath);
-
-        GPUResourceManager::CreateMaterial(newMat.get())
-
-		s_materialCache.push_back(newMat);
-		return newMat;
+		s_materialCache.push_back(std::make_unique<Material>());
+		Material* mat = s_materialCache.front().get();
+		GPUResourceManager::CreateMaterial(s_materialCache.front().get());
+        mat->m_diffuseTexture = static_cast<Texture2D*>(LoadTexture<Texture2D>(diffuseTexPath));
+        mat->m_specularTexture = static_cast<Texture2D*>(LoadTexture<Texture2D>(specularTexPath));
+		return s_materialCache.front().get();
     }
     void ResourceManager::DestroyMaterial(unsigned int materialId)
     {
+        // TODO
     	auto it = m_materialCache.find(materialId);
      	if (it == m_materialCache.end())
 		{
@@ -67,15 +66,8 @@ namespace WorldMaker
         }
 
     }
-    MaterialWPtr ResourceManager::GetMaterial(unsigned int materialId)
+    Material* ResourceManager::GetMaterial(unsigned int materialIndex)
     {
-   		auto it = m_materialCache.find(materialId);
-    	if (it == m_materialCache.end())
-		{
-			std::cout << "Warning: There is not such a material with id " << materialId << " to destroy\n";
-           return {};
-		}
-     	it->second.refCount++;
-    	return it->second.material;
+    	return s_materialCache[materialIndex].get();
     }
 }
