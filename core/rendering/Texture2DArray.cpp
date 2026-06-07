@@ -8,7 +8,7 @@ namespace WorldMaker
         GLCall(glGenTextures(1, &m_glName));
         bind();
         GLCall(glTextureStorage3D(
-           GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, layers
+           m_glName, 1, GL_RGBA8, width, height, layers
         ));
     }
     unsigned int Texture2DArray::pushTexture(Texture2D* texture)
@@ -20,6 +20,12 @@ namespace WorldMaker
             m_freeLayers.pop_back();
         }
         else layer=m_nextLayer++;
+
+        std::cout << "GL name: " << m_glName << "\n";
+        std::cout << "Width: " << texture->width() << "\n";
+        std::cout << "Height: " << texture->height() << "\n";
+        std::cout << "Layer: " << layer << "\n";
+        // std::cout << "Buffer size: " << texture->m_unsignedCharLocalBuffer << "\n";
 
         GLCall(glTextureSubImage3D(
             m_glName,
@@ -36,6 +42,6 @@ namespace WorldMaker
     }
     void Texture2DArray::bind()
     {
-        GLCall(glBindBuffer(GL_TEXTURE_2D_ARRAY, m_glName));
+        GLCall(glBindTexture(GL_TEXTURE_2D_ARRAY, m_glName));
     }
 }

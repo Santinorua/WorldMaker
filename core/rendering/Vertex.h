@@ -13,6 +13,7 @@ namespace WorldMaker
 	{
 		Vec3 m_position;  // x, y, z
 		Vec4 m_color = {1,1,1,1};
+		double m_materialLayer = 0;
 		Vec2 m_uv;
 		Vec3 m_normal;
 
@@ -24,6 +25,7 @@ namespace WorldMaker
 			{
 				m_position.x, m_position.y, m_position.z,
 				m_color.x, m_color.y, m_color.z, m_color.y,
+				m_materialLayer,
 				m_uv.x, m_uv.y,
 				m_normal.x, m_normal.y, m_normal.z
 			};

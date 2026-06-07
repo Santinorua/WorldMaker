@@ -11,9 +11,10 @@
 
 namespace WorldMaker
 {
-    inline std::string diffuseTexDefaultPath = "core/rendering/assets/textures/defaultGrass.png";
-    inline std::string specularTexDefaultPath = "core/rendering/assets/textures/defaultSpecular.png";
-    inline std::string reflectionTexDefaultPath = "core/rendering/assets/textures/defaultReflection.png";
+    inline std::string diffuseTexEmptyPath = "core/rendering/assets/textures/empty.png";
+    inline std::string diffuseTexDefaultPath = "core/rendering/assets/textures/default.png";
+    inline std::string specularTexDefaultPath = "core/rendering/assets/textures/default.png";
+    inline std::string diffuseTexDefaultGrassPath = "core/rendering/assets/textures/defaultGrass.png";
 
     class ResourceManager
     {
@@ -59,7 +60,6 @@ namespace WorldMaker
             return s_textureCache[unifiedPath].texture.get();
         }
 
-        template<typename T>
         static void UnloadTexture(const std::string& relativePath)
         {
             Texture* texture = GetTexture(relativePath);
@@ -81,8 +81,8 @@ namespace WorldMaker
         static Texture* GetTexture(const std::string& relativePath);
         static Texture* GetTexture(const std::vector<std::string>& relativePaths);
 
-        static Material* CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath, const std::string& reflectionTexPath = reflectionTexDefaultPath);
-        static void DestroyMaterial(unsigned int materialId);
+        static Material* CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath);
+        static void DestroyMaterial(unsigned int materialIndex);
         static Material* GetMaterial(unsigned int materialIndex);
 
     private:
@@ -93,13 +93,14 @@ namespace WorldMaker
             int refCount = 0;
         };
 
-        // struct MaterialEntry
-        // {
-        // 	MaterialUPtr material;
-        //  	int refCount = 0;
-        // };
+        struct MaterialEntry
+        {
+        	MaterialUPtr material;
+         	int refCount = 0;
+        };
+        static bool s_inited;
 public:
         static std::unordered_map<std::string, TextureEntry> s_textureCache;
-        static std::vector<MaterialUPtr> s_materialCache;
+        static std::vector<MaterialEntry> s_materialCache;
     };
 }

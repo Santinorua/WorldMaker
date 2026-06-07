@@ -2,11 +2,13 @@
 
 const int SSBOType_vertices = 0;
 const int SSBOType_indices = 1;
+const int SSBOType_materials = 2;
 
 struct VertexData
 {
     double position[3];
     double color[4];
+    double materialIndex;
     double uv[2];
     double normal[3];
 };
@@ -43,6 +45,11 @@ vec4 GetColor(uint index)
     );
 }
 
+double GetMaterialIndex(uint index)
+{
+    return data[index].materialIndex;
+}
+
 vec2 GetUV(uint index)
 {
     return vec2(
@@ -63,6 +70,7 @@ vec3 GetNormal(uint index)
 smooth out vec3 frag_normal;
 smooth out vec4 frag_pos;
 smooth out vec4 frag_color;
+smooth out double frag_materialIndex;
 smooth out vec2 frag_uv;
 
 void main()
@@ -71,6 +79,7 @@ void main()
     mat4 vp = u_projection * u_view;
     vec4 position = vec4(GetPosition(realIndex), 1.0);
     frag_color = GetColor(realIndex);
+    frag_materialIndex = GetMaterialIndex(realIndex);
     frag_pos = position;
     frag_normal = normalize(GetNormal(realIndex));
     frag_uv = GetUV(realIndex);

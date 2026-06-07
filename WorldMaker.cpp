@@ -1,8 +1,11 @@
 #include "WorldMaker.h"
 #include "Camera.h"
+#include "GPUResourceManager.h"
 #include "PerlinNoise.h"
 #include "RenderingConstants.h"
 #include "Renderer.h"
+#include "ResourceManager.h"
+#include "GPUResourceManager.h"
 #include "ShaderProgram.h"
 #include "Texture.h"
 #include "Vertex.h"
@@ -31,8 +34,6 @@ using namespace WorldMaker;
 
 ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
-<<<<<<< HEAD
-	Renderer::Init();
 	Input::SetUp(Renderer::GetWindow());
 
 	int gridWidth = ChunkRenderUnit::chunkWidth;
@@ -89,7 +90,6 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
         }
     }
     NoiseRenderUnit noise{width, height, pixels};
-=======
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
 
@@ -136,7 +136,9 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
 
 int main()
 {
-	Renderer::Init();
+    Renderer::Init();
+	GPUResourceManager::Init();
+	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
 
 	int gridWidth = ChunkRenderUnit::chunkWidth;
@@ -150,7 +152,6 @@ int main()
 	chunks.push_back(generate_chunk(fractal, 1, 0));
 	chunks.push_back(generate_chunk(fractal, 0, 1));
 	chunks.push_back(generate_chunk(fractal, 1, 1));
->>>>>>> main
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -158,11 +159,7 @@ int main()
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
 
-<<<<<<< HEAD
-    Renderer::PrepareToDrawNoise(noise);
-=======
 	int chunk_size = ChunkRenderUnit::chunkHeight;
->>>>>>> main
 	while (!Renderer::WindowShouldClose())
 	{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -202,16 +199,12 @@ int main()
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
-<<<<<<< HEAD
-        Renderer::DrawNoise(noise);
-        // Renderer::DrawChunk(chunk);
-=======
 		for (ChunkRenderUnit* ck : chunks) {
 			Renderer::PrepareToDrawChunk(*ck);
+			GPUResourceManager::PrepareToDraw();
 			Renderer::DrawChunk(*ck);
 		}
 
->>>>>>> main
 		ImGui::Render();
        	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(Renderer::GetWindow());

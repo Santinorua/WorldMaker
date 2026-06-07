@@ -17,9 +17,11 @@ namespace WorldMaker
 	RendererConfig Renderer::s_config;
 	GLFWwindow* Renderer::s_window = nullptr;
 	ShaderProgramSPtr Renderer::s_shaderProgramsByType[2] = {};
+	bool Renderer::s_inited = false;
 
 	void Renderer::Init()
 	{
+	    if (s_inited) std::cerr << "Error: Can't init Renderer again because it has already been initialized!\n";
 		ASSERT(glfwInit());
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -47,7 +49,7 @@ namespace WorldMaker
         s_shaderProgramsByType[ShaderProgramType::noise] = std::make_shared<ShaderProgram>("core/rendering/shaders/NoiseVertexShader.glsl", "core/rendering/shaders/NoiseFragmentShader.glsl");
         s_shaderProgramsByType[ShaderProgramType::terrain] = std::make_shared<ShaderProgram>("core/rendering/shaders/TerrainVertexShader.glsl", "core/rendering/shaders/TerrainFragmentShader.glsl");
 
-        ResourceManager::Init();
+        s_inited = true;
 	}
 
 	void Renderer::PrepareToDrawNoise(NoiseRenderUnit& noise)
@@ -70,7 +72,6 @@ namespace WorldMaker
 	void Renderer::PrepareToDrawChunk(ChunkRenderUnit& chunk)
 	{
 		chunk.m_vertexArray->bind();
-		Renderer::s_shaderProgramsByType[chunk.shaderProgramType]->loadMaterial(*GetShared(chunk.m_material));
 		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
 		chunk.m_indices->bindBufferBase(SSBOType::indices);
 	}

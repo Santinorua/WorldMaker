@@ -4,6 +4,7 @@
 #include "GPUMaterial.h"
 #include "Material.h"
 #include "Texture2DArray.h"
+#include "SSBO.h"
 
 #include <vector>
 
@@ -15,9 +16,13 @@ namespace WorldMaker
 
         static Texture2DArrayUPtr s_texture2DArray;
 
+        static SSBOUPtr<GPUMaterial> s_materialsSSBO;
     public:
-        inline static Texture2DArray* Texture2DArray() { return s_texture2DArray.get();};
-
+        static void Init();
+        static void PrepareToDraw();
+        inline static Texture2DArray* GetTexture2DArray() { return s_texture2DArray.get();};
         static void CreateMaterial(Material* mat);
+        static void DestroyMaterial(unsigned int matIndex);
+        static bool s_inited;
     };
 }

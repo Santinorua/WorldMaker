@@ -26,7 +26,6 @@ namespace WorldMaker
 		VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
 		SSBOUPtr<Vertex> m_vertices = std::make_unique<SSBO<Vertex>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
 		SSBOUPtr<unsigned int> m_indices = std::make_unique<SSBO<unsigned int>>(maxIndexCount, GL_DYNAMIC_STORAGE_BIT);
-		Material* m_material;
 
 		template<typename T>
         void resizeSSBO(SSBOUPtr<T>& ssbo, bool batchExceedsCapacity, unsigned int elementsToSupport)

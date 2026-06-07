@@ -9,12 +9,12 @@ namespace WorldMaker
     public:
 
         Material();
-        Vec4 m_baseColor = Vec4(1.0f, 1.0f, 1.0f, 1.0f); // blanco por defecto
+        ~Material();
+        void reset();
         float m_shininess = 1.0f;
 
         Texture2D* m_diffuseTexture = nullptr;
         Texture2D* m_specularTexture = nullptr;
-        Texture2D* m_reflectionTexture = nullptr;
 
 	    unsigned int id() const { return m_id; } // Is the instance id
     private:

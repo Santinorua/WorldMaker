@@ -9,7 +9,7 @@ namespace WorldMaker
 	class Texture2D : public Texture
 	{
 	private:
-		int m_width, m_height, m_BPP; // Bits per pixel
+		int m_width, m_height, m_BPP = 0; // Bits per pixel
 		unsigned int m_texture2DArrayLayer;
 	public:
 		float* m_floatLocalBuffer;
