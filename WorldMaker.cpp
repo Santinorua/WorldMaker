@@ -75,6 +75,20 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
     return new ChunkRenderUnit{chunkVertices};
 }
 
+void regenerate_chunks(std::vector<ChunkRenderUnit*>& chunks, FractalNoise& fractal, int width, int height)
+{
+	for (ChunkRenderUnit *ck : chunks) {
+		delete ck;
+	}
+	chunks.clear();
+
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			chunks.push_back(generate_chunk(fractal, x, y));
+		}
+	}
+}
+
 int main()
 {
 	Renderer::Init();
@@ -83,14 +97,14 @@ int main()
 	int gridWidth = ChunkRenderUnit::chunkWidth;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
+	int world_width = 4;
+	int world_height = 4;
+
     FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 4, 1, 4, 2.0, 0.75);
 
 	std::vector<ChunkRenderUnit*> chunks;
 
-	chunks.push_back(generate_chunk(fractal, 0, 0));
-	chunks.push_back(generate_chunk(fractal, 1, 0));
-	chunks.push_back(generate_chunk(fractal, 0, 1));
-	chunks.push_back(generate_chunk(fractal, 1, 1));
+	regenerate_chunks(chunks, fractal, world_width, world_height);
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -116,6 +130,13 @@ int main()
 		ImGui::Begin("Hola");
 		ImGui::Text("Mesh Size: ");
 		ImGui::InputInt("##mesh_size", &chunk_size);
+
+		ImGui::Text("Mesh size: ");
+		ImGui::InputInt("##world_width", &world_width);
+
+		ImGui::Text("x");
+		ImGui::InputInt("##world_height", &world_height);
+
 		if (ImGui::Button("Generate mesh")) {
 			ChunkRenderUnit::chunkWidth = chunk_size;
 			ChunkRenderUnit::chunkHeight = chunk_size;
@@ -125,10 +146,7 @@ int main()
 				delete ck;
 			}
 			chunks.clear();
-			chunks.push_back(generate_chunk(fractal, 0, 0));
-			chunks.push_back(generate_chunk(fractal, 1, 0));
-			chunks.push_back(generate_chunk(fractal, 0, 1));
-			chunks.push_back(generate_chunk(fractal, 1, 1));
+			regenerate_chunks(chunks, fractal, world_width, world_height);
 		}
 		ImGui::End();
 

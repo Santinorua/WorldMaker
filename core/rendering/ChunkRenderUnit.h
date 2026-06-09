@@ -41,7 +41,6 @@ namespace WorldMaker
 
 			GLCall(glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, ssbo->maxSize()));
 			ssbo = std::move(newSSBO);
-			std::cout << "SSBO resized!\n";
 			return;
 		}
 	};
