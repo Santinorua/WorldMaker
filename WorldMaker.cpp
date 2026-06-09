@@ -34,8 +34,6 @@ using namespace WorldMaker;
 
 ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
-	Input::SetUp(Renderer::GetWindow());
-
 	int gridWidth = ChunkRenderUnit::chunkWidth;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
@@ -174,35 +172,56 @@ int main()
     ImGui::StyleColorsDark();
 
 	int chunk_size = ChunkRenderUnit::chunkHeight;
+	int octaves = 4;
+	uint64_t seed = 1;
+	double frequency = 5;
+	double amplitude = 4;
+	double lacunarity = 2;
+	double persistence = 0.75;
 	while (!Renderer::WindowShouldClose())
 	{
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        CoolTime::Update();
+		CoolTime::Update();
         Input::Update();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+#define IMGUI_INPUT(var, type) (ImGui::InputScalar("##" #var, type, &var))
+
         ImGui::Text("FPS: %.1f",
                     ImGui::GetIO().Framerate);
 
-		ImGui::Begin("Hola");
+		ImGui::Begin("Generation");
 		ImGui::Text("Mesh Size: ");
-		ImGui::InputInt("##mesh_size", &chunk_size);
+		IMGUI_INPUT(chunk_size, ImGuiDataType_S32);
 
 		ImGui::Text("Mesh size: ");
-		ImGui::InputInt("##world_width", &world_width);
+		IMGUI_INPUT(world_width, ImGuiDataType_S32);
 
 		ImGui::Text("x");
-		ImGui::InputInt("##world_height", &world_height);
+		IMGUI_INPUT(world_height, ImGuiDataType_S32);
+
+		ImGui::Text("Noise:");
+		ImGui::Text("frequency:");
+		IMGUI_INPUT(frequency, ImGuiDataType_Double);
+
+		ImGui::Text("amplitude:");
+		IMGUI_INPUT(amplitude, ImGuiDataType_Double);
+
+		ImGui::Text("seed:");
+		IMGUI_INPUT(seed, ImGuiDataType_U64);
+
+		ImGui::Text("octaves:");
+		IMGUI_INPUT(octaves, ImGuiDataType_S32);
 
 		if (ImGui::Button("Generate mesh")) {
 			ChunkRenderUnit::chunkWidth = chunk_size;
 			ChunkRenderUnit::chunkHeight = chunk_size;
 
-			FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 4, 1, 4, 2.0, 0.75);
+			FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, frequency, amplitude, seed, octaves, lacunarity, persistence);
 			for (ChunkRenderUnit* ck : chunks) {
 				delete ck;
 			}
