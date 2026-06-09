@@ -37,7 +37,7 @@ namespace WorldMaker
 	public:
 		static RendererConfig s_config;
 		static GLFWwindow* s_window;
-		static std::map<ShaderProgramType, ShaderProgramSPtr> s_shaderProgramsByType;
+		static ShaderProgramSPtr s_shaderProgramsByType[2];
 
 		static void Init();
 

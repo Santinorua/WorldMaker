@@ -16,7 +16,7 @@ namespace WorldMaker
 {
 	RendererConfig Renderer::s_config;
 	GLFWwindow* Renderer::s_window = nullptr;
-	std::map<ShaderProgramType, ShaderProgramSPtr> Renderer::s_shaderProgramsByType = {};
+	ShaderProgramSPtr Renderer::s_shaderProgramsByType[2] = {};
 
 	void Renderer::Init()
 	{
