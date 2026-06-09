@@ -4,5 +4,19 @@
 
 namespace WorldMaker
 {
-    Material::Material(){};
+    unsigned int Material::s_idCount = 0;
+    Material::Material() : m_id(s_idCount++) {};
+    Material::~Material()
+    {
+        ResourceManager::UnloadTexture(m_diffuseTexture->path());
+        ResourceManager::UnloadTexture(m_specularTexture->path());
+    }
+    void Material::reset()
+    {
+        m_shininess = 1;
+        ResourceManager::UnloadTexture(m_diffuseTexture->path());
+        ResourceManager::UnloadTexture(m_specularTexture->path());
+        m_diffuseTexture = static_cast<Texture2D*>(ResourceManager::LoadTexture<Texture2D>(diffuseTexEmptyPath));
+        m_specularTexture = static_cast<Texture2D*>(ResourceManager::LoadTexture<Texture2D>(specularTexDefaultPath));
+    }
 }

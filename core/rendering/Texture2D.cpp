@@ -3,7 +3,7 @@
 #include "OpenGLUtils.h"
 #include "Texture2D.h"
 #include "FileFunctions.h"
-
+#include "GPUResourceManager.h"
 #include "stb_image.h"
 
 namespace WorldMaker
@@ -40,6 +40,7 @@ namespace WorldMaker
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
+		m_texture2DArrayLayer = GPUResourceManager::GetTexture2DArray()->pushTexture(this);
 
 		if (!m_unsignedCharLocalBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
 		ASSERT(m_unsignedCharLocalBuffer);

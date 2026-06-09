@@ -153,21 +153,12 @@ namespace WorldMaker
 		GLCall(glUniform1iv(loc, maxTextureSlots, samplers.data()));
 	}
 
-	void ShaderProgram::loadMaterial(const Material& material)
+	void ShaderProgram::loadTexture2DArray(unsigned int texture2DArray)
 	{
 		bind();
-		setUniform4f("u_baseColor", material.baseColor.x, material.baseColor.y, material.baseColor.z, material.baseColor.w);
 		GLCall(glActiveTexture(GL_TEXTURE0));
-		GLCall(glBindTexture(GL_TEXTURE_2D, GetShared(material.m_diffuseTexture)->glName()));
-
-		GLCall(glActiveTexture(GL_TEXTURE1));
-		GLCall(glBindTexture(GL_TEXTURE_2D, GetShared(material.m_specularTexture)->glName()));
-
-		GLCall(glActiveTexture(GL_TEXTURE2));
-		GLCall(glBindTexture(GL_TEXTURE_2D, GetShared(material.m_reflectionTexture)->glName()));
-
-		setUniform1f("u_shininess", material.m_shininess);
-		setUniform1i("u_cubemap", material.m_cubemap);
+		GLCall(glBindTexture(GL_TEXTURE_2D_ARRAY, texture2DArray));
+		setUniform1i("u_texture2DArray", 0);
 	}
 
 	void ShaderProgram::updateCameraMatrices()

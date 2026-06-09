@@ -12,7 +12,7 @@ namespace WorldMaker
     {
         vertices = 0,
         indices = 1,
-        modelMatrices = 2,
+        materials = 2,
         cubemaps = 3
     };
 
@@ -58,7 +58,11 @@ namespace WorldMaker
 			m_data.insert(m_data.end(), data.begin(), data.end());
 			m_currentBytes += data.size() * sizeof(T);
 		}
-
+		void pushBatchData(const T data)
+		{
+            m_data.push_back(data);
+            m_currentBytes+=sizeof(T);
+		}
 		// Shouldn't be used when using batch rendering
 		void submitData()
 		{
@@ -66,7 +70,14 @@ namespace WorldMaker
 			bind();
 			GLCall(glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, m_data.size()*sizeof(T), m_data.data()));
 		}
-
+		void submitSubData(unsigned int beginning, unsigned int end) // indexes of elements, not bytes
+		{
+    		ASSERT(m_data.size() * sizeof(T) <= m_maxBytes);
+            ASSERT(end>=beginning);
+    		bind();
+            size_t count = end - beginning + 1;
+    		GLCall(glBufferSubData(GL_SHADER_STORAGE_BUFFER, beginning*sizeof(T), count*sizeof(T), m_data.data()+beginning));
+		}
 		// Puts the data from m_data into the actual SSBO
 		void bindBufferBase(const int& binding)
 		{

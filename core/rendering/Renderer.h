@@ -38,6 +38,7 @@ namespace WorldMaker
 		static RendererConfig s_config;
 		static GLFWwindow* s_window;
 		static ShaderProgramSPtr s_shaderProgramsByType[2];
+		static bool s_inited;
 
 		static void Init();
 
