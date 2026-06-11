@@ -17,7 +17,7 @@ namespace WorldMaker
     void GPUResourceManager::CreateMaterial(Material* mat)
     {
         s_materials.push_back(std::move(std::make_unique<GPUMaterial>(mat)));
-        GPUMaterial* newMat = s_materials.front().get();
+        GPUMaterial* newMat = s_materials.back().get();
         if (s_materialsSSBO.get()->checkIfEnoughSpaceForPush(1))
         {
             s_materialsSSBO.get()->pushBatchData(*newMat);
@@ -32,14 +32,11 @@ namespace WorldMaker
     }
     void GPUResourceManager::Init()
     {
-        GLint maxLayers;
-        glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &maxLayers);
-        std::cout << "Max layers: " << maxLayers << "\n";
-        GLint maxSize;
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
-        std::cout << "Max texture size: " << maxSize << "\n";
-
-        if (s_inited) std::cerr << "Error: Can't init GPUResourceManager because it has already been initialized\n";
+        if (s_inited)
+        {
+            std::cerr << "Error: Can't init GPUResourceManager because it has already been initialized\n";
+            return;
+        }
         s_texture2DArray = std::make_unique<Texture2DArray>(terrainTexturesWidth, terrainTexturesHeight, maxTextures);
         s_materialsSSBO = std::move(std::make_unique<SSBO<GPUMaterial>>(maxMaterials,GL_DYNAMIC_STORAGE_BIT));
         s_inited = true;

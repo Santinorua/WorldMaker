@@ -1,5 +1,4 @@
 #pragma once
-#include "Material.h"
 #include "Texture2D.h"
 #include "Vec4.h"
 namespace WorldMaker

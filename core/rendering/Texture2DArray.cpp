@@ -16,16 +16,10 @@ namespace WorldMaker
         unsigned int layer;
         if (!m_freeLayers.empty())
         {
-            layer = m_freeLayers.front();
+            layer = m_freeLayers.back();
             m_freeLayers.pop_back();
         }
         else layer=m_nextLayer++;
-
-        std::cout << "GL name: " << m_glName << "\n";
-        std::cout << "Width: " << texture->width() << "\n";
-        std::cout << "Height: " << texture->height() << "\n";
-        std::cout << "Layer: " << layer << "\n";
-        // std::cout << "Buffer size: " << texture->m_unsignedCharLocalBuffer << "\n";
 
         GLCall(glTextureSubImage3D(
             m_glName,

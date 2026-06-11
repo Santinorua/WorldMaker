@@ -8,6 +8,7 @@ namespace WorldMaker
     Material::Material() : m_id(s_idCount++) {};
     Material::~Material()
     {
+        std::cout << "About to destroy material " <<"\n";
         ResourceManager::UnloadTexture(m_diffuseTexture->path());
         ResourceManager::UnloadTexture(m_specularTexture->path());
     }

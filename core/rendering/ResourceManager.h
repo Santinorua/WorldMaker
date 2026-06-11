@@ -65,16 +65,18 @@ namespace WorldMaker
             Texture* texture = GetTexture(relativePath);
             if (!texture)
             {
-                std::cout << "Warning: There is not such a texture with path " << relativePath << " to unload\n";
+                std::cout << "Warning: There is not such texture with path " << relativePath << " to unload\n";
                 return;
             }
 
+            std::cout << "One reference count less for tex " << relativePath << "\n";
             TextureEntry& entry = s_textureCache[relativePath];
             entry.refCount--;
 
             if (entry.refCount <=0)
             {
                 s_textureCache.erase(relativePath);
+                std::cout << "Texture of path " << relativePath << " removed from resource manager\n";
             }
 
         }
@@ -99,6 +101,7 @@ namespace WorldMaker
          	int refCount = 0;
         };
         static bool s_inited;
+        static bool s_ended;
 public:
         static std::unordered_map<std::string, TextureEntry> s_textureCache;
         static std::vector<MaterialEntry> s_materialCache;

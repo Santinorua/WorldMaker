@@ -21,7 +21,11 @@ namespace WorldMaker
 
 	void Renderer::Init()
 	{
-	    if (s_inited) std::cerr << "Error: Can't init Renderer again because it has already been initialized!\n";
+	    if (s_inited)
+		{
+		    std::cerr << "Error: Can't init Renderer again because it has already been initialized!\n";
+			return;
+		}
 		ASSERT(glfwInit());
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);

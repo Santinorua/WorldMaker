@@ -14,14 +14,33 @@ namespace WorldMaker
     std::vector<ResourceManager::MaterialEntry> ResourceManager::s_materialCache = {};
     std::unordered_map<std::string, ResourceManager::TextureEntry> ResourceManager::s_textureCache;
     bool ResourceManager::s_inited = false;
+    bool ResourceManager::s_ended = false;
 
     void ResourceManager::Init()
     {
-        if (s_inited) std::cerr << "Error: Can't init resource manager because it has already been initialized!\n";
-        CreateMaterial(diffuseTexDefaultPath, specularTexDefaultPath);
-        CreateMaterial(diffuseTexDefaultPath, specularTexDefaultPath);
+        if (s_inited)
+        {
+            std::cerr << "Error: Can't init resource manager because it has already been initialized!\n";
+            return;
+        }
         CreateMaterial(diffuseTexDefaultPath, specularTexDefaultPath);
         s_inited = true;
+    }
+
+    void ResourceManager::Shutdown()
+    {
+        std::cout << "shutdown called\n";
+        if (s_ended)
+        {
+            std::cerr << "Error: Can't end resource manager because it has already been ended!\n";
+            return;
+        }
+        std::cout << "Material count: " << s_materialCache.size() << "\n";
+        std::cout << "About to clear material cache\n";
+        s_materialCache.clear();
+        std::cout << "About to clear texture cache\n";
+        s_textureCache.clear();
+        s_ended = true;
     }
 
     // Texture handling ---------------------------------------------------------------------------------
@@ -51,11 +70,11 @@ namespace WorldMaker
         newEntry.refCount = 1;
         newEntry.material = std::make_unique<Material>();
         s_materialCache.push_back(std::move(newEntry));
-		Material* mat = s_materialCache.front().material.get();
+		Material* mat = s_materialCache.back().material.get();
         mat->m_diffuseTexture = static_cast<Texture2D*>(LoadTexture<Texture2D>(diffuseTexPath));
         mat->m_specularTexture = static_cast<Texture2D*>(LoadTexture<Texture2D>(specularTexPath));
 		GPUResourceManager::CreateMaterial(mat);
-		return s_materialCache.front().material.get();
+		return s_materialCache.back().material.get();
     }
     void ResourceManager::DestroyMaterial(unsigned int materialIndex)
     {

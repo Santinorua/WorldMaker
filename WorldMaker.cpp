@@ -89,7 +89,6 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
             pixels.push_back(1);
         }
     }
-    NoiseRenderUnit noise{width, height, pixels};
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
 
@@ -229,6 +228,7 @@ int main()
 
         glfwPollEvents();
 	}
+	ResourceManager::Shutdown();
 	ImGui_ImplOpenGL3_Shutdown();
    	ImGui_ImplGlfw_Shutdown();
    	ImGui::DestroyContext();
