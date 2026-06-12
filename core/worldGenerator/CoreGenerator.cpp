@@ -2,6 +2,7 @@
 
 #include "DebugUtils.h"
 #include "PRNG.h"
+#include "Interpolations.h"
 
 namespace WorldMaker {
 
@@ -16,22 +17,26 @@ namespace WorldMaker {
         nextSeed = PRNG::nextNumber64(nextSeed);
         m_humidity = FractalNoise(20.0, 1.0, nextSeed, 4, 2.5, 0.25);
         nextSeed = PRNG::nextNumber64(nextSeed);
-        m_base = FractalNoise(40.0, 1.0, nextSeed, 4, 2.0, 0.5);
+        m_base = FractalNoise(100.0, 1.5, nextSeed, 4, 2.0, 0.5);
     }
 
     double WorldGenerator::getHeight(float x, float z) {
         double continentalness = m_continentalness.getNoise(x, z);
-        double erosion = m_erosion.getNoise(x, z);
+        double erosion = m_erosion.getNoise(x, z) + 0.5;
         double base = m_base.getNoise(x, z);
-        // assert(erosion >= -1.0 && erosion <= 1.0);
-        // assert(continentalness >= -1.0 && continentalness <= 1.0);
-        if(base < -1.0 || base > 1.0) {
-            std::cout << "Base: " << base << "\n";
-        };
+        double continentalnessModifier;
 
+        if (continentalness >= -0.1) {
+            continentalnessModifier = std::max(0.0, continentalness);
 
-        double final = (base * (erosion * 0.5 + 0.5) * 0.5 + 0.5)  * (continentalness * 0.5 + 0.5);
-        assert(final >= 0.0 && final <= 1.0);
+        } else if (continentalness >= -0.6) {
+            continentalnessModifier = Lerp(-0.8, 0.0, ((continentalness+0.6) * 2), true);
+        } else {
+            continentalnessModifier = -0.8;
+        }
+
+        double final = base * erosion + continentalnessModifier * erosion;
+
         return final * m_yScale;
     }
 

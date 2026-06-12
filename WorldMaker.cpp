@@ -51,7 +51,7 @@ int main()
 
 
     // FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
-	WorldGenerator generator(500, 42);
+	WorldGenerator generator(150, 42);
 	// PerlinNoise perlin = PerlinNoise(40, 42);
 	for (int z = 0; z < gridDepth; ++z)
     {
@@ -83,6 +83,15 @@ int main()
 
 				Vertex v;
 				v.m_color = {1,1.0,1.0,1};
+				double cont = generator.m_continentalness.getNoise(x, z);
+				if (cont >= -0.1) {
+					v.m_color = {0.0, 1.0, 0.0, 1.0};
+				} else if (cont >= -0.6) {
+					v.m_color = {0.0, Lerp(0.0, 1.0, ((cont+0.6) * 2), true), Lerp(1.0, 0.0, ((cont+0.6) * 2), true), 1.0};
+				} else {
+					v.m_color = {0.0, 0.0, 1.0, 1.0};
+				}
+
 				v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
 				v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
 				v.m_normal = normal;
