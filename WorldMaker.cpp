@@ -20,6 +20,7 @@
 #include "GlobalLight.h"
 #include "CoolTime.h"
 #include "Input.h"
+#include "Frustum.h"
 
 #include "PRNG.h"
 
@@ -34,8 +35,6 @@ using namespace WorldMaker;
 
 ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
-	Input::SetUp(Renderer::GetWindow());
-
 	int gridWidth = ChunkRenderUnit::chunkWidth;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
@@ -173,6 +172,9 @@ int main()
     ImGui::StyleColorsDark();
 
 	int chunk_size = ChunkRenderUnit::chunkHeight;
+
+	Frustum frustum;
+
 	while (!Renderer::WindowShouldClose())
 	{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -216,11 +218,15 @@ int main()
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
+        int chunksSeen = 0;
 		for (ChunkRenderUnit* ck : chunks) {
+		    if (!Camera::CanSeeSphere(ck->Center(), chunk_size/2)) continue;
+			chunksSeen++;
 			Renderer::PrepareToDrawChunk(*ck);
 			GPUResourceManager::PrepareToDraw();
 			Renderer::DrawChunk(*ck);
 		}
+		std::cout << "Chunks seen: " << chunksSeen << "\n";
 
 		ImGui::Render();
        	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -228,8 +234,15 @@ int main()
 
         glfwPollEvents();
 	}
+	for (ChunkRenderUnit* ck : chunks) {
+    delete ck;
+	}
+    chunks.clear();
 	ResourceManager::Shutdown();
+	GPUResourceManager::Shutdown();
 	ImGui_ImplOpenGL3_Shutdown();
    	ImGui_ImplGlfw_Shutdown();
    	ImGui::DestroyContext();
+    glfwTerminate();
+    return 0;
 }

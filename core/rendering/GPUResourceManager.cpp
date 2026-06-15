@@ -13,7 +13,7 @@ namespace WorldMaker
     Texture2DArrayUPtr GPUResourceManager::s_texture2DArray = nullptr;
     SSBOUPtr<GPUMaterial> GPUResourceManager::s_materialsSSBO = nullptr;
     bool GPUResourceManager::s_inited = false;
-
+    bool GPUResourceManager::s_ended = false;
     void GPUResourceManager::CreateMaterial(Material* mat)
     {
         s_materials.push_back(std::move(std::make_unique<GPUMaterial>(mat)));
@@ -40,6 +40,18 @@ namespace WorldMaker
         s_texture2DArray = std::make_unique<Texture2DArray>(terrainTexturesWidth, terrainTexturesHeight, maxTextures);
         s_materialsSSBO = std::move(std::make_unique<SSBO<GPUMaterial>>(maxMaterials,GL_DYNAMIC_STORAGE_BIT));
         s_inited = true;
+    }
+    void  GPUResourceManager::Shutdown()
+    {
+        if (s_ended)
+        {
+            std::cerr << "Error: Can't end gpu resource manager because it has already been ended!\n";
+            return;
+        }
+        s_texture2DArray.reset();
+        s_materials.clear();
+        s_materialsSSBO->flush();
+        s_ended = true;
     }
     void GPUResourceManager::PrepareToDraw()
     {

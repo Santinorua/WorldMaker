@@ -7,19 +7,21 @@
 #include "RenderingConstants.h"
 #include "SSBO.h"
 #include "Material.h"
+#include "Vertex.h"
 
 #include <memory>
 #include <vector>
 
 namespace WorldMaker
 {
-    struct Vertex;
     class Material;
 	struct ChunkRenderUnit
 	{
 		static int chunkWidth; // Amount of pixels per chunk
 		static int chunkHeight; // Amount of pixels per chunk
+
 		ChunkRenderUnit(std::vector<Vertex>& p_vertices);
+		inline glm::vec3 Center() { return m_vertices->m_data[chunkHeight*chunkWidth/2-1].m_position;}
 		void ChangeVertices(std::vector<Vertex>& p_vertices);
 		static std::vector<unsigned int> GetIndicesForChunk();
 		const ShaderProgramType shaderProgramType = ShaderProgramType::terrain;
