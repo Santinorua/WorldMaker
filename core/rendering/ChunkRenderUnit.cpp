@@ -3,8 +3,16 @@
 
 namespace WorldMaker
 {
-	int ChunkRenderUnit::chunkWidth = 64; // Amount of pixels per chunk
-	int ChunkRenderUnit::chunkHeight = 64; // Amount of pixels per chunk
+	int ChunkRenderUnit::chunkSide = 64; // Amount of pixels per chunk
+	int ChunkRenderUnit::chunkHeight = 256; // Amount of pixels per chunk
+
+	glm::vec3 ChunkRenderUnit::center()
+	{
+	    glm::vec3 point = m_vertices->m_data[0].m_position; // First vertex pos
+		point.y = chunkHeight/2.0; // Y coordinate in the center
+		point+=glm::vec3(chunkSide/2 ,0 ,chunkSide/2); // X and Z coordinates in the center
+	    return point;
+	}
 
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices)
 	{
@@ -40,14 +48,14 @@ namespace WorldMaker
 	{
 		std::vector<unsigned int> indices;
 
-		for (int y = 0; y < chunkHeight-1; y++)
+		for (int y = 0; y < chunkSide-1; y++)
 		{
-			for (int x = 0; x < chunkWidth-1; x++)
+			for (int x = 0; x < chunkSide-1; x++)
 			{
-				unsigned int bottomLeft = y * chunkWidth + x;
-				unsigned int bottomRight = y * chunkWidth + (x + 1);
-				unsigned int topLeft = (y+1) * chunkWidth + x;
-				unsigned int topRight = (y+1) * chunkWidth + (x +1);
+				unsigned int bottomLeft = y * chunkSide + x;
+				unsigned int bottomRight = y * chunkSide + (x + 1);
+				unsigned int topLeft = (y+1) * chunkSide + x;
+				unsigned int topRight = (y+1) * chunkSide + (x +1);
 
 				indices.push_back(bottomLeft);
 				indices.push_back(bottomRight);

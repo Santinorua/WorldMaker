@@ -35,7 +35,7 @@ using namespace WorldMaker;
 
 ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
-	int gridWidth = ChunkRenderUnit::chunkWidth;
+	int gridWidth = ChunkRenderUnit::chunkSide;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
     // std::vector<Vertex> chunkVertices;
@@ -89,11 +89,11 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
         }
     }
     std::vector<Vertex> chunkVertices;
-    chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
+    chunkVertices.reserve(ChunkRenderUnit::chunkSide * ChunkRenderUnit::chunkSide);
 
-    for (int z = z_offset * ChunkRenderUnit::chunkHeight - (z_offset != 0); z < ChunkRenderUnit::chunkHeight * (z_offset + 1) - (z_offset != 0); ++z)
+    for (int z = z_offset * ChunkRenderUnit::chunkSide - (z_offset != 0); z < ChunkRenderUnit::chunkSide * (z_offset + 1) - (z_offset != 0); ++z)
     {
-        for (int x = x_offset * ChunkRenderUnit::chunkWidth - (x_offset != 0); x < ChunkRenderUnit::chunkWidth * (x_offset + 1) - (x_offset != 0); ++x)
+        for (int x = x_offset * ChunkRenderUnit::chunkSide - (x_offset != 0); x < ChunkRenderUnit::chunkSide * (x_offset + 1) - (x_offset != 0); ++x)
         {
 
             double posY = fractal.getNoise(x, z);
@@ -117,11 +117,11 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
 			v.m_normal = normal;
 
 
-			if (x % ChunkRenderUnit::chunkWidth == 0 || x % ChunkRenderUnit::chunkWidth == ChunkRenderUnit::chunkWidth - 1) {
+			if (x % ChunkRenderUnit::chunkSide == 0 || x % ChunkRenderUnit::chunkSide == ChunkRenderUnit::chunkSide - 1) {
 				v.m_color.x = 1;
 			}
 
-			if (z % ChunkRenderUnit::chunkHeight == 0 || z % ChunkRenderUnit::chunkHeight == ChunkRenderUnit::chunkHeight - 1) {
+			if (z % ChunkRenderUnit::chunkSide == 0 || z % ChunkRenderUnit::chunkSide == ChunkRenderUnit::chunkSide - 1) {
 				v.m_color.y = 1;
 			}
 
@@ -153,13 +153,13 @@ int main()
 	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
 
-	int gridWidth = ChunkRenderUnit::chunkWidth;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
+	int gridWidth = ChunkRenderUnit::chunkSide;
+    int gridDepth = ChunkRenderUnit::chunkSide;
 
 	int world_width = 4;
 	int world_height = 4;
 
-    FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 4, 1, 4, 2.0, 0.75);
+    FractalNoise fractal(ChunkRenderUnit::chunkSide * 4, ChunkRenderUnit::chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
 
 	std::vector<ChunkRenderUnit*> chunks;
 
@@ -171,7 +171,7 @@ int main()
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
 
-	int chunk_size = ChunkRenderUnit::chunkHeight;
+	int chunk_size = ChunkRenderUnit::chunkSide;
 
 	Frustum frustum;
 
@@ -200,10 +200,10 @@ int main()
 		ImGui::InputInt("##world_height", &world_height);
 
 		if (ImGui::Button("Generate mesh")) {
-			ChunkRenderUnit::chunkWidth = chunk_size;
-			ChunkRenderUnit::chunkHeight = chunk_size;
+			ChunkRenderUnit::chunkSide = chunk_size;
+			ChunkRenderUnit::chunkSide = chunk_size;
 
-			FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 4, 1, 4, 2.0, 0.75);
+			FractalNoise fractal(ChunkRenderUnit::chunkSide * 4, ChunkRenderUnit::chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
 			for (ChunkRenderUnit* ck : chunks) {
 				delete ck;
 			}
@@ -220,7 +220,7 @@ int main()
 
         int chunksSeen = 0;
 		for (ChunkRenderUnit* ck : chunks) {
-		    if (!Camera::CanSeeSphere(ck->Center(), chunk_size/2)) continue;
+		    if (!Camera::CanSeeBox(ck->minPoint(), ck->maxPoint())) continue;
 			chunksSeen++;
 			Renderer::PrepareToDrawChunk(*ck);
 			GPUResourceManager::PrepareToDraw();

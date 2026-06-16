@@ -17,11 +17,12 @@ namespace WorldMaker
     class Material;
 	struct ChunkRenderUnit
 	{
-		static int chunkWidth; // Amount of pixels per chunk
-		static int chunkHeight; // Amount of pixels per chunk
-
+		static int chunkSide; // Amount of pixels per chunk
+		static int chunkHeight;
 		ChunkRenderUnit(std::vector<Vertex>& p_vertices);
-		inline glm::vec3 Center() { return m_vertices->m_data[chunkHeight*chunkWidth/2-1].m_position;}
+		glm::vec3 center();
+		inline glm::vec3 minPoint() { return center()-glm::vec3(chunkSide/2, chunkHeight/2, chunkSide/2);}
+		inline glm::vec3 maxPoint() { return center()+glm::vec3(chunkSide/2, chunkHeight/2, chunkSide/2);}
 		void ChangeVertices(std::vector<Vertex>& p_vertices);
 		static std::vector<unsigned int> GetIndicesForChunk();
 		const ShaderProgramType shaderProgramType = ShaderProgramType::terrain;

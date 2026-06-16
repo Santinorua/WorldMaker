@@ -65,27 +65,38 @@ namespace WorldMaker
     bool Frustum::sphereInside(glm::vec3 center, float radius)
     {
         update();
-        Plane planes[] =
-        {
-            nearPlane,
-            farPlane,
-            leftPlane,
-            rightPlane,
-            topPlane,
-            bottomPlane
-        };
 
-        for(const Plane& plane : planes)
+        for(const Plane* plane : planes)
         {
             float distance =
             glm::dot(
-                plane.normal,
-                center - plane.point
+                plane->normal,
+                center - plane->point
             );
 
             if(distance < -radius) return false;
         }
 
+        return true;
+    }
+    bool Frustum::boxInside(glm::vec3 min, glm::vec3 max)
+    {
+        update();
+        for (const Plane* plane : planes)
+        {
+            glm::vec3 point;
+            point.x = plane->normal.x>0 ? max.x : min. x;
+            point.y = plane->normal.y>0 ? max.y : min. y;
+            point.z = plane->normal.z>0 ? max.z : min. z;
+
+            float distance =
+            glm::dot(
+                plane->normal,
+                point - plane->point
+            );
+
+            if (distance < 0) return false;
+        }
         return true;
     }
 }

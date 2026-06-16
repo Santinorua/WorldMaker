@@ -30,6 +30,7 @@ namespace WorldMaker
 		static inline float AspectRatio() { return s_aspectRatio; }
 
 		static bool CanSeeSphere(glm::vec3 center, float radius);
+		static bool CanSeeBox(glm::vec3 min, glm::vec3 max);
 		static void UpdateCameraTransform();
 		static glm::mat4 ProjectionMatrix();
 		static glm::mat4 ViewMatrix();

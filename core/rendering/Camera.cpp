@@ -64,7 +64,7 @@ namespace WorldMaker
     }
 
     bool Camera::CanSeeSphere(glm::vec3 center, float radius){return s_frustum.sphereInside(center, radius);}
-
+    bool Camera::CanSeeBox(glm::vec3 min, glm::vec3 max) { return s_frustum.boxInside(min, max);}
 	void Camera::UpdateCameraTransform()
 	{
 	    static bool firstClick = true;
