@@ -50,6 +50,10 @@ namespace WorldMaker
             GLCall(glEnable(GL_BLEND));
             GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         }
+        // GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+        GLCall(glFrontFace(GL_CW));
+        GLCall(glEnable(GL_CULL_FACE));
+        GLCall(glCullFace(GL_BACK));
         s_shaderProgramsByType[ShaderProgramType::noise] = std::make_shared<ShaderProgram>("core/rendering/shaders/NoiseVertexShader.glsl", "core/rendering/shaders/NoiseFragmentShader.glsl");
         s_shaderProgramsByType[ShaderProgramType::terrain] = std::make_shared<ShaderProgram>("core/rendering/shaders/TerrainVertexShader.glsl", "core/rendering/shaders/TerrainFragmentShader.glsl");
 
