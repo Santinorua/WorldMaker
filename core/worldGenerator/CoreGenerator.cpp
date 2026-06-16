@@ -35,7 +35,16 @@ namespace WorldMaker {
             continentalnessModifier = -0.8;
         }
 
-        double final = base * erosion + continentalnessModifier;
+        double erosionModifier;
+        if (erosion >= 0.8) {
+            erosionModifier = erosion;
+        } else if (erosion >= 0.6) {
+            erosionModifier = Lerp(0.2, 0.8, (erosion - 0.6) * 5, false);
+        } else {
+            erosionModifier = Lerp(0.0, 0.2, (erosion * 10.0) / 6.0, false);
+        }
+
+        double final = base * erosionModifier + continentalnessModifier;
 
         return final * m_yScale;
     }
