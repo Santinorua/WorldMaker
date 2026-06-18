@@ -35,9 +35,8 @@ using namespace WorldMaker;
 
 ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
-	int gridWidth = ChunkRenderUnit::chunkSide;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
-
+	int gridWidth = ChunkRenderUnit::s_chunkSide;
+    int gridDepth = ChunkRenderUnit::s_chunkHeight;
     // std::vector<Vertex> chunkVertices;
     // chunkVertices.reserve(gridWidth * gridDepth);
 
@@ -89,14 +88,19 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
         }
     }
     std::vector<Vertex> chunkVertices;
-    chunkVertices.reserve(ChunkRenderUnit::chunkSide * ChunkRenderUnit::chunkSide);
+    double tallestPoint = 0;
+    double lowestPoint = 0;
+    chunkVertices.reserve(ChunkRenderUnit::s_chunkSide * ChunkRenderUnit::s_chunkSide);
 
-    for (int z = z_offset * ChunkRenderUnit::chunkSide - (z_offset != 0); z < ChunkRenderUnit::chunkSide * (z_offset + 1) - (z_offset != 0); ++z)
+    for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0); z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0); ++z)
     {
-        for (int x = x_offset * ChunkRenderUnit::chunkSide - (x_offset != 0); x < ChunkRenderUnit::chunkSide * (x_offset + 1) - (x_offset != 0); ++x)
+        for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0); x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0); ++x)
         {
 
             double posY = fractal.getNoise(x, z);
+            std::cout << posY << "\n";
+            tallestPoint = std::max(tallestPoint, posY);
+            lowestPoint = std::min(lowestPoint, posY);
 
             double hL = fractal.getNoise(x - 1, z);
             double hR = fractal.getNoise(x + 1, z);
@@ -117,11 +121,11 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
 			v.m_normal = normal;
 
 
-			if (x % ChunkRenderUnit::chunkSide == 0 || x % ChunkRenderUnit::chunkSide == ChunkRenderUnit::chunkSide - 1) {
+			if (x % ChunkRenderUnit::s_chunkSide == 0 || x % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
 				v.m_color.x = 1;
 			}
 
-			if (z % ChunkRenderUnit::chunkSide == 0 || z % ChunkRenderUnit::chunkSide == ChunkRenderUnit::chunkSide - 1) {
+			if (z % ChunkRenderUnit::s_chunkSide == 0 || z % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
 				v.m_color.y = 1;
 			}
 
@@ -129,7 +133,7 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
         }
     }
 
-    return new ChunkRenderUnit{chunkVertices};
+    return new ChunkRenderUnit{chunkVertices, tallestPoint, lowestPoint};
 }
 
 void regenerate_chunks(std::vector<ChunkRenderUnit*>& chunks, FractalNoise& fractal, int width, int height)
@@ -153,13 +157,13 @@ int main()
 	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
 
-	int gridWidth = ChunkRenderUnit::chunkSide;
-    int gridDepth = ChunkRenderUnit::chunkSide;
+	int gridWidth = ChunkRenderUnit::s_chunkSide;
+    int gridDepth = ChunkRenderUnit::s_chunkSide;
 
 	int world_width = 4;
 	int world_height = 4;
 
-    FractalNoise fractal(ChunkRenderUnit::chunkSide * 4, ChunkRenderUnit::chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
+    FractalNoise fractal(ChunkRenderUnit::s_chunkSide * 4, ChunkRenderUnit::s_chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
 
 	std::vector<ChunkRenderUnit*> chunks;
 
@@ -171,7 +175,7 @@ int main()
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
 
-	int chunk_size = ChunkRenderUnit::chunkSide;
+	int chunk_size = ChunkRenderUnit::s_chunkSide;
 
 	Frustum frustum;
 
@@ -200,10 +204,10 @@ int main()
 		ImGui::InputInt("##world_height", &world_height);
 
 		if (ImGui::Button("Generate mesh")) {
-			ChunkRenderUnit::chunkSide = chunk_size;
-			ChunkRenderUnit::chunkSide = chunk_size;
+			ChunkRenderUnit::s_chunkSide = chunk_size;
+			ChunkRenderUnit::s_chunkSide = chunk_size;
 
-			FractalNoise fractal(ChunkRenderUnit::chunkSide * 4, ChunkRenderUnit::chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
+			FractalNoise fractal(ChunkRenderUnit::s_chunkSide * 4, ChunkRenderUnit::s_chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
 			for (ChunkRenderUnit* ck : chunks) {
 				delete ck;
 			}
