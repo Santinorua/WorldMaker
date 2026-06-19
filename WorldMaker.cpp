@@ -34,8 +34,6 @@ using namespace WorldMaker;
 
 ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
-	Input::SetUp(Renderer::GetWindow());
-
 	int gridWidth = ChunkRenderUnit::chunkWidth;
     int gridDepth = ChunkRenderUnit::chunkHeight;
 
@@ -93,9 +91,9 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
 
-    for (int z = z_offset * ChunkRenderUnit::chunkHeight - (z_offset != 0); z < ChunkRenderUnit::chunkHeight * (z_offset + 1) - (z_offset != 0); ++z)
+    for (int z = z_offset * ChunkRenderUnit::chunkHeight - (z_offset != 0) * z_offset; z < ChunkRenderUnit::chunkHeight * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
     {
-        for (int x = x_offset * ChunkRenderUnit::chunkWidth - (x_offset != 0); x < ChunkRenderUnit::chunkWidth * (x_offset + 1) - (x_offset != 0); ++x)
+        for (int x = x_offset * ChunkRenderUnit::chunkWidth - (x_offset != 0) * x_offset; x < ChunkRenderUnit::chunkWidth * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
         {
 
             double posY = fractal.getNoise(x, z);
