@@ -15,7 +15,6 @@
 #include "Texture2D.h"
 #include "NoiseRenderUnit.h"
 #include "ChunkRenderUnit.h"
-#include "ChunkUnion.h"
 
 #include "Camera.h"
 #include "GlobalLight.h"
@@ -94,9 +93,9 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
     std::vector<Vertex> chunkVertices;
     chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
 
-    for (int z = z_offset * ChunkRenderUnit::chunkHeight; z < ChunkRenderUnit::chunkHeight * (z_offset + 1); ++z)
+    for (int z = z_offset * ChunkRenderUnit::chunkHeight - (z_offset != 0); z < ChunkRenderUnit::chunkHeight * (z_offset + 1) - (z_offset != 0); ++z)
     {
-        for (int x = x_offset * ChunkRenderUnit::chunkWidth; x < ChunkRenderUnit::chunkWidth * (x_offset + 1); ++x)
+        for (int x = x_offset * ChunkRenderUnit::chunkWidth - (x_offset != 0); x < ChunkRenderUnit::chunkWidth * (x_offset + 1) - (x_offset != 0); ++x)
         {
 
             double posY = fractal.getNoise(x, z);
@@ -149,17 +148,6 @@ void regenerate_chunks(std::vector<ChunkRenderUnit*>& chunks, FractalNoise& frac
 	}
 }
 
-void regenerate_unions(std::vector<ChunkUnion*>& unions, const std::vector<ChunkRenderUnit*>& chunks, FractalNoise& fractal, int width, int height)
-{
-	for (ChunkUnion *ck : unions) {
-		delete ck;
-	}
-
-	for (int x = 0; x < width - 1; x++) {
-		
-	}
-}
-
 int main()
 {
     Renderer::Init();
@@ -176,7 +164,6 @@ int main()
     FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 4, 1, 4, 2.0, 0.75);
 
 	std::vector<ChunkRenderUnit*> chunks;
-	std::vector<ChunkUnion*> unions;
 
 	regenerate_chunks(chunks, fractal, world_width, world_height);
 
@@ -221,7 +208,6 @@ int main()
 			}
 			chunks.clear();
 			regenerate_chunks(chunks, fractal, world_width, world_height);
-
 		}
 		ImGui::End();
 

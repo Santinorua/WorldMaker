@@ -10,7 +10,6 @@
 namespace WorldMaker
 {
     class ChunkRenderUnit;
-    class ChunkUnion;
     class NoiseRenderUnit;
 	struct RendererConfig
     {
@@ -63,8 +62,5 @@ namespace WorldMaker
 
 		static void PrepareToDrawChunk(ChunkRenderUnit& chunk);
 		static void DrawChunk(ChunkRenderUnit& chunk);
-
-		static void PrepareToDrawChunkUnion(ChunkUnion& chunk_union);
-		static void DrawChunkUnion(ChunkUnion& chunk_union);
 	};
 }

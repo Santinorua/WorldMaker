@@ -1,7 +1,6 @@
 #include "Renderer.h"
 
 #include "ChunkRenderUnit.h"
-#include "ChunkUnion.h"
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "DebugUtils.h"
@@ -76,19 +75,6 @@ namespace WorldMaker
 		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
 		chunk.m_indices->bindBufferBase(SSBOType::indices);
 	}
-
-	void Renderer::PrepareToDrawChunkUnion(ChunkUnion& chunk_union)
-	{
-		chunk_union.m_vertexArray->bind();
-		chunk_union.m_vertices->bindBufferBase(SSBOType::vertices);
-		chunk_union.m_indices->bindBufferBase(SSBOType::indices);
-	}
-
-	void Renderer::DrawChunkUnion(ChunkUnion& chunk_union)
-	{
-		glDrawArrays(GL_TRIANGLES, 0, chunk_union.m_indices->m_data.size());
-	}
-
 	void Renderer::DrawChunk(ChunkRenderUnit& chunk)
 	{
 		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices->m_data.size());

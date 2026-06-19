@@ -106,7 +106,6 @@ namespace WorldMaker
 		unsigned int currentElements() const { return m_data.size(); }
 
 		friend class ChunkRenderUnit;
-		friend class ChunkUnion;
 	};
 	template<typename T>
 	using SSBOUPtr = std::unique_ptr<SSBO<T>>;
