@@ -215,6 +215,15 @@ target_include_directories(Utilities INTERFACE ${CMAKE_SOURCE_DIR}/core/utilitie
 target_link_libraries(Utilities PUBLIC Math)
 
 # -----------------------------------------------------------------------------------------------------
+
+# Chunk Gen
+
+file (GLOB CHUNKGEN_SRC "${CMAKE_SOURCE_DIR}/core/chunkGeneration/*.cpp")
+add_library(ChunkGeneration STATIC ${CHUNKGEN_SRC})
+target_link_libraries(ChunkGeneration PUBLIC Rendering PerlinNoise Math)
+target_include_directories(ChunkGeneration PUBLIC ${CMAKE_SOURCE_DIR}/core/chunkGeneration)
+
+# -----------------------------------------------------------------------------------------------------
 #######################################################################################################
 #######################################################################################################
 # -----------------------------------------------------------------------------------------------------
@@ -222,7 +231,7 @@ target_link_libraries(Utilities PUBLIC Math)
 # Core
 
 add_library(Core INTERFACE)
-target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise)
+target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise ChunkGeneration)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
