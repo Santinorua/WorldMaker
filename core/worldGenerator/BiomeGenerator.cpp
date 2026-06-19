@@ -1,7 +1,7 @@
 #include "BiomeGenerator.h"
+#include "Vec4.h"
 
 namespace WorldMaker {
-
 
     // ConditionGroup
     
@@ -43,6 +43,19 @@ namespace WorldMaker {
 
 
     // Biome
+
+    double Biome::idealDistance(double params[4]) {
+        double distance = 0.0;
+        double distanceVec[4];
+        for (int i = 0; i < 4; i++) {
+            distanceVec[i] = 0.0;
+            if (m_idealConditions[i] != -2.0) {
+                distanceVec[i] = params[i] - m_idealConditions[i];
+            }
+        }
+        distance = Vec4(distanceVec[0], distanceVec[1], distanceVec[2], distanceVec[3]).Magnitude();
+        return distance;
+    }
 
     void Biome::addConditionGroup(const ConditionGroup &conditionGroup) {
         m_conditionGroups.push_back(conditionGroup);
