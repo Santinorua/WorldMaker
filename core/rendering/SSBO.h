@@ -27,6 +27,31 @@ namespace WorldMaker
 	public:
 		std::vector<T> m_data = {};
 
+		void resize(unsigned int elementsToSupport)
+		{
+		    ASSERT(elementsToSupport >= currentElements());
+            unsigned int newSSBO;
+            GLCall(glCreateBuffers(1, &newSSBO));
+      		GLCall(
+     			glNamedBufferStorage
+     			(
+    				newSSBO,
+    				sizeof(T) * elementsToSupport,
+    				0,
+    				m_usage
+     			));
+                glCopyNamedBufferSubData(
+                m_glName,
+                newSSBO,
+                0,
+                0,
+                m_currentBytes
+            );
+            m_maxBytes = elementsToSupport * sizeof(T);
+            GLCall(glDeleteBuffers(1, &m_glName));
+            m_glName = newSSBO;
+            std::cout << "SSBO resized!\n";
+		}
 		SSBO(unsigned int maxCount, unsigned int usage)
 		{
 			GLCall(glGenBuffers(1, &m_glName));
@@ -53,13 +78,15 @@ namespace WorldMaker
 		}
 
 		// Should be used for buffers from the renderer batch
-		void pushBatchData(const std::vector<T>& data)
+		void pushData(const std::vector<T>& data)
 		{
+		    if (currentElements() + data.size() > maxElements()) resize(currentElements()+data.size());
 			m_data.insert(m_data.end(), data.begin(), data.end());
 			m_currentBytes += data.size() * sizeof(T);
 		}
-		void pushBatchData(const T data)
+		void pushData(const T data)
 		{
+		    if (currentElements() + 1 > maxElements()) resize(currentElements()+1);
             m_data.push_back(data);
             m_currentBytes+=sizeof(T);
 		}

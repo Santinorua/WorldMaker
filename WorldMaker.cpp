@@ -96,9 +96,7 @@ ChunkRenderUnit* generate_chunk(FractalNoise& fractal, float x_offset, float z_o
     {
         for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0); x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0); ++x)
         {
-
             double posY = fractal.getNoise(x, z);
-            std::cout << posY << "\n";
             tallestPoint = std::max(tallestPoint, posY);
             lowestPoint = std::min(lowestPoint, posY);
 

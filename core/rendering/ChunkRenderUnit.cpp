@@ -19,30 +19,23 @@ namespace WorldMaker
         m_lowestPoint = lowestPoint;
         m_tallestPoint = tallestPoint;
         std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
-       	while (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
-       	while (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
-
-        while (!m_vertices->checkIfEnoughSpaceForPush(vertices.size())) resizeSSBO(m_vertices, false, vertices.size());
-		m_vertices->pushBatchData(vertices);
+		m_vertices->pushData(vertices);
 		m_vertices->submitData();
 
-		while (!m_indices->checkIfEnoughSpaceForPush(indices.size())) resizeSSBO(m_indices, false, indices.size());
-		m_indices->pushBatchData(indices);
+		m_indices->pushData(indices);
 		m_indices->submitData();
 	}
 
 	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& vertices)
 	{
-	    while (m_vertices->checkIfPushIsBiggerThanMaxSize(vertices.size())) resizeSSBO(m_vertices, true, vertices.size());
 		m_vertices->flush();
-		m_vertices->pushBatchData(vertices);
+		m_vertices->pushData(vertices);
 		m_vertices->submitData();
 
 		std::vector<unsigned int> indices = ChunkRenderUnit::GetIndicesForChunk();
 
-		while (m_indices->checkIfPushIsBiggerThanMaxSize(indices.size())) resizeSSBO(m_indices, true, indices.size());
 		m_indices->flush();
-		m_indices->pushBatchData(indices);
+		m_indices->pushData(indices);
 		m_indices->submitData();
 	}
 

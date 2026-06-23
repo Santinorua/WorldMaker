@@ -20,7 +20,7 @@ namespace WorldMaker
         GPUMaterial* newMat = s_materials.back().get();
         if (s_materialsSSBO.get()->checkIfEnoughSpaceForPush(1))
         {
-            s_materialsSSBO.get()->pushBatchData(*newMat);
+            s_materialsSSBO.get()->pushData(*newMat);
             unsigned int lastElement = s_materialsSSBO.get()->currentElements()-1;
             s_materialsSSBO.get()->submitSubData(lastElement, lastElement);
         }
