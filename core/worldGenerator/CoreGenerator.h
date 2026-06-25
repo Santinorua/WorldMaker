@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "PerlinNoise.h"
+#include "Vertex.h"
 
 namespace WorldMaker {
     class WorldGenerator {
@@ -14,7 +15,8 @@ namespace WorldMaker {
         FractalNoise m_humidity;
         FractalNoise m_base;
     public:
-        double getHeight(float x, float z);
+        double getHeight(double erosion, double continentalness, double base);
+        Vertex getVertex(float x, float z);
         WorldGenerator(double yScale, uint64_t seed);
     };
 }

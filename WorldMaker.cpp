@@ -60,47 +60,37 @@ int main()
 
 
 			if (doRender2D) {
-				double color = generator.getHeight(x, z);
+				double color = generator.getVertex(x, z).m_position.y / generator.m_yScale;
 				colors.push_back(color);
 				colors.push_back(color);
 				colors.push_back(color);
 				colors.push_back(1.0);
 			} else {
-				double posY = generator.getHeight(x, z);
-
-
-				double hL = generator.getHeight(x - 1, z);
-				double hR = generator.getHeight(x + 1, z);
-				double hD = generator.getHeight(x, z - 1);
-				double hU = generator.getHeight(x, z + 1);
-
-				glm::vec3 normal;
-				normal.x = static_cast<float>(hL - hR);
-				normal.y = static_cast<float>(2.0 * 1);
-				normal.z = static_cast<float>(hD - hU);
-
-				normal = glm::normalize(normal);
-
-				Vertex v;
-				v.m_color = {1,1.0,1.0,1};
-				double cont = generator.m_continentalness.getNoise(x, z);
-				if (cont >= -0.1) {
-					v.m_color = {0.0, 1.0, 0.0, 1.0};
-				} else if (cont >= -0.6) {
-					v.m_color = {0.0, Lerp(0.0, 1.0, ((cont+0.6) * 2), true), Lerp(1.0, 0.0, ((cont+0.6) * 2), true), 1.0};
-				} else {
-					v.m_color = {0.0, 0.0, 1.0, 1.0};
-				}
-
-				v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
-				v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z) };
-				v.m_normal = normal;
-
-				chunkVertices.push_back(v);
+				chunkVertices.push_back(generator.getVertex(x, z));
 			}
 
         }
     }
+
+	for (int z = 0; z < gridDepth; ++z) {
+		for (int x = 0; x < gridWidth; ++x) {
+
+
+			float hL = x != 0 ? chunkVertices[z*gridWidth + x-1].m_position.y : generator.getVertex(x-1, z).m_position.y;
+			float hR = x != gridWidth-1 ? chunkVertices[z*gridWidth + x+1].m_position.y : generator.getVertex(x+1, z).m_position.y;
+			float hU = z != 0 ? chunkVertices[(z-1)*gridWidth + x].m_position.y : generator.getVertex(x, z-1).m_position.y;
+			float hD = z != gridDepth-1 ? chunkVertices[(z+1)*gridWidth + x].m_position.y : generator.getVertex(x, z+1).m_position.y;
+
+			glm::vec3 normal;
+			normal.x = static_cast<float>(hL - hR);
+			normal.y = static_cast<float>(2.0 * 1);
+			normal.z = static_cast<float>(hD - hU);
+
+			normal = glm::normalize(normal);
+
+			chunkVertices[z*gridWidth + x].m_normal = normal;
+		}
+	}
 
 	ChunkRenderUnit chunk{chunkVertices};
 

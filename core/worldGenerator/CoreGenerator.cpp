@@ -20,19 +20,16 @@ namespace WorldMaker {
         m_base = FractalNoise(60.0, 1.5, nextSeed, 4, 2.0, 0.5);
     }
 
-    double WorldGenerator::getHeight(float x, float z) {
-        double continentalness = m_continentalness.getNoise(x, z);
-        double erosion = (m_erosion.getNoise(x, z) + 0.5) * 0.5;
-        double base = m_base.getNoise(x, z);
+    double WorldGenerator::getHeight(double erosion, double continentalness, double base) {
         double continentalnessModifier;
 
         if (continentalness >= -0.1) {
             continentalnessModifier = 0;
 
         } else if (continentalness >= -0.6) {
-            continentalnessModifier = Lerp(-0.8, 0.0, ((continentalness+0.6) * 2), true);
+            continentalnessModifier = Lerp(-0.5, 0.0, ((continentalness+0.6) * 2), true);
         } else {
-            continentalnessModifier = -0.8;
+            continentalnessModifier = -0.5;
         }
 
         double erosionModifier;
@@ -46,7 +43,33 @@ namespace WorldMaker {
 
         double final = base * erosionModifier + continentalnessModifier;
 
-        return final * m_yScale;
+        return final;
+    }
+
+    Vertex WorldGenerator::getVertex(float x, float z) {
+        double continentalness = m_continentalness.getNoise(x, z);
+        double erosion = (m_erosion.getNoise(x, z) + 0.5);
+        double temperature = m_temperature.getNoise(x, z);
+        double humidity = m_humidity.getNoise(x, z);
+        double base = m_base.getNoise(x, z);
+
+        double height = getHeight(erosion, continentalness, base);
+
+        Vertex v;
+        v.m_color = {1,1.0,1.0,1};
+
+        if (continentalness >= -0.1) {
+            v.m_color = {0.0, 1.0, 0.0, 1.0};
+        } else if (continentalness >= -0.6) {
+            v.m_color = {0.0, Lerp(0.0, 1.0, ((continentalness+0.6) * 2), true), Lerp(1.0, 0.0, ((continentalness+0.6) * 2), true), 1.0};
+        } else {
+            v.m_color = {0.0, 0.0, 1.0, 1.0};
+        }
+
+        v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
+        v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
+
+        return v;
     }
 
 

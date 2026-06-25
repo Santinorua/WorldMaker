@@ -5,8 +5,6 @@
 #include "Features.h"
 
 namespace WorldMaker {
-    // template<typename T>
-    class
 
     enum class BiomeDeterminators {
         Erosion,
@@ -62,7 +60,10 @@ namespace WorldMaker {
 
     };
 
-    class BiomeGenerator {
 
+    class BiomeGenerator {
+        std::vector<Biome> m_biomes;
+
+        Biome getBiome(double params[4]);
     };
 }
