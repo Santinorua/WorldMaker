@@ -87,4 +87,60 @@ namespace WorldMaker {
         if (idx < 0 || idx >= m_modifiers.size() - 1) return;
         std::swap(m_modifiers[idx], m_modifiers[idx + 1]);
     }
+
+    Biome BiomeGenerator::getBiome(double params[4]) {
+        assert(m_biomes.size() > 0);
+        std::vector<double> distances;
+        distances.reserve(m_biomes.size());
+        double bestDistance = std::numeric_limits<double>::max();
+        int bestBiome;
+        for (int i = 0; i < m_biomes.size(); i++) {
+            bool conditionsMet = true;
+            // Comprobar condiciones
+            if (conditionsMet) {
+                double distance = m_biomes[i].idealDistance(params);
+                distances.push_back(distance);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestBiome = i;
+                }
+            }
+        }
+        return m_biomes[bestBiome];
+    }
+
+    void BiomeGenerator::addBiome(const Biome &biome) {
+        m_biomes.push_back(biome);
+    }
+
+    void BiomeGenerator::removeBiome(int index) {
+        m_biomes.erase(m_biomes.begin() + index);
+    }
+
+    void BiomeGenerator::addDefaultBiomes() {
+        // Plains
+
+        Biome plains = Biome();
+        plains.name = "Plains";
+        plains.setIdealCondition(BiomeDeterminators::Continentalness, -0.4);
+        plains.setIdealCondition(BiomeDeterminators::Erosion, 1);
+        plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
+        plains.setIdealCondition(BiomeDeterminators::Humidity,0.5);
+        plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
+
+        addBiome(plains);
+
+        Biome desert = Biome();
+        desert.name = "Desert";
+        desert.setIdealCondition(BiomeDeterminators::Continentalness, 0);
+        desert.setIdealCondition(BiomeDeterminators::Erosion, 0.5);
+        desert.setIdealCondition(BiomeDeterminators::Temperature, 1);
+        desert.setIdealCondition(BiomeDeterminators::Humidity,0);
+        desert.biomeColor = Vec4(1.0, 1.0, 0.0, 1.0);
+
+        addBiome(desert);
+
+    }
+
+
 }

@@ -3,6 +3,7 @@
 #include "DebugUtils.h"
 #include "PRNG.h"
 #include "Interpolations.h"
+#include "BiomeGenerator.h"
 
 namespace WorldMaker {
 
@@ -55,11 +56,15 @@ namespace WorldMaker {
 
         double height = getHeight(erosion, continentalness, base);
 
+        double params[4] = {erosion, continentalness, temperature, humidity};
+        Biome biome = BiomeGenerator::getBiome(params);
+
+
         Vertex v;
         v.m_color = {1,1.0,1.0,1};
 
         if (continentalness >= -0.1) {
-            v.m_color = {0.0, 1.0, 0.0, 1.0};
+            v.m_color = biome.biomeColor;
         } else if (continentalness >= -0.6) {
             v.m_color = {0.0, Lerp(0.0, 1.0, ((continentalness+0.6) * 2), true), Lerp(1.0, 0.0, ((continentalness+0.6) * 2), true), 1.0};
         } else {

@@ -23,6 +23,7 @@
 #include <iostream>
 #include <memory>
 #include "CoreGenerator.h"
+#include "BiomeGenerator.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -42,6 +43,8 @@ int main()
 
     std::vector<Vertex> chunkVertices;
 	std::vector<double> colors;
+
+	BiomeGenerator::addDefaultBiomes();
 
 	if (doRender2D) {
 		colors.reserve(gridWidth * gridDepth);

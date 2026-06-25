@@ -3,6 +3,7 @@
 #include <functional>
 #include "Texture2D.h"
 #include "Features.h"
+#include "Vec4.h"
 
 namespace WorldMaker {
 
@@ -44,6 +45,10 @@ namespace WorldMaker {
         double m_featureProbability = 0.1;
         std::vector<Modifier> m_modifiers;
 
+    public:
+        std::string name;
+        Vec4 biomeColor;
+
         void setIdealCondition(BiomeDeterminators determinator, double value) {
             m_idealConditions[(int)determinator] = value;
         }
@@ -62,8 +67,11 @@ namespace WorldMaker {
 
 
     class BiomeGenerator {
-        std::vector<Biome> m_biomes;
-
-        Biome getBiome(double params[4]);
+    public:
+        static std::vector<Biome> m_biomes;
+        static Biome getBiome(double params[4]);
+        static void addBiome(const Biome &biome);
+        static void removeBiome(int index);
+        static void addDefaultBiomes();
     };
 }
