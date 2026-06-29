@@ -3,9 +3,11 @@
 
 namespace WorldMaker {
 
+    std::vector<Biome> BiomeGenerator::m_biomes = {};
+
     // ConditionGroup
     
-    void ConditionGroup::addCondition(std::function<bool(const double &value)> condition) {;
+    void ConditionGroup::addCondition(std::function<bool(const double &value)> condition) {
         m_conditions.push_back(condition);
     }
 

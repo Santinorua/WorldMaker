@@ -61,7 +61,7 @@ namespace WorldMaker {
 
 
         Vertex v;
-        v.m_color = {1,1.0,1.0,1};
+        v.m_color = {1.0,1.0,1.0,1.0};
 
         if (continentalness >= -0.1) {
             v.m_color = biome.biomeColor;
@@ -70,7 +70,7 @@ namespace WorldMaker {
         } else {
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
-
+        
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
 

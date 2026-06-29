@@ -31,17 +31,16 @@
 
 using namespace WorldMaker;
 
-int main()
-{
+int main() {
 	Renderer::Init();
 	Input::SetUp(Renderer::GetWindow());
 
 	int gridWidth = ChunkRenderUnit::chunkWidth;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
+	int gridDepth = ChunkRenderUnit::chunkHeight;
 
 	bool doRender2D = false;
 
-    std::vector<Vertex> chunkVertices;
+	std::vector<Vertex> chunkVertices;
 	std::vector<double> colors;
 
 	BiomeGenerator::addDefaultBiomes();

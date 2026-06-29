@@ -5,7 +5,8 @@ namespace WorldMaker
 {
 	NoiseRenderUnit::NoiseRenderUnit(const int& p_width, const int& p_height, std::vector<double>& p_data) : width(p_width), height(p_height)
 	{
-		ChangeNoise(p_width, p_height, p_data);
+		if (p_data.size()!=0)
+			ChangeNoise(p_width, p_height, p_data);
 	}
 	void NoiseRenderUnit::ChangeNoise(const int& p_width, const int& p_height, std::vector<double>& p_data)
 	{
