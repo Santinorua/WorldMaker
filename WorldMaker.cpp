@@ -22,6 +22,7 @@
 #include "GlobalLight.h"
 #include "CoolTime.h"
 #include "Input.h"
+#include "Frustum.h"
 
 #include "PRNG.h"
 
@@ -41,13 +42,13 @@ int main()
 	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
 
-	int gridWidth = ChunkRenderUnit::chunkWidth;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
+	int gridWidth = ChunkRenderUnit::s_chunkSide;
+    int gridDepth = ChunkRenderUnit::s_chunkSide;
 
 	int world_width = 4;
 	int world_height = 4;
 
-    FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 4, 1, 4, 2.0, 0.75);
+    FractalNoise fractal(ChunkRenderUnit::s_chunkSide * 4, ChunkRenderUnit::s_chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
 
 	std::vector<ChunkRenderUnit*> chunks;
 
@@ -59,7 +60,7 @@ int main()
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
 
-	int chunk_size = ChunkRenderUnit::chunkHeight;
+	int chunk_size = ChunkRenderUnit::s_chunkSide;
 	int octaves = 4;
 	uint64_t seed = 1;
 	double frequency = 5;
@@ -106,10 +107,10 @@ int main()
 		IMGUI_INPUT(octaves, ImGuiDataType_S32);
 
 		if (ImGui::Button("Generate mesh")) {
-			ChunkRenderUnit::chunkWidth = chunk_size;
-			ChunkRenderUnit::chunkHeight = chunk_size;
+			ChunkRenderUnit::s_chunkSide = chunk_size;
+			ChunkRenderUnit::s_chunkSide = chunk_size;
 
-			FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, frequency, amplitude, seed, octaves, lacunarity, persistence);
+			FractalNoise fractal(ChunkRenderUnit::s_chunkSide * 4, ChunkRenderUnit::s_chunkSide * 4, frequency, amplitude, seed, octaves, lacunarity, persistence);
 			for (ChunkRenderUnit* ck : chunks) {
 				delete ck;
 			}
@@ -125,6 +126,7 @@ int main()
         GlobalLight::LoadLightSettings();
 
 		for (ChunkRenderUnit* ck : chunks) {
+		    if (!Camera::CanSeeBox(ck->minPoint(), ck->maxPoint())) continue;
 			Renderer::PrepareToDrawChunk(*ck);
 			GPUResourceManager::PrepareToDraw();
 			Renderer::DrawChunk(*ck);
@@ -136,8 +138,15 @@ int main()
 
         glfwPollEvents();
 	}
+	for (ChunkRenderUnit* ck : chunks) {
+    delete ck;
+	}
+    chunks.clear();
 	ResourceManager::Shutdown();
+	GPUResourceManager::Shutdown();
 	ImGui_ImplOpenGL3_Shutdown();
    	ImGui_ImplGlfw_Shutdown();
    	ImGui::DestroyContext();
+    glfwTerminate();
+    return 0;
 }

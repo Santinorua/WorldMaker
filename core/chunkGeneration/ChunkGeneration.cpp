@@ -6,8 +6,8 @@ namespace ChunkGeneration {
 
 ChunkRenderUnit* GenerateChunk(FractalNoise& fractal, float x_offset, float z_offset)
 {
-	int gridWidth = ChunkRenderUnit::chunkWidth;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
+	int gridWidth = ChunkRenderUnit::s_chunkSide;
+    int gridDepth = ChunkRenderUnit::s_chunkSide;
 
     // std::vector<Vertex> chunkVertices;
     // chunkVertices.reserve(gridWidth * gridDepth);
@@ -60,14 +60,18 @@ ChunkRenderUnit* GenerateChunk(FractalNoise& fractal, float x_offset, float z_of
         }
     }
     std::vector<Vertex> chunkVertices;
-    chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
+    chunkVertices.reserve(ChunkRenderUnit::s_chunkSide * ChunkRenderUnit::s_chunkSide);
+    double tallestPoint = 0;
+    double lowestPoint = 0;
 
-    for (int z = z_offset * ChunkRenderUnit::chunkHeight - (z_offset != 0) * z_offset; z < ChunkRenderUnit::chunkHeight * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
+    for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
     {
-        for (int x = x_offset * ChunkRenderUnit::chunkWidth - (x_offset != 0) * x_offset; x < ChunkRenderUnit::chunkWidth * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
+        for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
         {
 
             double posY = fractal.getNoise(x, z);
+            tallestPoint = std::max(tallestPoint, posY);
+            lowestPoint = std::min(lowestPoint, posY);
 
             double hL = fractal.getNoise(x - 1, z);
             double hR = fractal.getNoise(x + 1, z);
@@ -88,11 +92,11 @@ ChunkRenderUnit* GenerateChunk(FractalNoise& fractal, float x_offset, float z_of
 			v.m_normal = normal;
 
 
-			if (x % ChunkRenderUnit::chunkWidth == 0 || x % ChunkRenderUnit::chunkWidth == ChunkRenderUnit::chunkWidth - 1) {
+			if (x % ChunkRenderUnit::s_chunkSide == 0 || x % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
 				v.m_color.x = 1;
 			}
 
-			if (z % ChunkRenderUnit::chunkHeight == 0 || z % ChunkRenderUnit::chunkHeight == ChunkRenderUnit::chunkHeight - 1) {
+			if (z % ChunkRenderUnit::s_chunkSide == 0 || z % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
 				v.m_color.y = 1;
 			}
 
@@ -100,7 +104,7 @@ ChunkRenderUnit* GenerateChunk(FractalNoise& fractal, float x_offset, float z_of
         }
     }
 
-    return new ChunkRenderUnit{chunkVertices};
+    return new ChunkRenderUnit{chunkVertices, tallestPoint, lowestPoint};
 }
 
 void RegenerateChunks(std::vector<ChunkRenderUnit*>& chunks, FractalNoise& fractal, int width, int height)

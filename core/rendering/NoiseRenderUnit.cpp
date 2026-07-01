@@ -18,10 +18,10 @@ namespace WorldMaker
 		}
 		noiseTex = std::make_shared<Texture2D>(width, height, hola.data());
 		vertices->flush();
-		vertices->pushBatchData(quad);
+		vertices->pushData(quad);
 		vertices->submitData();
 		indices->flush();
-		indices->pushBatchData(quadIndices);
+		indices->pushData(quadIndices);
 		indices->submitData();
 	}
 }

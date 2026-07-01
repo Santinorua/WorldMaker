@@ -35,10 +35,7 @@ namespace WorldMaker
             std::cerr << "Error: Can't end resource manager because it has already been ended!\n";
             return;
         }
-        std::cout << "Material count: " << s_materialCache.size() << "\n";
-        std::cout << "About to clear material cache\n";
         s_materialCache.clear();
-        std::cout << "About to clear texture cache\n";
         s_textureCache.clear();
         s_ended = true;
     }
