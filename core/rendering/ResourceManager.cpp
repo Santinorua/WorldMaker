@@ -11,8 +11,8 @@
 
 namespace WorldMaker
 {
-    std::vector<ResourceManager::MaterialEntry> ResourceManager::s_materialCache = {};
-    std::unordered_map<std::string, ResourceManager::TextureEntry> ResourceManager::s_textureCache;
+    std::unordered_map<unsigned int, MaterialWPtr> ResourceManager::s_materialCache = {};
+    std::unordered_map<std::string, TextureWPtr> ResourceManager::s_textureCache;
     bool ResourceManager::s_inited = false;
     bool ResourceManager::s_ended = false;
 
@@ -43,54 +43,74 @@ namespace WorldMaker
     // Texture handling ---------------------------------------------------------------------------------
 
     // Returns nullptr if the texture is not found
-    Texture* ResourceManager::GetTexture(const std::string &relativePath)
+    TextureSPtr ResourceManager::GetTexture(const std::string &relativePath)
     {
         auto it = s_textureCache.find(relativePath);
-        if (it != s_textureCache.end()) return it->second.texture.get();
+        if (it != s_textureCache.end()) return it->second.lock();
         return nullptr;
     }
 
     // Returns nullptr if the texture is not found
-    Texture* ResourceManager::GetTexture(const std::vector<std::string>& relativePaths)
+    TextureSPtr ResourceManager::GetTexture(const std::vector<std::string>& relativePaths)
     {
         std::string unifiedPath = UnifyPaths(relativePaths);
         auto it = s_textureCache.find(unifiedPath);
-        if (it != s_textureCache.end()) return it->second.texture.get();
-        return {};
+        if (it != s_textureCache.end()) return it->second.lock();
+        return nullptr;
+    }
+
+    void ResourceManager::RemoveTextureIfExpired(const std::string& relativePath)
+    {
+        auto it = s_textureCache.find(relativePath);
+
+        if (it != s_textureCache.end() && it->second.expired())
+        {
+            s_textureCache.erase(relativePath);
+            std::cout << "Texture of relative path " << relativePath << " destroyed\n";
+        }
+    }
+    void ResourceManager::RemoveTextureIfExpired(const std::vector<std::string>& relativePaths)
+    {
+        std::string relativePath = UnifyPaths(relativePaths);
+        auto it = s_textureCache.find(relativePath);
+
+        if (it != s_textureCache.end() && it->second.expired())
+        {
+            s_textureCache.erase(relativePath);
+            std::cout << "Texture of relative path " << relativePath << " destroyed\n";
+        }
     }
 
     // Material handling ---------------------------------------------------------------------------------
 
-    Material* ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath)
+    MaterialSPtr ResourceManager::CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath)
     {
-        MaterialEntry newEntry;
-        newEntry.refCount = 1;
-        newEntry.material = std::make_unique<Material>();
-        s_materialCache.push_back(std::move(newEntry));
-		Material* mat = s_materialCache.back().material.get();
-        mat->m_diffuseTexture = static_cast<Texture2D*>(LoadTexture<Texture2D>(diffuseTexPath));
-        mat->m_specularTexture = static_cast<Texture2D*>(LoadTexture<Texture2D>(specularTexPath));
-		GPUResourceManager::CreateMaterial(mat);
-		return s_materialCache.back().material.get();
+        MaterialSPtr newMaterial = std::make_shared<Material>();
+        newMaterial->m_diffuseTexture = LoadTexture<Texture2D>(diffuseTexPath);
+        newMaterial->m_specularTexture = LoadTexture<Texture2D>(specularTexPath);
+
+        s_materialCache[newMaterial->id()] = newMaterial;
+        GPUResourceManager::CreateMaterial(newMaterial);
+		return newMaterial;
     }
-    void ResourceManager::DestroyMaterial(unsigned int materialIndex)
+    MaterialSPtr ResourceManager::GetMaterial(unsigned int materialId)
     {
-        if (materialIndex>=s_materialCache.size())
+        auto it = s_materialCache.find(materialId);
+        if (it != s_materialCache.end())
         {
-            std::cerr << "Error: Trying to delete a material with an index (" << materialIndex << ") out of the bounds of length in s_materialCache\n";
+            if (!it->second.expired()) return it->second.lock();
         }
-
-       	s_materialCache[materialIndex].refCount--;
-
-       	if (s_materialCache[materialIndex].refCount<=0)
-        {
-            s_materialCache[materialIndex].material.reset();
-            GPUResourceManager::DestroyMaterial(materialIndex);
-        }
-
+        return nullptr;
     }
-    Material* ResourceManager::GetMaterial(unsigned int materialIndex)
+    void ResourceManager::RemoveMaterialIfExpired(unsigned int materialId)
     {
-    	return s_materialCache[materialIndex].material.get();
+        auto it = s_materialCache.find(materialId);
+
+        if (it != s_materialCache.end() && it->second.expired())
+        {
+            s_materialCache.erase(materialId);
+            GPUResourceManager::ResetMaterial(materialId);
+            std::cout << "Material of id " << materialId << " destroyed\n";
+        }
     }
 }

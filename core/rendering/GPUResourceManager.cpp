@@ -14,7 +14,7 @@ namespace WorldMaker
     SSBOUPtr<GPUMaterial> GPUResourceManager::s_materialsSSBO = nullptr;
     bool GPUResourceManager::s_inited = false;
     bool GPUResourceManager::s_ended = false;
-    void GPUResourceManager::CreateMaterial(Material* mat)
+    void GPUResourceManager::CreateMaterial(MaterialSPtr mat)
     {
         s_materials.push_back(std::move(std::make_unique<GPUMaterial>(mat)));
         GPUMaterial* newMat = s_materials.back().get();
@@ -25,7 +25,7 @@ namespace WorldMaker
             s_materialsSSBO.get()->submitSubData(lastElement, lastElement);
         }
     }
-    void GPUResourceManager::DestroyMaterial(unsigned int matIndex)
+    void GPUResourceManager::ResetMaterial(unsigned int matIndex)
     {
         s_materials[matIndex]->reset();
         s_materialsSSBO.get()->submitSubData(matIndex, matIndex);

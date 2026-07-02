@@ -25,85 +25,51 @@ namespace WorldMaker
 
         // Textures handling ---------------------------------------------------------------------------------
         template <typename T>
-        static Texture* LoadTexture(const std::string& relativePath)
+        static std::shared_ptr<T> LoadTexture(const std::string& relativePath)
         {
-            Texture* texture = GetTexture(relativePath);
-            if (texture)
+            auto it = s_textureCache.find(relativePath);
+            if (it != s_textureCache.end())
             {
-                s_textureCache[relativePath].refCount++;
-                return texture;
+                if (!it->second.expired()) return std::static_pointer_cast<T>(it->second.lock());
+                else s_textureCache.erase(it);
             }
 
-            TextureEntry newEntry;
-            newEntry.texture = std::make_unique<T>(relativePath);
-            newEntry.refCount = 1;
+            std::shared_ptr<T> newTexture = std::make_shared<T>(relativePath);
 
-            s_textureCache[relativePath] = std::move(newEntry);
-            return s_textureCache[relativePath].texture.get();
+            s_textureCache[relativePath] = newTexture;
+            return newTexture;
         }
         template <typename T>
-        static Texture* LoadTexture(const std::vector<std::string>& relativePaths)
+        static std::shared_ptr<T> LoadTexture(const std::vector<std::string>& relativePaths)
         {
             std::string unifiedPath = UnifyPaths(relativePaths);
-            Texture* texture = GetTexture(unifiedPath);
-            if (texture)
+            auto it = s_textureCache.find(unifiedPath);
+            if (it != s_textureCache.end())
             {
-                s_textureCache[unifiedPath].refCount++;
-                return texture;
+                if (!it->second.expired()) return std::static_pointer_cast<T>(it->second.lock());
+                else s_textureCache.erase(it);
             }
 
-            TextureEntry newEntry;
-            newEntry.texture = std::make_unique<T>(relativePaths);
-            newEntry.refCount = 1;
-
-            s_textureCache[unifiedPath] = std::move(newEntry);
-            return s_textureCache[unifiedPath].texture.get();
+            std::shared_ptr<T> newTexture = std::make_shared<T>(relativePaths);
+            s_textureCache[unifiedPath] = newTexture;
+            return newTexture;
         }
 
-        static void UnloadTexture(const std::string& relativePath)
-        {
-            Texture* texture = GetTexture(relativePath);
-            if (!texture)
-            {
-                std::cout << "Warning: There is not such texture with path " << relativePath << " to unload\n";
-                return;
-            }
+        static TextureSPtr GetTexture(const std::string& relativePath);
+        static TextureSPtr GetTexture(const std::vector<std::string>& relativePaths);
+        static void RemoveTextureIfExpired(const std::string& relativePath);
+        static void RemoveTextureIfExpired(const std::vector<std::string>& relativePaths);
 
-            std::cout << "One reference count less for tex " << relativePath << "\n";
-            TextureEntry& entry = s_textureCache[relativePath];
-            entry.refCount--;
-
-            if (entry.refCount <=0)
-            {
-                s_textureCache.erase(relativePath);
-                std::cout << "Texture of path " << relativePath << " removed from resource manager\n";
-            }
-
-        }
-        static Texture* GetTexture(const std::string& relativePath);
-        static Texture* GetTexture(const std::vector<std::string>& relativePaths);
-
-        static Material* CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath);
-        static void DestroyMaterial(unsigned int materialIndex);
-        static Material* GetMaterial(unsigned int materialIndex);
+        static MaterialSPtr CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath);
+        static MaterialSPtr GetMaterial(unsigned int materialId);
+        static void RemoveMaterialIfExpired(unsigned int materialId);
 
     private:
 
-        struct TextureEntry
-        {
-            TextureUPtr texture;
-            int refCount = 0;
-        };
-
-        struct MaterialEntry
-        {
-        	MaterialUPtr material;
-         	int refCount = 0;
-        };
         static bool s_inited;
         static bool s_ended;
 public:
-        static std::unordered_map<std::string, TextureEntry> s_textureCache;
-        static std::vector<MaterialEntry> s_materialCache;
+        static std::unordered_map<std::string, TextureWPtr> s_textureCache;
+        static std::unordered_map<unsigned int, MaterialWPtr> s_materialCache;
     };
 }

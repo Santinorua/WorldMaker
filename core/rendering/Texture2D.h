@@ -26,7 +26,7 @@ namespace WorldMaker
 		unsigned int texture2DArrayLayer() const { return m_texture2DArrayLayer; };
 		int width() const { return m_width; }
 		int height() const { return m_height; }
-		std::string test() { return m_filePath; }
+		std::string test() { return m_path; }
 	};
 	using Texture2DSPtr = std::shared_ptr<Texture2D>;
 	using Texture2DWPtr = std::weak_ptr<Texture2D>;

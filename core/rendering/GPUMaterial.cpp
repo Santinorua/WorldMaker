@@ -3,10 +3,10 @@
 
 namespace WorldMaker
 {
-    GPUMaterial::GPUMaterial(Material* mat)
+    GPUMaterial::GPUMaterial(MaterialSPtr mat)
     {
-        m_diffuseIndex = GetShared(mat->m_diffuseTexture)->texture2DArrayLayer();
-        m_specularIndex = GetShared(mat->m_specularTexture)->texture2DArrayLayer();
+        m_diffuseIndex = mat->m_diffuseTexture->texture2DArrayLayer();
+        m_specularIndex = mat->m_specularTexture->texture2DArrayLayer();
         m_shininess = mat->m_shininess;
     }
     void GPUMaterial::reset()
