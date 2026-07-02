@@ -122,6 +122,7 @@ int main()
 		Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
 
 		Camera::UpdateCameraTransform();
+		// if (Input::GetKeyDown(KeyCode::SpaceBar_Key))
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
