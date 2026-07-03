@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Para que no se traten las warnings como errores
@@ -190,7 +191,6 @@ target_include_directories(Time PUBLIC ${CMAKE_SOURCE_DIR}/core/time)
 
 file (GLOB PRNG_SRC "${CMAKE_SOURCE_DIR}/core/PRNG/*.cpp")
 add_library(PRNG STATIC ${PRNG_SRC})
-target_compile_definitions(PRNG PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(PRNG INTERFACE ${CMAKE_SOURCE_DIR}/core/PRNG)
 target_link_libraries(PRNG PUBLIC Math)
 
@@ -200,7 +200,6 @@ target_link_libraries(PRNG PUBLIC Math)
 
 file (GLOB PERLINNOISE_SRC "${CMAKE_SOURCE_DIR}/core/perlinNoise/*.cpp")
 add_library(PerlinNoise STATIC ${PERLINNOISE_SRC})
-target_compile_definitions(PerlinNoise PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(PerlinNoise INTERFACE ${CMAKE_SOURCE_DIR}/core/perlinNoise)
 target_link_libraries(PerlinNoise PUBLIC Math PRNG Utilities)
 
@@ -210,9 +209,17 @@ target_link_libraries(PerlinNoise PUBLIC Math PRNG Utilities)
 
 file (GLOB UTILITIES_SRC "${CMAKE_SOURCE_DIR}/core/utilities/*.cpp")
 add_library(Utilities STATIC ${UTILITIES_SRC})
-target_compile_definitions(Utilities PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(Utilities INTERFACE ${CMAKE_SOURCE_DIR}/core/utilities)
 target_link_libraries(Utilities PUBLIC Math)
+
+# -----------------------------------------------------------------------------------------------------
+
+# WorldGenerator
+
+file (GLOB WORLDGENERATOR_SRC "${CMAKE_SOURCE_DIR}/core/worldGenerator/*.cpp")
+add_library(WorldGenerator STATIC ${WORLDGENERATOR_SRC})
+target_include_directories(WorldGenerator INTERFACE ${CMAKE_SOURCE_DIR}/core/worldGenerator)
+target_link_libraries(WorldGenerator PUBLIC Math PerlinNoise Rendering)
 
 # -----------------------------------------------------------------------------------------------------
 
@@ -220,7 +227,7 @@ target_link_libraries(Utilities PUBLIC Math)
 
 file (GLOB CHUNKGEN_SRC "${CMAKE_SOURCE_DIR}/core/chunkGeneration/*.cpp")
 add_library(ChunkGeneration STATIC ${CHUNKGEN_SRC})
-target_link_libraries(ChunkGeneration PUBLIC Rendering PerlinNoise Math)
+target_link_libraries(ChunkGeneration PUBLIC Rendering PerlinNoise Math WorldGenerator)
 target_include_directories(ChunkGeneration PUBLIC ${CMAKE_SOURCE_DIR}/core/chunkGeneration)
 
 # -----------------------------------------------------------------------------------------------------
@@ -231,7 +238,7 @@ target_include_directories(ChunkGeneration PUBLIC ${CMAKE_SOURCE_DIR}/core/chunk
 # Core
 
 add_library(Core INTERFACE)
-target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise ChunkGeneration)
+target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator ChunkGeneration)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################

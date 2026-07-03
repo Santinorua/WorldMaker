@@ -17,7 +17,7 @@ namespace WorldMaker {
         return dx * gradient.x + dy * gradient.y;
     }
 
-    double PerlinNoise::getPerlinNoise(int x, int y) {
+    double PerlinNoise::getPerlinNoise(float x, float y) {
         // Calculate the position of the point asked for in the noise space
         double sampleX = x / m_scale;
         double sampleY = y / m_scale;
@@ -39,10 +39,8 @@ namespace WorldMaker {
         return Bilinear(Vec4(gradients[0], gradients[1], gradients[2], gradients[3]), sampleX - std::floor(sampleX), sampleY - std::floor(sampleY));
     }
 
-    PerlinNoise::PerlinNoise(int width, int height, double frequency, uint64_t seed) {
-        m_height = height;
-        m_width = width;
-        m_scale = 60 / frequency;
+    PerlinNoise::PerlinNoise(double frequency, uint64_t seed) {
+        m_scale = 10000 / frequency;
         m_seed = seed;
     }
 
@@ -60,7 +58,7 @@ namespace WorldMaker {
         return dx * gradient.x + dy * gradient.y + dz * gradient.z;
     }
 
-    double PerlinNoise3D::getPerlinNoise3D(int x, int y, int z) {
+    double PerlinNoise3D::getPerlinNoise3D(float x, float y, float z) {
         // Calculate the position of the point asked for in the noise space
         double sampleX = x / m_scale;
         double sampleY = y / m_scale;
@@ -71,7 +69,7 @@ namespace WorldMaker {
         int fY = (int)sampleY;
         int fZ = (int)sampleZ;
 
-        // Calculate the dot product between the random gradients and the distance vectors for each of the four corners
+        // Calculate the dot product between the random gradients and the distance vectors for each of the eight corners
         double gradients[8] = {
             dotGradient3D(fX, fY, fZ, sampleX, sampleY, sampleZ),
             dotGradient3D(fX + 1, fY, fZ, sampleX, sampleY, sampleZ),
@@ -88,28 +86,26 @@ namespace WorldMaker {
         return Trilinear(gradients, sampleX - fX, sampleY - fY, sampleZ - fZ);
     }
 
-    PerlinNoise3D::PerlinNoise3D(int width, int height, double frequency, double heightScale, uint64_t seed) {
-        m_height = height;
-        m_width = width;
-        m_scale = width / frequency;
+    PerlinNoise3D::PerlinNoise3D(double frequency, double heightScale, uint64_t seed) {
+        m_scale = 10000 / frequency;
         m_heightScale = heightScale;
         m_seed = seed;
     }
 
 
-    FractalNoise::FractalNoise(int width, int height, double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
+    FractalNoise::FractalNoise(double frequency, double amplitude, uint64_t seed, int numOctaves, double lacunarity, double persistence) {
         m_persistance = persistence;
         m_amplitude = amplitude;
         m_octaves.reserve(numOctaves);
         uint64_t currentSeed = seed;
         for (int i = 0; i < numOctaves; i++) {
-            m_octaves.emplace_back(width, height, frequency, currentSeed);
+            m_octaves.emplace_back(frequency, currentSeed);
             frequency *= lacunarity;
             currentSeed = PRNG::nextNumber64(currentSeed);
         }
     }
 
-    double FractalNoise::getNoise(int x, int y) {
+    double FractalNoise::getNoise(float x, float y) {
         double result = 0.0;
         double amplitude = m_amplitude;
         for (PerlinNoise& octave : m_octaves) {
@@ -119,21 +115,21 @@ namespace WorldMaker {
         return result;
     }
 
-    ComplexNoise::ComplexNoise(int width, int height, int first, const std::vector<double>& amplitudes, uint64_t seed) {
+    ComplexNoise::ComplexNoise(int first, const std::vector<double>& amplitudes, uint64_t seed) {
             assert(first < 0);
             assert(!amplitudes.empty());
             m_amplitudes = amplitudes;
             m_octaves.reserve(amplitudes.size() * 2);
             uint64_t currentSeed = seed;
             for (int i = 0; i < amplitudes.size(); i++) {
-                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                m_octaves.emplace_back(std::pow(2.0, (i - first)), currentSeed);
                 currentSeed = PRNG::nextNumber64(currentSeed);
-                m_octaves.emplace_back(width, height, std::pow(2.0, (i - first)), currentSeed);
+                m_octaves.emplace_back(std::pow(2.0, (i - first)), currentSeed);
                 currentSeed = PRNG::nextNumber64(currentSeed);
             }
     }
 
-    double ComplexNoise::getNoise(int x, int y) {
+    double ComplexNoise::getNoise(float x, float y) {
         double result = 0.0;
         for (int i = 0; i < m_octaves.size(); i = i+2) {
             double h = m_octaves[i].getPerlinNoise(x, y) * m_amplitudes[i/2];
@@ -146,6 +142,12 @@ namespace WorldMaker {
         // double totalAmplitude = m_amplitudes.size()
     }
 
+    RidgesFolded::RidgesFolded() : m_fractalNoise(50, 1, 42, 5, 2.0, 0.5) {
 
+    }
 
+    double RidgesFolded::getNoise(float x, float y) {
+        double fractalValue = m_fractalNoise.getNoise(x, y) * 0.5 + 0.5;
+        return 1 - std::abs(std::abs(fractalValue * 3) - 2);
+    }
 }

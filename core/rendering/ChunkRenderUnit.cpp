@@ -5,6 +5,7 @@ namespace WorldMaker
 {
 	int ChunkRenderUnit::s_chunkSide = 64; // Amount of pixels per chunk
 
+
 	glm::vec3 ChunkRenderUnit::center()
 	{
 	    glm::vec3 point = m_vertices->m_data[0].m_position; // First vertex pos

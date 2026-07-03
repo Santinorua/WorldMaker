@@ -28,12 +28,15 @@
 
 #include <iostream>
 #include <memory>
+#include "CoreGenerator.h"
+#include "BiomeGenerator.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
 using namespace WorldMaker;
+
 
 int main()
 {
@@ -54,6 +57,64 @@ int main()
 
 	ChunkGeneration::RegenerateChunks(chunks, fractal, world_width, world_height);
 
+	bool doRender2D = false;
+
+	std::vector<double> colors;
+
+	BiomeGenerator::addDefaultBiomes();
+
+	if (doRender2D) {
+		colors.reserve(gridWidth * gridDepth);
+	}
+
+
+    // FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
+	WorldGenerator generator(150, 42);
+	// PerlinNoise perlin = PerlinNoise(40, 42);
+	for (int z = 0; z < gridDepth; ++z)
+    {
+        for (int x = 0; x < gridWidth; ++x)
+        {
+
+
+			if (doRender2D) {
+				double color = generator.getVertex(x, z).m_position.y / generator.m_yScale;
+				colors.push_back(color);
+				colors.push_back(color);
+				colors.push_back(color);
+				colors.push_back(1.0);
+			}
+        }
+    }
+
+	// for (int z = 0; z < gridDepth; ++z) {
+	// 	for (int x = 0; x < gridWidth; ++x) {
+	//
+	//
+	// 		float hL = x != 0 ? chunkVertices[z*gridWidth + x-1].m_position.y : generator.getVertex(x-1, z).m_position.y;
+	// 		float hR = x != gridWidth-1 ? chunkVertices[z*gridWidth + x+1].m_position.y : generator.getVertex(x+1, z).m_position.y;
+	// 		float hU = z != 0 ? chunkVertices[(z-1)*gridWidth + x].m_position.y : generator.getVertex(x, z-1).m_position.y;
+	// 		float hD = z != gridDepth-1 ? chunkVertices[(z+1)*gridWidth + x].m_position.y : generator.getVertex(x, z+1).m_position.y;
+	//
+	// 		glm::vec3 normal;
+	// 		normal.x = static_cast<float>(hL - hR);
+	// 		normal.y = static_cast<float>(2.0 * 1);
+	// 		normal.z = static_cast<float>(hD - hU);
+	//
+	// 		normal = glm::normalize(normal);
+	//
+	// 		chunkVertices[z*gridWidth + x].m_normal = normal;
+	// 	}
+	// }
+
+
+	NoiseRenderUnit noise1 = NoiseRenderUnit(gridWidth, gridDepth, colors);
+
+
+	if (doRender2D) {
+		Renderer::PrepareToDrawNoise(noise1);
+	}
+
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplGlfw_InitForOpenGL(Renderer::GetWindow(), true);
@@ -67,6 +128,7 @@ int main()
 	double amplitude = 4;
 	double lacunarity = 2;
 	double persistence = 0.75;
+
 	while (!Renderer::WindowShouldClose())
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,6 +193,10 @@ int main()
 			Renderer::PrepareToDrawChunk(*ck);
 			GPUResourceManager::PrepareToDraw();
 			Renderer::DrawChunk(*ck);
+		}
+
+		if (doRender2D) {
+			Renderer::DrawNoise(noise1);
 		}
 
 		ImGui::Render();
