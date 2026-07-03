@@ -7,8 +7,8 @@ namespace WorldMaker
     {
         GLCall(glGenTextures(1, &m_glName));
         bind();
-        GLCall(glTextureStorage3D(
-           m_glName, 1, GL_RGBA8, width, height, layers
+        GLCall(glTexStorage3D(
+           GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width, height, layers
         ));
     }
     unsigned int Texture2DArray::pushTexture(Texture2D* texture)
@@ -21,8 +21,8 @@ namespace WorldMaker
         }
         else layer=m_nextLayer++;
 
-        GLCall(glTextureSubImage3D(
-            m_glName,
+        GLCall(glTexSubImage3D(
+            GL_TEXTURE_2D_ARRAY,
             0,
             0,0,layer,
             texture->width(),

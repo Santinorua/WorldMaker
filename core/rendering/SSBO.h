@@ -31,22 +31,25 @@ namespace WorldMaker
 		{
 		    ASSERT(elementsToSupport >= currentElements());
             unsigned int newSSBO;
-            GLCall(glCreateBuffers(1, &newSSBO));
-      		GLCall(
-     			glNamedBufferStorage
+            GLCall(glGenBuffers(1, &newSSBO));
+			GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, newSSBO));
+			GLCall(
+     			glBufferStorage
      			(
-    				newSSBO,
+    				GL_SHADER_STORAGE_BUFFER,
     				sizeof(T) * elementsToSupport,
     				0,
     				m_usage
      			));
-                glCopyNamedBufferSubData(
-                m_glName,
-                newSSBO,
+			GLCall(glBindBuffer(GL_COPY_READ_BUFFER, m_glName));
+			GLCall(glBindBuffer(GL_COPY_WRITE_BUFFER, newSSBO));
+			GLCall(glCopyBufferSubData(
+                GL_COPY_READ_BUFFER,
+                GL_COPY_WRITE_BUFFER,
                 0,
                 0,
                 m_currentBytes
-            );
+            ));
             m_maxBytes = elementsToSupport * sizeof(T);
             GLCall(glDeleteBuffers(1, &m_glName));
             m_glName = newSSBO;

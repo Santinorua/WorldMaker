@@ -44,6 +44,7 @@ int main()
 	GPUResourceManager::Init();
 	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
+	BiomeGenerator::addDefaultBiomes();
 
 	int gridWidth = ChunkRenderUnit::s_chunkSide;
     int gridDepth = ChunkRenderUnit::s_chunkSide;
@@ -51,26 +52,22 @@ int main()
 	int world_width = 4;
 	int world_height = 4;
 
-    FractalNoise fractal(ChunkRenderUnit::s_chunkSide * 4, ChunkRenderUnit::s_chunkSide * 4, 5, 4, 1, 4, 2.0, 0.75);
+	WorldGenerator generator(150, 42);
 
 	std::vector<ChunkRenderUnit*> chunks;
 
-	ChunkGeneration::RegenerateChunks(chunks, fractal, world_width, world_height);
+	ChunkGeneration::RegenerateChunks(chunks, generator, world_width, world_height);
 
 	bool doRender2D = false;
 
 	std::vector<double> colors;
 
-	BiomeGenerator::addDefaultBiomes();
+
 
 	if (doRender2D) {
 		colors.reserve(gridWidth * gridDepth);
 	}
 
-
-    // FractalNoise fractal(gridWidth, gridDepth, 5, 2, 1, 4, 2.0, 0.75);
-	WorldGenerator generator(150, 42);
-	// PerlinNoise perlin = PerlinNoise(40, 42);
 	for (int z = 0; z < gridDepth; ++z)
     {
         for (int x = 0; x < gridWidth; ++x)
@@ -86,26 +83,6 @@ int main()
 			}
         }
     }
-
-	// for (int z = 0; z < gridDepth; ++z) {
-	// 	for (int x = 0; x < gridWidth; ++x) {
-	//
-	//
-	// 		float hL = x != 0 ? chunkVertices[z*gridWidth + x-1].m_position.y : generator.getVertex(x-1, z).m_position.y;
-	// 		float hR = x != gridWidth-1 ? chunkVertices[z*gridWidth + x+1].m_position.y : generator.getVertex(x+1, z).m_position.y;
-	// 		float hU = z != 0 ? chunkVertices[(z-1)*gridWidth + x].m_position.y : generator.getVertex(x, z-1).m_position.y;
-	// 		float hD = z != gridDepth-1 ? chunkVertices[(z+1)*gridWidth + x].m_position.y : generator.getVertex(x, z+1).m_position.y;
-	//
-	// 		glm::vec3 normal;
-	// 		normal.x = static_cast<float>(hL - hR);
-	// 		normal.y = static_cast<float>(2.0 * 1);
-	// 		normal.z = static_cast<float>(hD - hU);
-	//
-	// 		normal = glm::normalize(normal);
-	//
-	// 		chunkVertices[z*gridWidth + x].m_normal = normal;
-	// 	}
-	// }
 
 
 	NoiseRenderUnit noise1 = NoiseRenderUnit(gridWidth, gridDepth, colors);
@@ -172,12 +149,12 @@ int main()
 			ChunkRenderUnit::s_chunkSide = chunk_size;
 			ChunkRenderUnit::s_chunkSide = chunk_size;
 
-			FractalNoise fractal(ChunkRenderUnit::s_chunkSide * 4, ChunkRenderUnit::s_chunkSide * 4, frequency, amplitude, seed, octaves, lacunarity, persistence);
+			WorldGenerator generator(150,seed);
 			for (ChunkRenderUnit* ck : chunks) {
 				delete ck;
 			}
 			chunks.clear();
-			ChunkGeneration::RegenerateChunks(chunks, fractal, world_width, world_height);
+			ChunkGeneration::RegenerateChunks(chunks, generator, world_width, world_height);
 		}
 		ImGui::End();
 
