@@ -22,8 +22,8 @@ namespace WorldMaker
 		double m_lowestPoint = 0;
 		ChunkRenderUnit(std::vector<Vertex>& p_vertices, double tallestPoint, double lowestPoint);
 		glm::vec3 center();
-		inline glm::vec3 minPoint() { return center()-glm::vec3(s_chunkSide/2, m_lowestPoint, s_chunkSide/2);}
-		inline glm::vec3 maxPoint() { return center()+glm::vec3(s_chunkSide/2, m_tallestPoint, s_chunkSide/2);}
+		inline glm::vec3 minPoint() { return glm::vec3(center().x-s_chunkSide/2.0, m_lowestPoint, center().z - s_chunkSide/2.0);}
+		inline glm::vec3 maxPoint() { return glm::vec3(center().x+s_chunkSide/2.0, m_tallestPoint, center().z + s_chunkSide/2.0);}
 		void ChangeVertices(std::vector<Vertex>& p_vertices);
 		static std::vector<unsigned int> GetIndicesForChunk();
 		const ShaderProgramType shaderProgramType = ShaderProgramType::terrain;
