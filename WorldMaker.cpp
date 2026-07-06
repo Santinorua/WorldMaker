@@ -55,7 +55,7 @@ int main()
 
 	WorldGenerator generator(150, 42);
 
-	std::vector<ChunkRenderUnit*> chunks;
+	ChunkGeneration::ChunkArray chunks;
 
 	ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
 
@@ -173,11 +173,11 @@ int main()
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
-		for (ChunkRenderUnit* ck : chunks) {
-		    if (!Camera::CanSeeBox(ck->minPoint(), ck->maxPoint())) continue;
-			Renderer::PrepareToDrawChunk(*ck);
+		for (auto& ck : chunks) {
+		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
+			Renderer::PrepareToDrawChunk(*ck.second);
 			GPUResourceManager::PrepareToDraw();
-			Renderer::DrawChunk(*ck);
+			Renderer::DrawChunk(*ck.second);
 		}
 
 		if (doRender2D) {
@@ -190,8 +190,8 @@ int main()
 
         glfwPollEvents();
 	}
-	for (ChunkRenderUnit* ck : chunks) {
-    delete ck;
+	for (auto& ck : chunks) {
+    delete ck.second;
 	}
     chunks.clear();
 	ResourceManager::Shutdown();

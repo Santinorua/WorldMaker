@@ -76,7 +76,7 @@ glm::ivec2 GetGenerationRange(int pos, int render_distance) {
 	return {CLAMP0(pos - render_distance), pos + render_distance};
 }
 
-void RegenerateChunks(std::vector<ChunkRenderUnit*>& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos)
+void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos)
 {
 	static glm::ivec2 last_pos = {INT_MAX, INT_MAX};
 	glm::ivec2 pos = GetChunkPos(camera_pos);
@@ -87,17 +87,26 @@ void RegenerateChunks(std::vector<ChunkRenderUnit*>& chunks, WorldGenerator& gen
 	}
 	last_pos = pos;
 
-	for (ChunkRenderUnit *ck : chunks) {
-		delete ck;
+	for (int i = 0; i < chunks.size(); i++) {
+		auto& chunk = chunks[i];
+
+		auto ck_pos = chunk.first;
+		if (glm::abs(pos.x - ck_pos.x) > render_distance || glm::abs(pos.y - ck_pos.y) > render_distance) {
+			//printf("Deleting (%d, %d)\n", ck_pos.x, ck_pos.y);
+			delete chunk.second;
+			chunks.erase(std::next(chunks.begin(), i));
+			i--;
+		}
 	}
-	chunks.clear();
 
 	glm::ivec2 x_generation_range = GetGenerationRange(pos.x, render_distance);
 	glm::ivec2 y_generation_range = GetGenerationRange(pos.y, render_distance);
 
 	for (int x = x_generation_range.x; x < x_generation_range.y; x++) {
 		for (int y = y_generation_range.x; y < y_generation_range.y; y++) {
-			chunks.push_back(GenerateChunk(generator, x, y));
+			auto found = std::find_if(chunks.begin(), chunks.end(), [x, y](std::pair<glm::ivec2, ChunkRenderUnit*>& ck) {return ck.first == glm::ivec2{x, y};} );
+			if (found != chunks.end()) continue;
+			chunks.push_back({{x, y}, GenerateChunk(generator, x, y)});
 		}
 	}
 }
