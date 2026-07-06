@@ -7,7 +7,7 @@ namespace WorldMaker
 {
     struct GPUMaterial
     {
-        GPUMaterial(Material* mat);
+        GPUMaterial(MaterialSPtr mat);
         void reset();
         float m_diffuseIndex = 0.0f;
         float m_specularIndex = 0.0f;

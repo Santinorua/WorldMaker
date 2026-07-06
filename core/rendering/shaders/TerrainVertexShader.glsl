@@ -70,7 +70,7 @@ vec3 GetNormal(uint index)
 smooth out vec3 frag_normal;
 smooth out vec4 frag_pos;
 smooth out vec4 frag_color;
-smooth out double frag_materialIndex;
+flat out double frag_materialIndex;
 smooth out vec2 frag_uv;
 
 void main()

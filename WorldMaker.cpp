@@ -22,11 +22,14 @@
 #include "GlobalLight.h"
 #include "CoolTime.h"
 #include "Input.h"
+#include "Frustum.h"
 
 #include "PRNG.h"
 
 #include <iostream>
 #include <memory>
+#include "CoreGenerator.h"
+#include "BiomeGenerator.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -34,24 +37,61 @@
 
 using namespace WorldMaker;
 
+
 int main()
 {
     Renderer::Init();
 	GPUResourceManager::Init();
 	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
+	BiomeGenerator::addDefaultBiomes();
 
-	int gridWidth = ChunkRenderUnit::chunkWidth;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
+	int gridWidth = ChunkRenderUnit::s_chunkSide;
+    int gridDepth = ChunkRenderUnit::s_chunkSide;
 
 	int world_width = 4;
 	int world_height = 4;
+	int render_distance = 4;
 
-    FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, 5, 4, 1, 4, 2.0, 0.75);
+	WorldGenerator generator(150, 42);
 
 	std::vector<ChunkRenderUnit*> chunks;
 
-	ChunkGeneration::RegenerateChunks(chunks, fractal, world_width, world_height);
+	ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
+
+	bool doRender2D = false;
+
+	std::vector<double> colors;
+
+
+
+	if (doRender2D) {
+		colors.reserve(gridWidth * gridDepth);
+	}
+
+	for (int z = 0; z < gridDepth; ++z)
+    {
+        for (int x = 0; x < gridWidth; ++x)
+        {
+
+
+			if (doRender2D) {
+				double color = generator.getVertex(x, z).m_position.y / generator.m_yScale;
+				colors.push_back(color);
+				colors.push_back(color);
+				colors.push_back(color);
+				colors.push_back(1.0);
+			}
+        }
+    }
+
+
+	NoiseRenderUnit noise1 = NoiseRenderUnit(gridWidth, gridDepth, colors);
+
+
+	if (doRender2D) {
+		Renderer::PrepareToDrawNoise(noise1);
+	}
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -59,15 +99,17 @@ int main()
     ImGui_ImplOpenGL3_Init();
     ImGui::StyleColorsDark();
 
-	int chunk_size = ChunkRenderUnit::chunkHeight;
+	int chunk_size = ChunkRenderUnit::s_chunkSide;
 	int octaves = 4;
 	uint64_t seed = 1;
 	double frequency = 5;
 	double amplitude = 4;
 	double lacunarity = 2;
 	double persistence = 0.75;
+
 	while (!Renderer::WindowShouldClose())
 	{
+		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		CoolTime::Update();
@@ -81,6 +123,15 @@ int main()
 
         ImGui::Text("FPS: %.1f",
                     ImGui::GetIO().Framerate);
+
+		auto chunk_pos = ChunkGeneration::GetChunkPos(Camera::Position());
+        ImGui::Text("Chunk Pos: (%d, %d)", chunk_pos.x, chunk_pos.y);
+
+		auto x_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.x, render_distance);
+        ImGui::Text("X Gen. Range: [%d; %d]", x_generation_range.x, x_generation_range.y);
+
+		auto y_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.y, render_distance);
+        ImGui::Text("X Gen. Range: [%d; %d]", y_generation_range.x, y_generation_range.y);
 
 		ImGui::Begin("Generation");
 		ImGui::Text("Mesh Size: ");
@@ -106,28 +157,31 @@ int main()
 		IMGUI_INPUT(octaves, ImGuiDataType_S32);
 
 		if (ImGui::Button("Generate mesh")) {
-			ChunkRenderUnit::chunkWidth = chunk_size;
-			ChunkRenderUnit::chunkHeight = chunk_size;
+			ChunkRenderUnit::s_chunkSide = chunk_size;
+			ChunkRenderUnit::s_chunkSide = chunk_size;
 
-			FractalNoise fractal(ChunkRenderUnit::chunkWidth * 4, ChunkRenderUnit::chunkHeight * 4, frequency, amplitude, seed, octaves, lacunarity, persistence);
-			for (ChunkRenderUnit* ck : chunks) {
-				delete ck;
-			}
-			chunks.clear();
-			ChunkGeneration::RegenerateChunks(chunks, fractal, world_width, world_height);
+			WorldGenerator generator(150,seed);
+
+			ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
 		}
 		ImGui::End();
 
 		Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
 
 		Camera::UpdateCameraTransform();
+		// if (Input::GetKeyDown(KeyCode::SpaceBar_Key))
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
 
 		for (ChunkRenderUnit* ck : chunks) {
+		    if (!Camera::CanSeeBox(ck->minPoint(), ck->maxPoint())) continue;
 			Renderer::PrepareToDrawChunk(*ck);
 			GPUResourceManager::PrepareToDraw();
 			Renderer::DrawChunk(*ck);
+		}
+
+		if (doRender2D) {
+			Renderer::DrawNoise(noise1);
 		}
 
 		ImGui::Render();
@@ -136,8 +190,15 @@ int main()
 
         glfwPollEvents();
 	}
+	for (ChunkRenderUnit* ck : chunks) {
+    delete ck;
+	}
+    chunks.clear();
 	ResourceManager::Shutdown();
+	GPUResourceManager::Shutdown();
 	ImGui_ImplOpenGL3_Shutdown();
    	ImGui_ImplGlfw_Shutdown();
    	ImGui::DestroyContext();
+    glfwTerminate();
+    return 0;
 }

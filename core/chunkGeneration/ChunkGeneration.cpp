@@ -1,41 +1,53 @@
 #include "ChunkGeneration.h"
 
+#define CLAMP0(x) ((x) * ((x) > 0))
+
 namespace WorldMaker {
 
 namespace ChunkGeneration {
 
-ChunkRenderUnit* GenerateChunk(FractalNoise& fractal, float x_offset, float z_offset)
+ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float z_offset)
 {
-	int gridWidth = ChunkRenderUnit::chunkWidth;
-    int gridDepth = ChunkRenderUnit::chunkHeight;
+	int gridWidth = ChunkRenderUnit::s_chunkSide;
+    int gridDepth = ChunkRenderUnit::s_chunkSide;
 
-    std::vector<double> pixels;
-    int width = 10;
-    int height = 10;
-    for (int x = 0; x < width; x++)
+    std::vector<Vertex> chunkVertices;
+    chunkVertices.reserve(ChunkRenderUnit::s_chunkSide * ChunkRenderUnit::s_chunkSide);
+    double tallestPoint = 0;
+    double lowestPoint = 0;
+
+    for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
     {
-        for (int y = 0; y < height; y++)
+        for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
         {
-            pixels.push_back(1);
-            pixels.push_back(1);
-            pixels.push_back(1);
-            pixels.push_back(1);
+
+        	Vertex v;
+            v = generator.getVertex(x, z);
+            tallestPoint = std::max(tallestPoint, v.m_position.y);
+            lowestPoint = std::min(lowestPoint, v.m_position.y);
+
+   //          v.m_color = {0.5,0.5,0.5,1};
+   //
+			// if (x % ChunkRenderUnit::s_chunkSide == 0 || x % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
+			// 	v.m_color.x = 1;
+			// }
+   //
+			// if (z % ChunkRenderUnit::s_chunkSide == 0 || z % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
+			// 	v.m_color.y = 1;
+			// }
+
+			chunkVertices.push_back(v);
         }
     }
-    std::vector<Vertex> chunkVertices;
-    chunkVertices.reserve(ChunkRenderUnit::chunkWidth * ChunkRenderUnit::chunkHeight);
 
-    for (int z = z_offset * ChunkRenderUnit::chunkHeight - (z_offset != 0) * z_offset; z < ChunkRenderUnit::chunkHeight * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
-    {
-        for (int x = x_offset * ChunkRenderUnit::chunkWidth - (x_offset != 0) * x_offset; x < ChunkRenderUnit::chunkWidth * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
-        {
-
-            double posY = fractal.getNoise(x, z);
-
-            double hL = fractal.getNoise(x - 1, z);
-            double hR = fractal.getNoise(x + 1, z);
-            double hD = fractal.getNoise(x, z - 1);
-            double hU = fractal.getNoise(x, z + 1);
+	for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z) {
+		int localZ = z % ChunkRenderUnit::s_chunkSide;
+		for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x) {
+			int localX = x % ChunkRenderUnit::s_chunkSide;
+			float hL = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position.y : generator.getVertex(x-1, z).m_position.y;
+			float hR = localX != ChunkRenderUnit::s_chunkSide - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position.y : generator.getVertex(x+1, z).m_position.y;
+			float hU = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position.y : generator.getVertex(x, z-1).m_position.y;
+			float hD = localZ != ChunkRenderUnit::s_chunkSide - 1 ? chunkVertices[(localZ+1)*gridWidth + localX].m_position.y : generator.getVertex(x, z+1).m_position.y;
 
 			glm::vec3 normal;
 			normal.x = static_cast<float>(hL - hR);
@@ -44,38 +56,48 @@ ChunkRenderUnit* GenerateChunk(FractalNoise& fractal, float x_offset, float z_of
 
 			normal = glm::normalize(normal);
 
-            Vertex v;
-            v.m_color = {0.5,0.5,0.5,1};
-            v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
-			v.m_position = { static_cast<float>(x), static_cast<float>(posY), static_cast<float>(z)};
-			v.m_normal = normal;
+			chunkVertices[(z % ChunkRenderUnit::s_chunkSide)*gridWidth + (x % ChunkRenderUnit::s_chunkSide)].m_normal = normal;
+		}
+	}
 
-
-			if (x % ChunkRenderUnit::chunkWidth == 0 || x % ChunkRenderUnit::chunkWidth == ChunkRenderUnit::chunkWidth - 1) {
-				v.m_color.x = 1;
-			}
-
-			if (z % ChunkRenderUnit::chunkHeight == 0 || z % ChunkRenderUnit::chunkHeight == ChunkRenderUnit::chunkHeight - 1) {
-				v.m_color.y = 1;
-			}
-
-			chunkVertices.push_back(v);
-        }
-    }
-
-    return new ChunkRenderUnit{chunkVertices};
+    return new ChunkRenderUnit{chunkVertices, tallestPoint, lowestPoint};
 }
 
-void RegenerateChunks(std::vector<ChunkRenderUnit*>& chunks, FractalNoise& fractal, int render_distance, glm::vec3 pos)
+glm::ivec2 GetChunkPos(glm::vec3 pos) {
+	int x = pos.x / ChunkRenderUnit::s_chunkSide;
+	int y = pos.z / ChunkRenderUnit::s_chunkSide;
+	if (pos.x < 0) x--;
+	if (pos.z < 0) y--;
+
+	return {x, y};
+}
+
+glm::ivec2 GetGenerationRange(int pos, int render_distance) {
+	return {CLAMP0(pos - render_distance), pos + render_distance};
+}
+
+void RegenerateChunks(std::vector<ChunkRenderUnit*>& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos)
 {
+	static glm::ivec2 last_pos = {INT_MAX, INT_MAX};
+	glm::ivec2 pos = GetChunkPos(camera_pos);
+
+	// TODO: Find if there's a better way
+	if (pos == last_pos) {
+		return;
+	}
+	last_pos = pos;
+
 	for (ChunkRenderUnit *ck : chunks) {
 		delete ck;
 	}
 	chunks.clear();
 
-	for (int x = 0; x < render_distance; x++) {
-		for (int y = 0; y < render_distance; y++) {
-			chunks.push_back(GenerateChunk(fractal, x, y));
+	glm::ivec2 x_generation_range = GetGenerationRange(pos.x, render_distance);
+	glm::ivec2 y_generation_range = GetGenerationRange(pos.y, render_distance);
+
+	for (int x = x_generation_range.x; x < x_generation_range.y; x++) {
+		for (int y = y_generation_range.x; y < y_generation_range.y; y++) {
+			chunks.push_back(GenerateChunk(generator, x, y));
 		}
 	}
 }

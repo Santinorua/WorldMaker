@@ -5,7 +5,8 @@ namespace WorldMaker
 {
 	NoiseRenderUnit::NoiseRenderUnit(const int& p_width, const int& p_height, std::vector<double>& p_data) : width(p_width), height(p_height)
 	{
-		ChangeNoise(p_width, p_height, p_data);
+		if (p_data.size()!=0)
+			ChangeNoise(p_width, p_height, p_data);
 	}
 	void NoiseRenderUnit::ChangeNoise(const int& p_width, const int& p_height, std::vector<double>& p_data)
 	{
@@ -18,10 +19,10 @@ namespace WorldMaker
 		}
 		noiseTex = std::make_shared<Texture2D>(width, height, hola.data());
 		vertices->flush();
-		vertices->pushBatchData(quad);
+		vertices->pushData(quad);
 		vertices->submitData();
 		indices->flush();
-		indices->pushBatchData(quadIndices);
+		indices->pushData(quadIndices);
 		indices->submitData();
 	}
 }

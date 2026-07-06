@@ -23,6 +23,7 @@ namespace WorldMaker
 
 	ShaderProgram::~ShaderProgram()
 	{
+	    GLCall(glDeleteProgram(m_glName));
 		std::cout << "Shader Destroyed!\n";
 	}
 

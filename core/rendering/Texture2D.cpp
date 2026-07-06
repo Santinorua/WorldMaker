@@ -1,3 +1,4 @@
+#include "ResourceManager.h"
 #define STB_IMAGE_STATIC
 #include "DebugUtils.h"
 #include "OpenGLUtils.h"
@@ -11,7 +12,7 @@ namespace WorldMaker
 	Texture2D::Texture2D(const std::string& relativePath)
 		: m_width(0), m_height(0), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
-	    m_filePath = relativePath;
+	    m_path = relativePath;
 		std::string globalPath = GlobalizePath(relativePath);
 		GLCall(glGenTextures(1, &m_glName));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_glName));
@@ -23,10 +24,10 @@ namespace WorldMaker
 		{
 			const char* reason = stbi_failure_reason();
 			if (reason) {
-				std::cerr << "Couldn't load texture at path : "<< m_filePath << "\n The reason was: " << reason << "\n";
+				std::cerr << "Couldn't load texture at path : "<< m_path << "\n The reason was: " << reason << "\n";
 			}
 			else {
-				std::cerr << "Couldn't load texture at path :" << m_filePath << "\n There was no apparent reason\n";
+				std::cerr << "Couldn't load texture at path :" << m_path << "\n There was no apparent reason\n";
 			}
 		}
 		else {
@@ -50,7 +51,7 @@ namespace WorldMaker
 
 	Texture2D::Texture2D(int width, int height, float* data) : m_width(width), m_height(height), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
-        m_filePath = "Created without file";
+        m_path = "Created without file";
 		if (data!=nullptr) m_floatLocalBuffer = data;
 		else std::cerr << "Error: the data provided when creating a Texture2D is null!\n";
 		GLCall(glGenTextures(1, &m_glName));
@@ -70,7 +71,7 @@ namespace WorldMaker
 
 	Texture2D::~Texture2D()
 	{
-		std::cout << "Texture2D at path " << m_filePath << " Destroyed!\n";
+	    ResourceManager::RemoveTextureIfExpired(m_path);
 		GLCall(glDeleteTextures(1, &m_glName));
 	}
 

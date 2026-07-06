@@ -19,10 +19,12 @@ namespace WorldMaker
         static SSBOUPtr<GPUMaterial> s_materialsSSBO;
     public:
         static void Init();
+        static void Shutdown();
         static void PrepareToDraw();
         inline static Texture2DArray* GetTexture2DArray() { return s_texture2DArray.get();};
-        static void CreateMaterial(Material* mat);
-        static void DestroyMaterial(unsigned int matIndex);
+        static void CreateMaterial(MaterialSPtr mat);
+        static void ResetMaterial(unsigned int matIndex);
         static bool s_inited;
+        static bool s_ended;
     };
 }
