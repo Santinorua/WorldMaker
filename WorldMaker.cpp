@@ -124,6 +124,8 @@ int main()
         ImGui::Text("FPS: %.1f",
                     ImGui::GetIO().Framerate);
 
+		IMGUI_INPUT(render_distance, ImGuiDataType_S32);
+
 		auto chunk_pos = ChunkGeneration::GetChunkPos(Camera::Position());
         ImGui::Text("Chunk Pos: (%d, %d)", chunk_pos.x, chunk_pos.y);
 
@@ -133,48 +135,49 @@ int main()
 		auto y_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.y, render_distance);
         ImGui::Text("X Gen. Range: [%d; %d]", y_generation_range.x, y_generation_range.y);
 
-		ImGui::Begin("Generation");
-		ImGui::Text("Mesh Size: ");
-		IMGUI_INPUT(chunk_size, ImGuiDataType_S32);
+		if (ImGui::Begin("Generation"))	{
+			ImGui::Text("Mesh Size: ");
+			IMGUI_INPUT(chunk_size, ImGuiDataType_S32);
 
-		ImGui::Text("Mesh size: ");
-		IMGUI_INPUT(world_width, ImGuiDataType_S32);
+			ImGui::Text("Mesh size: ");
+			IMGUI_INPUT(world_width, ImGuiDataType_S32);
 
-		ImGui::Text("x");
-		IMGUI_INPUT(world_height, ImGuiDataType_S32);
+			ImGui::Text("x");
+			IMGUI_INPUT(world_height, ImGuiDataType_S32);
 
-		ImGui::Text("Noise:");
-		ImGui::Text("frequency:");
-		IMGUI_INPUT(frequency, ImGuiDataType_Double);
+			ImGui::Text("Noise:");
+			ImGui::Text("frequency:");
+			IMGUI_INPUT(frequency, ImGuiDataType_Double);
 
-		ImGui::Text("amplitude:");
-		IMGUI_INPUT(amplitude, ImGuiDataType_Double);
+			ImGui::Text("amplitude:");
+			IMGUI_INPUT(amplitude, ImGuiDataType_Double);
 
-		ImGui::Text("seed:");
-		IMGUI_INPUT(seed, ImGuiDataType_U64);
+			ImGui::Text("seed:");
+			IMGUI_INPUT(seed, ImGuiDataType_U64);
 
-		ImGui::Text("octaves:");
-		IMGUI_INPUT(octaves, ImGuiDataType_S32);
+			ImGui::Text("octaves:");
+			IMGUI_INPUT(octaves, ImGuiDataType_S32);
 
-		if (ImGui::Button("Generate mesh")) {
-			ChunkRenderUnit::s_chunkSide = chunk_size;
-			ChunkRenderUnit::s_chunkSide = chunk_size;
+			if (ImGui::Button("Generate mesh")) {
+				ChunkRenderUnit::s_chunkSide = chunk_size;
+				ChunkRenderUnit::s_chunkSide = chunk_size;
 
-			WorldGenerator generator(150,seed);
+				WorldGenerator generator(150,seed);
 
-			ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
+				ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
+			}
+			ImGui::End();
 		}
-		ImGui::End();
 
 		Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
 
 		Camera::UpdateCameraTransform();
 		// if (Input::GetKeyDown(KeyCode::SpaceBar_Key))
 		ShaderProgram::s_boundShader->updateCameraMatrices();
-        GlobalLight::LoadLightSettings();
+		GlobalLight::LoadLightSettings();
 
 		for (auto& ck : chunks) {
-		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
+			if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
 			Renderer::PrepareToDrawChunk(*ck.second);
 			GPUResourceManager::PrepareToDraw();
 			Renderer::DrawChunk(*ck.second);
@@ -185,20 +188,20 @@ int main()
 		}
 
 		ImGui::Render();
-       	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(Renderer::GetWindow());
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		glfwSwapBuffers(Renderer::GetWindow());
 
-        glfwPollEvents();
+		glfwPollEvents();
 	}
 	for (auto& ck : chunks) {
-    delete ck.second;
+		delete ck.second;
 	}
-    chunks.clear();
+	chunks.clear();
 	ResourceManager::Shutdown();
 	GPUResourceManager::Shutdown();
 	ImGui_ImplOpenGL3_Shutdown();
-   	ImGui_ImplGlfw_Shutdown();
-   	ImGui::DestroyContext();
-    glfwTerminate();
-    return 0;
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+	glfwTerminate();
+	return 0;
 }

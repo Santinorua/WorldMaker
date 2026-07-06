@@ -64,8 +64,8 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
 }
 
 glm::ivec2 GetChunkPos(glm::vec3 pos) {
-	int x = pos.x / ChunkRenderUnit::s_chunkSide;
-	int y = pos.z / ChunkRenderUnit::s_chunkSide;
+	int x = (pos.x - 1) / (ChunkRenderUnit::s_chunkSide - 1);
+	int y = (pos.z - 1) / (ChunkRenderUnit::s_chunkSide - 1);
 	if (pos.x < 0) x--;
 	if (pos.z < 0) y--;
 
