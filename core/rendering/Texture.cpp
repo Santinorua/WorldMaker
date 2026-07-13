@@ -3,5 +3,6 @@
 
 namespace WorldMaker
 {
-    Texture::~Texture() { ResourceManager::RemoveTextureIfExpired(m_path); }
+    Texture::Texture() {}
+    Texture::~Texture() { ResourceManager::RemoveTexture2DIfExpired(m_path); }
 }

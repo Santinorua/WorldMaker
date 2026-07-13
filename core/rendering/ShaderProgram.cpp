@@ -4,7 +4,7 @@
 #include "DebugUtils.h"
 #include "OpenGLUtils.h"
 #include "Camera.h"
-#include "Material.h"
+#include "TerrainMaterial.h"
 #include "Pointers.h"
 
 namespace WorldMaker
@@ -15,7 +15,7 @@ namespace WorldMaker
 
 
 	ShaderProgram::ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath)
-		: m_vFilePath(GlobalizePath(vertexPath)), m_fFilePath(GlobalizePath(fragmentPath)), m_instanceId(s_idInstanceCount++), m_glName(0)
+		: m_vFilePath(globalizePath(vertexPath)), m_fFilePath(globalizePath(fragmentPath)), m_instanceId(s_idInstanceCount++), m_glName(0)
 	{
 		m_glName = createProgram(vertexPath, fragmentPath);
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
@@ -59,8 +59,8 @@ namespace WorldMaker
 	unsigned int ShaderProgram::createProgram(const std::string& vertexPath, const std::string& fragmentPath)
 	{
 		unsigned int program = glCreateProgram();
-		unsigned int vs = compileShader(GL_VERTEX_SHADER, RelativeFileToString(vertexPath));
-		unsigned int fs = compileShader(GL_FRAGMENT_SHADER, RelativeFileToString(fragmentPath));
+		unsigned int vs = compileShader(GL_VERTEX_SHADER, relativeFileToString(vertexPath));
+		unsigned int fs = compileShader(GL_FRAGMENT_SHADER, relativeFileToString(fragmentPath));
 		// A program is a group of glsl that can run on the GPU
 		GLCall(glAttachShader(program, vs));
 		GLCall(glAttachShader(program, fs));

@@ -1,7 +1,6 @@
 #include "GPUResourceManager.h"
-#include "GPUMaterial.h"
+#include "GPUTerrainMaterial.h"
 #include "RenderingConstants.h"
-#include "ResourceManager.h"
 #include "ShaderProgram.h"
 #include "Texture.h"
 #include "Texture2DArray.h"
@@ -9,15 +8,15 @@
 
 namespace WorldMaker
 {
-    std::vector<GPUMaterialUPtr> GPUResourceManager::s_materials = {};
+    std::vector<GPUTerrainMaterialUPtr> GPUResourceManager::s_materials = {};
     Texture2DArrayUPtr GPUResourceManager::s_texture2DArray = nullptr;
-    SSBOUPtr<GPUMaterial> GPUResourceManager::s_materialsSSBO = nullptr;
+    SSBOUPtr<GPUTerrainMaterial> GPUResourceManager::s_materialsSSBO = nullptr;
     bool GPUResourceManager::s_inited = false;
     bool GPUResourceManager::s_ended = false;
-    void GPUResourceManager::CreateMaterial(MaterialSPtr mat)
+    void GPUResourceManager::CreateTerrainMaterial(TerrainMaterialSPtr mat)
     {
-        s_materials.push_back(std::move(std::make_unique<GPUMaterial>(mat)));
-        GPUMaterial* newMat = s_materials.back().get();
+        s_materials.push_back(std::move(std::make_unique<GPUTerrainMaterial>(mat)));
+        GPUTerrainMaterial* newMat = s_materials.back().get();
         if (s_materialsSSBO.get()->checkIfEnoughSpaceForPush(1))
         {
             s_materialsSSBO.get()->pushData(*newMat);
@@ -25,9 +24,9 @@ namespace WorldMaker
             s_materialsSSBO.get()->submitSubData(lastElement, lastElement);
         }
     }
-    void GPUResourceManager::ResetMaterial(unsigned int matIndex)
+    void GPUResourceManager::ResetMaterial(unsigned int matIndex, ArrayTexture2DSPtr diffuseTex, ArrayTexture2DSPtr specularTex)
     {
-        s_materials[matIndex]->reset();
+        s_materials[matIndex]->reset(diffuseTex, specularTex);
         s_materialsSSBO.get()->submitSubData(matIndex, matIndex);
     }
     void GPUResourceManager::Init()
@@ -38,7 +37,7 @@ namespace WorldMaker
             return;
         }
         s_texture2DArray = std::make_unique<Texture2DArray>(terrainTexturesWidth, terrainTexturesHeight, maxTextures);
-        s_materialsSSBO = std::move(std::make_unique<SSBO<GPUMaterial>>(maxMaterials,GL_DYNAMIC_STORAGE_BIT));
+        s_materialsSSBO = std::move(std::make_unique<SSBO<GPUTerrainMaterial>>(maxMaterials,GL_DYNAMIC_STORAGE_BIT));
         s_inited = true;
     }
     void  GPUResourceManager::Shutdown()

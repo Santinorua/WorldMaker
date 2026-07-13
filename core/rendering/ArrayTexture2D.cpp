@@ -3,14 +3,14 @@
 #define STB_IMAGE_STATIC
 #include "DebugUtils.h"
 #include "OpenGLUtils.h"
-#include "Texture2D.h"
+#include "ArrayTexture2D.h"
 #include "FileFunctions.h"
 #include "GPUResourceManager.h"
 #include "stb_image.h"
 
 namespace WorldMaker
 {
-	Texture2D::Texture2D(const std::string& relativePath)
+	ArrayTexture2D::ArrayTexture2D(const std::string& relativePath)
 		: m_width(0), m_height(0), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
 	    m_path = relativePath;
@@ -25,14 +25,14 @@ namespace WorldMaker
 		{
 			const char* reason = stbi_failure_reason();
 			if (reason) {
-				std::cerr << "Couldn't load Texture2D at path : "<< m_path << "\n The reason was: " << reason << "\n";
+				std::cerr << "Couldn't load ArrayTexture2D at path : "<< m_path << "\n The reason was: " << reason << "\n";
 			}
 			else {
-				std::cerr << "Couldn't load Texture2D at path :" << m_path << "\n There was no apparent reason\n";
+				std::cerr << "Couldn't load ArrayTexture2D at path :" << m_path << "\n There was no apparent reason\n";
 			}
 		}
 		else {
-			std::cout << "Texture2D at path: " << globalPath << " was loaded succesfully" << "\n";
+			std::cout << "ArrayTexture2D at path: " << globalPath << " was loaded succesfully" << "\n";
 		}
 
 		GLCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, m_width, m_height));
@@ -43,12 +43,14 @@ namespace WorldMaker
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
+		m_texture2DArrayLayer = GPUResourceManager::GetTexture2DArray()->pushTexture(this);
+
 		if (!m_unsignedCharLocalBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
 		ASSERT(m_unsignedCharLocalBuffer);
 		stbi_image_free(m_unsignedCharLocalBuffer);
 	}
 
-	Texture2D::Texture2D(int width, int height, float* data) : m_width(width), m_height(height), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
+	ArrayTexture2D::ArrayTexture2D(int width, int height, float* data) : m_width(width), m_height(height), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
         m_path = "Created without file";
 		if (data!=nullptr) m_floatLocalBuffer = data;
@@ -68,20 +70,20 @@ namespace WorldMaker
 		stbi_image_free(m_floatLocalBuffer);
 	}
 
-	Texture2D::~Texture2D()
+	ArrayTexture2D::~ArrayTexture2D()
 	{
-	    ResourceManager::RemoveTexture2DIfExpired(m_path);
+	    ResourceManager::RemoveArrayTexture2DIfExpired(m_path, m_texture2DArrayLayer);
 		GLCall(glDeleteTextures(1, &m_glName));
 	}
 
-	void Texture2D::bind(unsigned int slot /*= 0*/) const
+	void ArrayTexture2D::bind(unsigned int slot /*= 0*/) const
 	{
 		// OpenGL has slots for textures. "Put this texture into slot 3 please"
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot));
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_glName));
 	}
 
-	void Texture2D::unbind() const
+	void ArrayTexture2D::unbind() const
 	{
 		GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 	}

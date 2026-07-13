@@ -26,7 +26,7 @@ namespace WorldMaker
 
     void VertexBuffer::setSubData(const void* data, unsigned int offset, unsigned int size)
     {
-        ASSERT(offset + size <= maxVertexSize * maxVertexCount);
+        ASSERT(offset + size <= maxVertexSize * baseVertexCount);
 
         bind();
 

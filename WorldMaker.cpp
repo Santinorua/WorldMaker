@@ -54,10 +54,9 @@ int main()
 
 	WorldGenerator generator(150, 42);
 
-	std::vector<ChunkRenderUnit*> chunks;
+	std::vector<ChunkRenderUnitUPtr> chunks;
 
 	ChunkGeneration::RegenerateChunks(chunks, generator, world_width, world_height);
-
 	bool doRender2D = false;
 
 	std::vector<double> colors;
@@ -150,26 +149,17 @@ int main()
 			ChunkRenderUnit::s_chunkSide = chunk_size;
 
 			WorldGenerator generator(150,seed);
-			for (ChunkRenderUnit* ck : chunks) {
-				delete ck;
-			}
 			chunks.clear();
 			ChunkGeneration::RegenerateChunks(chunks, generator, world_width, world_height);
 		}
 		ImGui::End();
 
-		Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
-
 		Camera::UpdateCameraTransform();
-		// if (Input::GetKeyDown(KeyCode::SpaceBar_Key))
-		ShaderProgram::s_boundShader->updateCameraMatrices();
-        GlobalLight::LoadLightSettings();
 
-		for (ChunkRenderUnit* ck : chunks) {
+		for (auto& ck : chunks) {
 		    if (!Camera::CanSeeBox(ck->minPoint(), ck->maxPoint())) continue;
-			Renderer::PrepareToDrawChunk(*ck);
-			GPUResourceManager::PrepareToDraw();
-			Renderer::DrawChunk(*ck);
+			Renderer::DrawChunkTerrain(*ck);
+			Renderer::DrawChunkModels(*ck);
 		}
 
 		if (doRender2D) {
@@ -181,9 +171,6 @@ int main()
         glfwSwapBuffers(Renderer::GetWindow());
 
         glfwPollEvents();
-	}
-	for (ChunkRenderUnit* ck : chunks) {
-    delete ck;
 	}
     chunks.clear();
 	ResourceManager::Shutdown();

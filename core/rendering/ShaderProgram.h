@@ -17,6 +17,7 @@ namespace WorldMaker
 	{
 		noise = 0,
 		terrain = 1,
+		model = 3,
 	};
 
 	class ShaderProgram

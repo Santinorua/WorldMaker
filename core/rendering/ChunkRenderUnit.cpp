@@ -1,5 +1,6 @@
 #include "ChunkRenderUnit.h"
 #include "Vertex.h"
+#include "glm/common.hpp"
 
 namespace WorldMaker
 {
@@ -14,27 +15,15 @@ namespace WorldMaker
 	    return point;
 	}
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint)
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels)
 	{
+	    m_models = chunkModels;
         m_lowestPoint = lowestPoint;
         m_tallestPoint = tallestPoint;
         std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
 		m_vertices->pushData(vertices);
 		m_vertices->submitData();
 
-		m_indices->pushData(indices);
-		m_indices->submitData();
-	}
-
-	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& vertices)
-	{
-		m_vertices->flush();
-		m_vertices->pushData(vertices);
-		m_vertices->submitData();
-
-		std::vector<unsigned int> indices = ChunkRenderUnit::GetIndicesForChunk();
-
-		m_indices->flush();
 		m_indices->pushData(indices);
 		m_indices->submitData();
 	}
@@ -62,5 +51,18 @@ namespace WorldMaker
 			}
 		}
 		return indices;
+	}
+
+	void ChunkModels::addInstance(const std::string& modelPath, glm::vec3 pos)
+	{
+        ModelSPtr model = ResourceManager::LoadModel(modelPath);
+        auto& ssbo = m_modelInstancesSSBO[model->instanceId()].second;
+        if (!ssbo)
+        {
+            ssbo = std::make_shared<SSBO<glm::mat4>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
+        }
+        ssbo->pushData(glm::translate(glm::mat4(1.0f), pos));
+        ssbo->submitData();
+        m_modelInstancesSSBO[model->instanceId()].first = model;
 	}
 }
