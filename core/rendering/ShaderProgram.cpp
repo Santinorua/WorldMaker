@@ -162,6 +162,19 @@ namespace WorldMaker
 		setUniform1i("u_texture2DArray", 0);
 	}
 
+	void ShaderProgram::loadMaterial(ModelMaterial* mat)
+	{
+        bind();
+        // setUniform4f("u_baseColor", mat->baseColor.x, mat->baseColor.y, material->baseColor.z, material->baseColor.w);
+        GLCall(glActiveTexture(GL_TEXTURE0));
+        GLCall(glBindTexture(GL_TEXTURE_2D, mat->m_diffuseTexture->glName()));
+
+        GLCall(glActiveTexture(GL_TEXTURE1));
+        GLCall(glBindTexture(GL_TEXTURE_2D,mat->m_specularTexture->glName()));
+
+        setUniform1f("u_shininess", mat->m_shininess);
+	}
+
 	void ShaderProgram::updateCameraMatrices()
 	{
 		bind();

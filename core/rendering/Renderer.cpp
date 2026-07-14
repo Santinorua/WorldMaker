@@ -104,6 +104,7 @@ namespace WorldMaker
             auto& [model, matricesSSBO] = pair;
             for (MeshSPtr mesh : model->m_meshes)
             {
+                ShaderProgram::s_boundShader->loadMaterial(mesh->m_material.get());
                 mesh->m_vertexArray->bind();
                 matricesSSBO->submitData();
                 matricesSSBO->bindBufferBase(SSBOType::modelMatrices);

@@ -40,7 +40,7 @@ ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, flo
             v = generator.getVertex(x, z);
             if (!treeTest)
             {
-                // chunkModels.addInstance("core/rendering/assets/models/Fede.obj", v.m_position);
+                chunkModels.addInstance("core/rendering/assets/models/Fede.obj", v.m_position);
                 treeTest = true;
             }
             tallestPoint = std::max(tallestPoint, v.m_position.y);
