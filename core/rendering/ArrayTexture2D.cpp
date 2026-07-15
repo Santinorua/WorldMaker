@@ -72,7 +72,7 @@ namespace WorldMaker
 
 	ArrayTexture2D::~ArrayTexture2D()
 	{
-	    ResourceManager::RemoveArrayTexture2DIfExpired(m_path, m_texture2DArrayLayer);
+	    ResourceManager::RemoveArrayTexture2DIfExpired(m_path, this);
 		GLCall(glDeleteTextures(1, &m_glName));
 	}
 

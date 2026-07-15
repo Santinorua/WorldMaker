@@ -10,13 +10,14 @@ namespace WorldMaker
     public:
         Texture2DArray(int width, int height, int layers);
         unsigned int pushTexture(ArrayTexture2D* texture);
-        void resetTextureLayer(unsigned int layer);
+        void resetTextureLayer(ArrayTexture2D* tex);
         void bind();
         inline unsigned int glName() const { return m_glName; }
     private:
         GLuint m_glName;
         unsigned int m_nextLayer = 0;
         std::vector<unsigned int> m_freeLayers = {};
+        std::unordered_map<std::string, unsigned int> m_texturesRegistered;
     };
     using Texture2DArrayUPtr = std::unique_ptr<Texture2DArray>;
 }

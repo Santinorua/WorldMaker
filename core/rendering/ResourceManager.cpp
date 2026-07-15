@@ -73,13 +73,13 @@ namespace WorldMaker
     //     return nullptr;
     // }
 
-    void ResourceManager::RemoveArrayTexture2DIfExpired(const std::string& relativePath, unsigned int layer)
+    void ResourceManager::RemoveArrayTexture2DIfExpired(const std::string& relativePath, ArrayTexture2D* tex)
     {
         auto it = s_arrayTexture2DCache.find(relativePath);
 
         if (it != s_arrayTexture2DCache.end() && it->second.expired())
         {
-            GPUResourceManager::GetTexture2DArray()->resetTextureLayer(layer);
+            GPUResourceManager::GetTexture2DArray()->resetTextureLayer(tex);
             s_arrayTexture2DCache.erase(relativePath);
             std::cout << "ArrayTexture2D of relative path " << relativePath << " destroyed\n";
         }

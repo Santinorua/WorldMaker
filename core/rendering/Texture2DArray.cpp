@@ -1,4 +1,5 @@
 #include "Texture2DArray.h"
+#include "ArrayTexture2D.h"
 #include "DebugUtils.h"
 #include "OpenGLUtils.h"
 #include "ResourceManager.h"
@@ -14,6 +15,7 @@ namespace WorldMaker
     }
     unsigned int Texture2DArray::pushTexture(ArrayTexture2D* texture)
     {
+        if (m_texturesRegistered[texture->path()]>0) return texture->texture2DArrayLayer(); // This assumes that the ArrayTexture2D* was got with ResourceManager::LoadArrayTexture2D
         unsigned int layer;
         if (!m_freeLayers.empty())
         {
@@ -21,7 +23,6 @@ namespace WorldMaker
             m_freeLayers.pop_back();
         }
         else layer=m_nextLayer++;
-
         GLCall(glTexSubImage3D(
             GL_TEXTURE_2D_ARRAY,
             0,
@@ -33,11 +34,13 @@ namespace WorldMaker
             GL_UNSIGNED_BYTE,
             texture->m_unsignedCharLocalBuffer));
 
+        m_texturesRegistered[texture->path()]++;
         return layer;
     }
-    void Texture2DArray::resetTextureLayer(unsigned int layer)
+    void Texture2DArray::resetTextureLayer(ArrayTexture2D* tex)
     {
         Texture2DSPtr emptyTex = ResourceManager::LoadTexture(diffuseTexEmptyPath);
+        unsigned int layer = tex->texture2DArrayLayer();
         ASSERT(layer < m_nextLayer);
         ASSERT(layer >= 0);
         GLCall(glTexSubImage3D(
@@ -51,6 +54,7 @@ namespace WorldMaker
             GL_UNSIGNED_BYTE,
             emptyTex->m_unsignedCharLocalBuffer));
         m_freeLayers.push_back(layer);
+        if (m_texturesRegistered[tex->path()]>0) m_texturesRegistered[tex->path()]--;
     }
     void Texture2DArray::bind()
     {

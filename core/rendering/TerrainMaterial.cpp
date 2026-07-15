@@ -16,8 +16,6 @@ namespace WorldMaker
     void TerrainMaterial::reset(const std::string& diffusePath, const std::string& specularPath)
     {
         m_shininess = 1;
-        ResourceManager::RemoveArrayTexture2DIfExpired(m_diffuseTexture->path(), m_diffuseTexture->texture2DArrayLayer());
-        ResourceManager::RemoveArrayTexture2DIfExpired(m_specularTexture->path(), m_specularTexture->texture2DArrayLayer());
         m_diffuseTexture = ResourceManager::LoadArrayTexture(diffusePath);
         m_specularTexture = ResourceManager::LoadArrayTexture(specularPath);
         GPUResourceManager::ResetMaterial(m_id, m_diffuseTexture, m_specularTexture);

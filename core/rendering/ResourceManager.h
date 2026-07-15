@@ -53,7 +53,7 @@ namespace WorldMaker
         static TextureSPtr GetTexture2D(const std::string& relativePath);
         static ArrayTexture2DSPtr GetArrayTexture2D(const std::string& relativePath);
         // static TextureSPtr GetTexture(const std::vector<std::string>& relativePaths);
-        static void RemoveArrayTexture2DIfExpired(const std::string& relativePath, unsigned int layer);
+        static void RemoveArrayTexture2DIfExpired(const std::string& relativePath, ArrayTexture2D* tex);
         static void RemoveTexture2DIfExpired(const std::string& relativePath);
         // static void RemoveTextureIfExpired(const std::vector<std::string>& relativePaths);
 

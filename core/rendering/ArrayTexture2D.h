@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include <map>
 #include <typeinfo>
+#include <unordered_map>
 
 namespace WorldMaker
 {
