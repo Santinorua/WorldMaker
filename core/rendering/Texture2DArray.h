@@ -17,7 +17,6 @@ namespace WorldMaker
         GLuint m_glName;
         unsigned int m_nextLayer = 0;
         std::vector<unsigned int> m_freeLayers = {};
-        std::unordered_map<std::string, unsigned int> m_texturesRegistered;
     };
     using Texture2DArrayUPtr = std::unique_ptr<Texture2DArray>;
 }

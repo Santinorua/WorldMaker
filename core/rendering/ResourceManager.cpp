@@ -30,8 +30,9 @@ namespace WorldMaker
             std::cerr << "Error: Can't init resource manager because it has already been initialized!\n";
             return;
         }
-        CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath);
-        // s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
+        // CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath);
+        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
+        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
         s_inited = true;
     }
 

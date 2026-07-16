@@ -15,7 +15,6 @@ namespace WorldMaker
     }
     unsigned int Texture2DArray::pushTexture(ArrayTexture2D* texture)
     {
-        if (m_texturesRegistered[texture->path()]>0) return texture->texture2DArrayLayer(); // This assumes that the ArrayTexture2D* was got with ResourceManager::LoadArrayTexture2D
         unsigned int layer;
         if (!m_freeLayers.empty())
         {
@@ -54,7 +53,6 @@ namespace WorldMaker
             GL_UNSIGNED_BYTE,
             emptyTex->m_unsignedCharLocalBuffer));
         m_freeLayers.push_back(layer);
-        if (m_texturesRegistered[tex->path()]>0) m_texturesRegistered[tex->path()]--;
     }
     void Texture2DArray::bind()
     {
