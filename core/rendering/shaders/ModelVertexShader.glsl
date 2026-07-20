@@ -84,9 +84,9 @@ void main()
     vec4 position = vec4(GetPosition(realIndex), 1.0);
     frag_color = GetColor(realIndex);
     frag_materialIndex = GetMaterialIndex(realIndex);
-    frag_pos = position;
-    frag_normal = normalize(GetNormal(realIndex));
     frag_uv = GetUV(realIndex);
-    frag_normal = normalize(mat3(modelMatrices[gl_InstanceID]) * GetNormal(realIndex));
+    mat3 normalMatrix = transpose(inverse(mat3(modelMatrices[gl_InstanceID])));
+    frag_normal = normalMatrix * GetNormal(realIndex);
     gl_Position = vp * modelMatrices[gl_InstanceID] * position;
-};
+    frag_pos = gl_Position;
+}
