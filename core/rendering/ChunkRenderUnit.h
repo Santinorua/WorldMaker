@@ -3,15 +3,16 @@
 #include "ResourceManager.h"
 #include "ShaderProgram.h"
 #include "VertexArray.h"
-#include "Texture2D.h"
 #include "RenderingConstants.h"
 #include "SSBO.h"
-#include "TerrainMaterial.h"
 #include "Vertex.h"
 #include "SSBO.h"
+#include "Model.h"
 
 #include <memory>
 #include <vector>
+
+#include <glm/gtc/quaternion.hpp>
 
 namespace WorldMaker
 {
@@ -19,7 +20,7 @@ namespace WorldMaker
 	struct ChunkModels
 	{
 	    std::unordered_map<unsigned int, std::pair<ModelSPtr, MatricesSSBO>> m_modelInstancesSSBO = {};
-		void addInstance(const std::string& modelPath, glm::vec3 pos);
+		void addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot = glm::identity<glm::quat>(), glm::vec3 scale = {1,1,1});
 	};
 	struct ChunkRenderUnit
 	{

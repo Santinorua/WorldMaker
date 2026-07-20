@@ -1,6 +1,5 @@
 #include "ChunkRenderUnit.h"
 #include "Vertex.h"
-#include "glm/common.hpp"
 
 namespace WorldMaker
 {
@@ -53,7 +52,7 @@ namespace WorldMaker
 		return indices;
 	}
 
-	void ChunkModels::addInstance(const std::string& modelPath, glm::vec3 pos)
+	void ChunkModels::addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
 	{
         ModelSPtr model = ResourceManager::LoadModel(modelPath);
         auto& ssbo = m_modelInstancesSSBO[model->instanceId()].second;
@@ -61,7 +60,11 @@ namespace WorldMaker
         {
             ssbo = std::make_shared<SSBO<glm::mat4>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
         }
-        ssbo->pushData(glm::translate(glm::mat4(1.0f), pos));
+        glm::mat4 modelMat =
+            glm::translate(glm::mat4(1), pos) *
+            glm::mat4_cast(rot) *
+            glm::scale(glm::mat4(1), scale);
+        ssbo->pushData(modelMat);
         ssbo->submitData();
         m_modelInstancesSSBO[model->instanceId()].first = model;
 	}

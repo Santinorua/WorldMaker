@@ -6,6 +6,7 @@
 #include "Pointers.h"
 #include "RenderUnit.h"
 #include "Renderer.h"
+#include "ShaderProgram.h"
 #include "TerrainMaterial.h"
 #include "Texture2D.h"
 
@@ -51,6 +52,49 @@ namespace WorldMaker
     }
 
     // Texture handling ---------------------------------------------------------------------------------
+
+    Texture2DSPtr ResourceManager::LoadTexture(const std::string& relativePath)
+    {
+        auto it = s_texture2DCache.find(relativePath);
+        if (it != s_texture2DCache.end())
+        {
+            if (!it->second.expired()) return GetShared<Texture2D>(it->second);
+            else s_texture2DCache.erase(it);
+        }
+
+        Texture2DSPtr newTexture = std::make_shared<Texture2D>(relativePath);
+
+        s_texture2DCache[relativePath] = newTexture;
+        return newTexture;
+    }
+    Texture2DSPtr ResourceManager::LoadTexture(const std::string& modelTexPath, const aiTexture* tex)
+    {
+        auto it = s_texture2DCache.find(modelTexPath);
+        if (it != s_texture2DCache.end())
+        {
+            if (!it->second.expired()) return GetShared<Texture2D>(it->second);
+            else s_texture2DCache.erase(it);
+        }
+
+        Texture2DSPtr newTexture = std::make_shared<Texture2D>(modelTexPath, tex);
+
+        s_texture2DCache[modelTexPath] = newTexture;
+        return newTexture;
+    }
+    ArrayTexture2DSPtr ResourceManager::LoadArrayTexture(const std::string& relativePath)
+    {
+        auto it = s_arrayTexture2DCache.find(relativePath);
+        if (it != s_arrayTexture2DCache.end())
+        {
+            if (!it->second.expired()) return GetShared<ArrayTexture2D>(it->second);
+            else s_arrayTexture2DCache.erase(it);
+        }
+
+        ArrayTexture2DSPtr newTexture = std::make_shared<ArrayTexture2D>(relativePath);
+
+        s_arrayTexture2DCache[relativePath] = newTexture;
+        return newTexture;
+    }
 
     // Returns nullptr if the texture is not found
     TextureSPtr ResourceManager::GetTexture2D(const std::string &relativePath)
@@ -140,11 +184,9 @@ namespace WorldMaker
         }
     }
 
-    ModelMaterialSPtr ResourceManager::CreateModelMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath)
+    ModelMaterialSPtr ResourceManager::CreateModelMaterial(Texture2DSPtr diffuse, Texture2DSPtr specular)
     {
-        Texture2DSPtr diffuseTex = LoadTexture(diffuseTexPath);
-        Texture2DSPtr specularTex = LoadTexture(specularTexPath);
-        ModelMaterialSPtr newMat = std::make_shared<ModelMaterial>(diffuseTex, specularTex);
+        ModelMaterialSPtr newMat = std::make_shared<ModelMaterial>(diffuse, specular);
         s_modelMaterialCache[newMat->id()] = newMat;
         return newMat;
     }

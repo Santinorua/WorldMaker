@@ -22,34 +22,9 @@ namespace WorldMaker
         static void Shutdown();
 
         // Textures handling ---------------------------------------------------------------------------------
-        static Texture2DSPtr LoadTexture(const std::string& relativePath)
-        {
-            auto it = s_texture2DCache.find(relativePath);
-            if (it != s_texture2DCache.end())
-            {
-                if (!it->second.expired()) return GetShared<Texture2D>(it->second);
-                else s_texture2DCache.erase(it);
-            }
-
-            Texture2DSPtr newTexture = std::make_shared<Texture2D>(relativePath);
-
-            s_texture2DCache[relativePath] = newTexture;
-            return newTexture;
-        }
-        static ArrayTexture2DSPtr LoadArrayTexture(const std::string& relativePath)
-        {
-            auto it = s_arrayTexture2DCache.find(relativePath);
-            if (it != s_arrayTexture2DCache.end())
-            {
-                if (!it->second.expired()) return GetShared<ArrayTexture2D>(it->second);
-                else s_arrayTexture2DCache.erase(it);
-            }
-
-            ArrayTexture2DSPtr newTexture = std::make_shared<ArrayTexture2D>(relativePath);
-
-            s_arrayTexture2DCache[relativePath] = newTexture;
-            return newTexture;
-        }
+        static Texture2DSPtr LoadTexture(const std::string& relativePath);
+        static Texture2DSPtr LoadTexture(const std::string& modelTexPath, const aiTexture* tex);
+        static ArrayTexture2DSPtr LoadArrayTexture(const std::string& relativePath);
         static TextureSPtr GetTexture2D(const std::string& relativePath);
         static ArrayTexture2DSPtr GetArrayTexture2D(const std::string& relativePath);
         // static TextureSPtr GetTexture(const std::vector<std::string>& relativePaths);
@@ -61,7 +36,7 @@ namespace WorldMaker
         static TerrainMaterialSPtr CreateTerrainMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath);
         static TerrainMaterialSPtr GetTerrainMaterial(unsigned int materialId);
         static void RemoveTerrainMaterialIfExpired(unsigned int materialId);
-        static ModelMaterialSPtr CreateModelMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath);
+        static ModelMaterialSPtr CreateModelMaterial(Texture2DSPtr diffuse, Texture2DSPtr specular);
         static ModelMaterialSPtr GetModelMaterial(unsigned int materialId);
         static void RemoveModelMaterialIfExpired(unsigned int materialId);
 

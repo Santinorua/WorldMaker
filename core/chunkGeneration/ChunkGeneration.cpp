@@ -1,6 +1,6 @@
 #include "ChunkGeneration.h"
 #include "ChunkRenderUnit.h"
-#include "SSBO.h"
+#include <glm/gtc/quaternion.hpp>
 
 namespace WorldMaker {
 
@@ -40,7 +40,8 @@ ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, flo
             v = generator.getVertex(x, z);
             if (!treeTest)
             {
-                chunkModels.addInstance("core/rendering/assets/models/Fede.obj", v.m_position);
+                glm::quat rot = glm::identity<glm::quat>();
+                chunkModels.addInstance("core/rendering/assets/models/tree.glb", v.m_position, rot, {0.1, 0.1f, 0.1f});
                 treeTest = true;
             }
             tallestPoint = std::max(tallestPoint, v.m_position.y);

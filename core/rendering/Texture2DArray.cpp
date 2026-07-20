@@ -33,7 +33,6 @@ namespace WorldMaker
             GL_UNSIGNED_BYTE,
             texture->m_unsignedCharLocalBuffer));
 
-        m_texturesRegistered[texture->path()]++;
         return layer;
     }
     void Texture2DArray::resetTextureLayer(ArrayTexture2D* tex)

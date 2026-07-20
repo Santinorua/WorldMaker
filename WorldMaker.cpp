@@ -152,6 +152,7 @@ int main()
 			chunks.clear();
 			ChunkGeneration::RegenerateChunks(chunks, generator, world_width, world_height);
 		}
+
 		ImGui::End();
 
 		Camera::UpdateCameraTransform();
