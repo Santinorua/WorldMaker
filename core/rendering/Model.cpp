@@ -5,6 +5,7 @@
 #include "FileFunctions.h"
 #include "assimp/material.h"
 #include "assimp/matrix4x4.h"
+#include <algorithm>
 
 #include <memory>
 namespace WorldMaker
@@ -102,7 +103,8 @@ namespace WorldMaker
 
 			aiVector3D pos = globalPos * mesh->mVertices[i];
 			vertex.m_position = { pos.x, pos.y, pos.z };
-
+			m_tallestPoint = std::max(m_tallestPoint, static_cast<double>(pos.y));
+			m_lowestPoint = std::min(m_lowestPoint, static_cast<double>(pos.y));
 			if (mesh->mTextureCoords[0])
 			{
 				vector.x = mesh->mTextureCoords[0][i].x;

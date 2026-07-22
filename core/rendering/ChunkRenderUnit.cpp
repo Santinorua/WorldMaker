@@ -5,7 +5,6 @@ namespace WorldMaker
 {
 	int ChunkRenderUnit::s_chunkSide = 64; // Amount of pixels per chunk
 
-
 	glm::vec3 ChunkRenderUnit::center()
 	{
 	    glm::vec3 point = m_vertices->m_data[0].m_position; // First vertex pos
@@ -17,8 +16,8 @@ namespace WorldMaker
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels)
 	{
 	    m_models = chunkModels;
-        m_lowestPoint = lowestPoint;
-        m_tallestPoint = tallestPoint;
+        m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
+        m_tallestPoint = std::max(tallestPoint, chunkModels.tallestPoint);
         std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
 		m_vertices->pushData(vertices);
 		m_vertices->submitData();
@@ -67,5 +66,7 @@ namespace WorldMaker
         ssbo->pushData(modelMat);
         ssbo->submitData();
         m_modelInstancesSSBO[model->instanceId()].first = model;
+        tallestPoint = std::max(tallestPoint, pos.y + model->tallestPoint() * scale.y);
+        lowestPoint = std::max(lowestPoint, pos.y + model->lowestPoint() * scale.y);
 	}
 }

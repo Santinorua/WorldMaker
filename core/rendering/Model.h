@@ -26,7 +26,11 @@ namespace WorldMaker
 		std::vector<MeshSPtr> m_meshes;
 		std::unordered_map<unsigned int, ModelMaterialWPtr> m_localToGlobalMaterials = {};
 		inline const unsigned int instanceId() const { return m_instanceId; }
+		inline double tallestPoint() const { return m_tallestPoint; }
+		inline double lowestPoint() const { return m_lowestPoint; }
 	private:
+	    double m_tallestPoint = 0;
+	    double m_lowestPoint = 0;
 		std::string m_relativePath;
 		std::string m_globalPath;
 		unsigned int m_instanceId;

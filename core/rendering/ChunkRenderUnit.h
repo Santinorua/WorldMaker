@@ -19,6 +19,8 @@ namespace WorldMaker
     class TerrainMaterial;
 	struct ChunkModels
 	{
+	    double tallestPoint = 0;
+		double lowestPoint = 0;
 	    std::unordered_map<unsigned int, std::pair<ModelSPtr, MatricesSSBO>> m_modelInstancesSSBO = {};
 		void addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot = glm::identity<glm::quat>(), glm::vec3 scale = {1,1,1});
 	};
