@@ -88,5 +88,5 @@ void main()
     mat3 normalMatrix = transpose(inverse(mat3(modelMatrices[gl_InstanceID])));
     frag_normal = normalMatrix * GetNormal(realIndex);
     gl_Position = vp * modelMatrices[gl_InstanceID] * position;
-    frag_pos = gl_Position;
+    frag_pos = modelMatrices[gl_InstanceID] * position;
 }

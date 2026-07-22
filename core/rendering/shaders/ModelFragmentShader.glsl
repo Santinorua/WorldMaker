@@ -18,6 +18,7 @@ uniform float u_shininess;
 void main()
 {
     vec4 diffuse = texture(u_diffuse, frag_uv);
+    if (diffuse.a < 0.5) discard;
     vec4 specular = texture(u_specular, frag_uv);
 
     vec4 lightColor = vec4(u_globalLightColor[0], u_globalLightColor[1], u_globalLightColor[2], u_globalLightColor[3]);
@@ -28,6 +29,6 @@ void main()
     float similarity = -dot(lightDir, frag_normal);
     float intensity = min(((similarity + 1.0) * 0.5) * u_shininess, 1);
     vec4 intensityVec = vec4(intensity, intensity, intensity, 1.0);
-    // final_color = frag_color * lightColor * intensityVec;
     final_color = (frag_color * diffuse * 0.8 + specular * 0.2) * lightColor * intensityVec;
+    // final_color = vec4(normalize(frag_normal) * 0.5 + 0.5, 1.0);
 }
