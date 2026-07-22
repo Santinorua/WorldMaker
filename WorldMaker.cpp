@@ -157,14 +157,11 @@ int main()
 
 		Camera::UpdateCameraTransform();
 
-		int count = 0;
 		for (auto& ck : chunks) {
 		    if (!Camera::CanSeeBox(ck->minPoint(), ck->maxPoint())) continue;
-			count++;
 			Renderer::DrawChunkTerrain(*ck);
 			Renderer::DrawChunkModels(*ck);
 		}
-		std::cout << count << "\n";
 		if (doRender2D) {
 			Renderer::DrawNoise(noise1);
 		}

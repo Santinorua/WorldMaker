@@ -102,7 +102,8 @@ namespace WorldMaker
        	if (Input::GetKey(KeyCode::A_Key)) horizontalDirection.x -= 1;
        	if (Input::GetKey(KeyCode::D_Key)) horizontalDirection.x += 1;
 
-       	s_pos += static_cast<glm::vec3>(Front() * horizontalDirection.z * CoolTime::DeltaTime() * s_speed);
-       	s_pos += static_cast<glm::vec3>(Left() * horizontalDirection.x * CoolTime::DeltaTime() * s_speed);
+        float moveSpeed = Input::GetKey(KeyCode::LeftShift_Key) ? s_speed*2 : s_speed;
+       	s_pos += static_cast<glm::vec3>(Front() * horizontalDirection.z * CoolTime::DeltaTime() * moveSpeed);
+       	s_pos += static_cast<glm::vec3>(Left() * horizontalDirection.x * CoolTime::DeltaTime() * moveSpeed);
     }
 }
