@@ -56,7 +56,6 @@ namespace WorldMaker
         }
         // GLCall(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         GLCall(glFrontFace(GL_CW));
-        GLCall(glEnable(GL_CULL_FACE));
         GLCall(glCullFace(GL_BACK));
         s_shaderProgramsByType[ShaderProgramType::noise] = std::make_shared<ShaderProgram>("core/rendering/shaders/NoiseVertexShader.glsl", "core/rendering/shaders/NoiseFragmentShader.glsl");
         s_shaderProgramsByType[ShaderProgramType::terrain] = std::make_shared<ShaderProgram>("core/rendering/shaders/TerrainVertexShader.glsl", "core/rendering/shaders/TerrainFragmentShader.glsl");
@@ -84,6 +83,7 @@ namespace WorldMaker
 
 	void Renderer::DrawChunkTerrain(ChunkRenderUnit& chunk)
 	{
+	    GLCall(glEnable(GL_CULL_FACE));
 	    Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
@@ -95,6 +95,7 @@ namespace WorldMaker
 	}
 	void Renderer::DrawChunkModels(ChunkRenderUnit& chunk)
 	{
+	    GLCall(glDisable(GL_CULL_FACE));
         Renderer::s_shaderProgramsByType[ShaderProgramType::model]->bind();
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
