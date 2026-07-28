@@ -1,6 +1,5 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
-#define STB_IMAGE_STATIC
 #include "DebugUtils.h"
 #include "OpenGLUtils.h"
 #include "Texture2D.h"

@@ -1,6 +1,7 @@
 #include "WorldMaker.h"
 #include "Camera.h"
 #include "GPUResourceManager.h"
+#include "KeyCode.h"
 #include "PerlinNoise.h"
 #include "RenderingConstants.h"
 #include "Renderer.h"
@@ -17,6 +18,7 @@
 #include "ChunkRenderUnit.h"
 
 #include "ChunkGeneration.h"
+#include "WorldExporter.h"
 
 #include "Camera.h"
 #include "GlobalLight.h"
@@ -31,6 +33,7 @@
 #include "CoreGenerator.h"
 #include "BiomeGenerator.h"
 
+#include "core/worldExporter/WorldExporter.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -152,7 +155,10 @@ int main()
 			chunks.clear();
 			ChunkGeneration::RegenerateChunks(chunks, generator, world_width, world_height);
 		}
-
+		if (Input::GetKey(KeyCode::SpaceBar_Key))
+		{
+            WorldExporter::ExportChunkToGLB(chunks[0].get());
+		}
 		ImGui::End();
 
 		Camera::UpdateCameraTransform();
