@@ -60,7 +60,7 @@ namespace WorldMaker
 
 	MeshSPtr Model::processMesh(aiMesh* mesh, const aiScene* scene, aiMatrix4x4 globalPos)
 	{
-		ModelMaterialSPtr sharedMeshMaterial = nullptr;
+		MeshMaterialSPtr sharedMeshMaterial = nullptr;
 
 		bool materialFound = false;
 		for (auto& pair : m_localToGlobalMaterials)
@@ -68,7 +68,7 @@ namespace WorldMaker
 			if (pair.first == mesh->mMaterialIndex)
 			{
 				sharedMeshMaterial = pair.second.lock();
-				ResourceManager::GetModelMaterial(sharedMeshMaterial->id());
+				ResourceManager::GetMeshMaterial(sharedMeshMaterial->id());
 				materialFound = true;
 				break;
 			}
@@ -85,7 +85,7 @@ namespace WorldMaker
 
                 diffuse = getTexture2D(aiTextureType_DIFFUSE, material, texAiPath, *scene);
                 specular = getTexture2D(aiTextureType_SPECULAR, material, texAiPath, *scene);
-                sharedMeshMaterial = ResourceManager::CreateModelMaterial(diffuse, specular);
+                sharedMeshMaterial = ResourceManager::CreateMeshMaterial(diffuse, specular);
                 m_localToGlobalMaterials.emplace(mesh->mMaterialIndex, sharedMeshMaterial);
     		}
     		else std::cout << "No materials\n";

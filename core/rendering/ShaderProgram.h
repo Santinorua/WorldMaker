@@ -4,7 +4,7 @@
 
 #include <string>
 #include <unordered_map>
-#include "ModelMaterial.h"
+#include "MeshMaterial.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "GL/glew.h"
@@ -40,7 +40,7 @@ namespace WorldMaker
 		void setUniformMat4f(const std::string& name, glm::mat4 matrix);
 		void setUniformTextureSlots(const std::string& name);
 		void loadTexture2DArray(unsigned int texture2DArray);
-		void loadMaterial(ModelMaterial* mat);
+		void loadMeshMaterial(MeshMaterial* mat);
 		void updateCameraMatrices();
 		unsigned int maxTexturesCapacity() { return  maxTextureSlots; }
 		unsigned int instanceId() const { return m_instanceId; }

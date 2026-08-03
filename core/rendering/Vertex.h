@@ -25,7 +25,7 @@ namespace WorldMaker
 			return
 			{
 				m_position.x, m_position.y, m_position.z,
-				m_color.x, m_color.y, m_color.z, m_color.y,
+				m_color.x, m_color.y, m_color.z, m_color.w,
 				m_materialLayer,
 				m_uv.x, m_uv.y,
 				m_normal.x, m_normal.y, m_normal.z

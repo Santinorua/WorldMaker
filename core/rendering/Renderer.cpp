@@ -87,7 +87,7 @@ namespace WorldMaker
 	    Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
-        GPUResourceManager::PrepareToDraw();
+        GPUResourceManager::PrepareToDrawTerrain();
 		chunk.m_vertexArray->bind();
 		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
 		chunk.m_indices->bindBufferBase(SSBOType::indices);
@@ -99,13 +99,12 @@ namespace WorldMaker
         Renderer::s_shaderProgramsByType[ShaderProgramType::model]->bind();
 		ShaderProgram::s_boundShader->updateCameraMatrices();
         GlobalLight::LoadLightSettings();
-		GPUResourceManager::PrepareToDraw();
 	    for (auto& [modelId, pair] : chunk.m_models.m_modelInstancesSSBO)
     	{
             auto& [model, matricesSSBO] = pair;
             for (MeshSPtr mesh : model->m_meshes)
             {
-                ShaderProgram::s_boundShader->loadMaterial(mesh->m_material.get());
+                ShaderProgram::s_boundShader->loadMeshMaterial(mesh->m_material.get());
                 mesh->m_vertexArray->bind();
                 matricesSSBO->submitData();
                 matricesSSBO->bindBufferBase(SSBOType::modelMatrices);

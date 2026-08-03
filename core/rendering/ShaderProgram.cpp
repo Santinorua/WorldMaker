@@ -162,7 +162,7 @@ namespace WorldMaker
 		setUniform1i("u_texture2DArray", 0);
 	}
 
-	void ShaderProgram::loadMaterial(ModelMaterial* mat)
+	void ShaderProgram::loadMeshMaterial(MeshMaterial* mat)
 	{
         bind();
         // setUniform4f("u_baseColor", mat->baseColor.x, mat->baseColor.y, material->baseColor.z, material->baseColor.w);

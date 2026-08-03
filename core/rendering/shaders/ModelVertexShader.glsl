@@ -74,7 +74,6 @@ vec3 GetNormal(uint index)
 smooth out vec3 frag_normal;
 smooth out vec4 frag_pos;
 smooth out vec4 frag_color;
-flat out double frag_materialIndex;
 smooth out vec2 frag_uv;
 
 void main()
@@ -83,7 +82,6 @@ void main()
     mat4 vp = u_projection * u_view;
     vec4 position = vec4(GetPosition(realIndex), 1.0);
     frag_color = GetColor(realIndex);
-    frag_materialIndex = GetMaterialIndex(realIndex);
     frag_uv = GetUV(realIndex);
     mat3 normalMatrix = transpose(inverse(mat3(modelMatrices[gl_InstanceID])));
     frag_normal = normalMatrix * GetNormal(realIndex);

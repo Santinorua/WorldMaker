@@ -2,7 +2,7 @@
 
 
 #include "Mesh.h"
-#include "ModelMaterial.h"
+#include "MeshMaterial.h"
 #include "FileFunctions.h"
 #include "assimp/material.h"
 
@@ -24,7 +24,7 @@ namespace WorldMaker
 		const inline std::string relativePath() const { return m_relativePath; }
 		const inline std::string globalPath() const { return m_globalPath; }
 		std::vector<MeshSPtr> m_meshes;
-		std::unordered_map<unsigned int, ModelMaterialWPtr> m_localToGlobalMaterials = {};
+		std::unordered_map<unsigned int, MeshMaterialWPtr> m_localToGlobalMaterials = {};
 		inline const unsigned int instanceId() const { return m_instanceId; }
 		inline double tallestPoint() const { return m_tallestPoint; }
 		inline double lowestPoint() const { return m_lowestPoint; }
