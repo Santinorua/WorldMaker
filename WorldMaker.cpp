@@ -166,23 +166,16 @@ int main()
 
 				ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
 			}
-			ImGui::End();
 		}
-
-		Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
+		ImGui::End();
 
 		Camera::UpdateCameraTransform();
-		// if (Input::GetKeyDown(KeyCode::SpaceBar_Key))
-		ShaderProgram::s_boundShader->updateCameraMatrices();
-		GlobalLight::LoadLightSettings();
 
 		for (auto& ck : chunks) {
-			if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
-			Renderer::PrepareToDrawChunk(*ck.second);
-			GPUResourceManager::PrepareToDraw();
-			Renderer::DrawChunk(*ck.second);
+		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
+			Renderer::DrawChunkTerrain(*ck.second);
+			Renderer::DrawChunkModels(*ck.second);
 		}
-
 		if (doRender2D) {
 			Renderer::DrawNoise(noise1);
 		}
@@ -193,10 +186,12 @@ int main()
 
 		glfwPollEvents();
 	}
+
 	for (auto& ck : chunks) {
 		delete ck.second;
 	}
 	chunks.clear();
+
 	ResourceManager::Shutdown();
 	GPUResourceManager::Shutdown();
 	ImGui_ImplOpenGL3_Shutdown();

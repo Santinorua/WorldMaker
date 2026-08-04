@@ -5,7 +5,6 @@ namespace WorldMaker
 {
 	int ChunkRenderUnit::s_chunkSide = 64; // Amount of pixels per chunk
 
-
 	glm::vec3 ChunkRenderUnit::center()
 	{
 	    glm::vec3 point = m_vertices->m_data[0].m_position; // First vertex pos
@@ -14,27 +13,15 @@ namespace WorldMaker
 	    return point;
 	}
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint)
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels)
 	{
-        m_lowestPoint = lowestPoint;
-        m_tallestPoint = tallestPoint;
+	    m_models = chunkModels;
+        m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
+        m_tallestPoint = std::max(tallestPoint, chunkModels.tallestPoint);
         std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
 		m_vertices->pushData(vertices);
 		m_vertices->submitData();
 
-		m_indices->pushData(indices);
-		m_indices->submitData();
-	}
-
-	void ChunkRenderUnit::ChangeVertices(std::vector<Vertex>& vertices)
-	{
-		m_vertices->flush();
-		m_vertices->pushData(vertices);
-		m_vertices->submitData();
-
-		std::vector<unsigned int> indices = ChunkRenderUnit::GetIndicesForChunk();
-
-		m_indices->flush();
 		m_indices->pushData(indices);
 		m_indices->submitData();
 	}
@@ -62,5 +49,24 @@ namespace WorldMaker
 			}
 		}
 		return indices;
+	}
+
+	void ChunkModels::addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	{
+        ModelSPtr model = ResourceManager::LoadModel(modelPath);
+        auto& ssbo = m_modelInstancesSSBO[model->instanceId()].second;
+        if (!ssbo)
+        {
+            ssbo = std::make_shared<SSBO<glm::mat4>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
+        }
+        glm::mat4 modelMat =
+            glm::translate(glm::mat4(1), pos) *
+            glm::mat4_cast(rot) *
+            glm::scale(glm::mat4(1), scale);
+        ssbo->pushData(modelMat);
+        ssbo->submitData();
+        m_modelInstancesSSBO[model->instanceId()].first = model;
+        tallestPoint = std::max(tallestPoint, pos.y + model->tallestPoint() * scale.y);
+        lowestPoint = std::max(lowestPoint, pos.y + model->lowestPoint() * scale.y);
 	}
 }

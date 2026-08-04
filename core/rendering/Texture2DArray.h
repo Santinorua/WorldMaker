@@ -1,6 +1,6 @@
 #pragma once
 #include "OpenGLUtils.h"
-#include "Texture2D.h"
+#include "ArrayTexture2D.h"
 #include <vector>
 
 namespace WorldMaker
@@ -9,7 +9,8 @@ namespace WorldMaker
     {
     public:
         Texture2DArray(int width, int height, int layers);
-        unsigned int pushTexture(Texture2D* texture);
+        unsigned int pushTexture(ArrayTexture2D* texture);
+        void resetTextureLayer(ArrayTexture2D* tex);
         void bind();
         inline unsigned int glName() const { return m_glName; }
     private:

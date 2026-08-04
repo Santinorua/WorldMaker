@@ -27,9 +27,9 @@
 // 		ShaderProgramSPtr m_program = nullptr;
 //         MaterialWPtr m_material = {};
 //         VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
-//         SSBOUPtr<Vertex> m_vertices = std::make_unique<SSBO<Vertex>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
-//         SSBOUPtr<unsigned int> m_indices = std::make_unique<SSBO<unsigned int>>(maxIndexCount, GL_DYNAMIC_STORAGE_BIT);
-//         SSBOUPtr<glm::mat4> m_modelMatrices = std::make_unique<SSBO<glm::mat4>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
+//         SSBOUPtr<Vertex> m_vertices = std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
+//         SSBOUPtr<unsigned int> m_indices = std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);
+//         SSBOUPtr<glm::mat4> m_modelMatrices = std::make_unique<SSBO<glm::mat4>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
 //     	std::vector<unsigned int> m_meshesRegistered; // Stores all the meshes instance id
 
 // 		bool m_staticStorage = false;

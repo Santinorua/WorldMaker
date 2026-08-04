@@ -1,4 +1,6 @@
 #include "ChunkGeneration.h"
+#include "ChunkRenderUnit.h"
+#include <glm/gtc/quaternion.hpp>
 
 #define CLAMP0(x) ((x) * ((x) > 0))
 
@@ -16,6 +18,8 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
     double tallestPoint = 0;
     double lowestPoint = 0;
 
+    ChunkModels chunkModels;
+    bool treeTest = false;
     for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
     {
         for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
@@ -23,6 +27,12 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
 
         	Vertex v;
             v = generator.getVertex(x, z);
+            if (!treeTest)
+            {
+                glm::quat rot = glm::identity<glm::quat>();
+                chunkModels.addInstance("core/rendering/assets/models/tree.glb", v.m_position, rot, {0.1, 0.1f, 0.1f});
+                treeTest = true;
+            }
             tallestPoint = std::max(tallestPoint, v.m_position.y);
             lowestPoint = std::min(lowestPoint, v.m_position.y);
 
@@ -59,8 +69,7 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
 			chunkVertices[(z % ChunkRenderUnit::s_chunkSide)*gridWidth + (x % ChunkRenderUnit::s_chunkSide)].m_normal = normal;
 		}
 	}
-
-    return new ChunkRenderUnit{chunkVertices, tallestPoint, lowestPoint};
+    return new ChunkRenderUnit(chunkVertices, tallestPoint, lowestPoint, chunkModels);
 }
 
 glm::ivec2 GetChunkPos(glm::vec3 pos) {

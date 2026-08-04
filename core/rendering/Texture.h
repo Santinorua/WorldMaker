@@ -13,6 +13,7 @@ namespace WorldMaker
         GLuint m_glName = 0;
 
     public:
+        Texture();
         virtual ~Texture();
 
         virtual void bind(unsigned int slot = 0) const = 0;

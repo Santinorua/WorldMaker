@@ -1,0 +1,47 @@
+#pragma once
+
+
+#include "Mesh.h"
+#include "ModelMaterial.h"
+#include "FileFunctions.h"
+#include "assimp/material.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+#include <memory>
+#include <vector>
+#include <string>
+#include <unordered_map>
+namespace WorldMaker
+{
+	class Model
+	{
+	public:
+	    ~Model();
+		Model(const std::string& path);
+		const inline std::string relativePath() const { return m_relativePath; }
+		const inline std::string globalPath() const { return m_globalPath; }
+		std::vector<MeshSPtr> m_meshes;
+		std::unordered_map<unsigned int, ModelMaterialWPtr> m_localToGlobalMaterials = {};
+		inline const unsigned int instanceId() const { return m_instanceId; }
+		inline double tallestPoint() const { return m_tallestPoint; }
+		inline double lowestPoint() const { return m_lowestPoint; }
+	private:
+	    double m_tallestPoint = 0;
+	    double m_lowestPoint = 0;
+		std::string m_relativePath;
+		std::string m_globalPath;
+		unsigned int m_instanceId;
+		static unsigned int s_idCount;
+		void loadModel(const std::string& path);
+		void processNode(aiNode* node, const aiScene* scene, aiMatrix4x4 parentTransform);
+		MeshSPtr processMesh(aiMesh* mesh, const aiScene* scene, aiMatrix4x4 globalPos);
+
+		Texture2DSPtr getTexture2D(aiTextureType texType, aiMaterial* material, aiString& texAiPath, const aiScene& scene);
+	};
+	using ModelSPtr = std::shared_ptr<Model>;
+	using ModelWPtr = std::weak_ptr<Model>;
+	using ModelPath = std::string;
+}

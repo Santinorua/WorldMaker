@@ -4,8 +4,8 @@
 namespace WorldMaker
 {
 	Vec4 GlobalLight::s_color = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float GlobalLight::s_lightOffset = 0.1f;
-	Vec3 GlobalLight::s_pos = {0.0f, 100.0f, 0.0f};
+	float GlobalLight::s_lightOffset = 0.9f;
+	Vec3 GlobalLight::s_pos = {0.0f, 500.0f, 0.0f};
 	void GlobalLight::SetLightColor(Vec4 color)
 	{
 		s_color = color;

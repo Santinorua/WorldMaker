@@ -13,7 +13,7 @@ namespace WorldMaker
         vertices = 0,
         indices = 1,
         materials = 2,
-        cubemaps = 3
+        modelMatrices = 3
     };
 
     template<typename T>
@@ -53,7 +53,6 @@ namespace WorldMaker
             m_maxBytes = elementsToSupport * sizeof(T);
             GLCall(glDeleteBuffers(1, &m_glName));
             m_glName = newSSBO;
-            std::cout << "SSBO resized!\n";
 		}
 		SSBO(unsigned int maxCount, unsigned int usage)
 		{
@@ -139,4 +138,7 @@ namespace WorldMaker
 	};
 	template<typename T>
 	using SSBOUPtr = std::unique_ptr<SSBO<T>>;
+	template<typename T>
+	using SSBOSPtr = std::shared_ptr<SSBO<T>>;
+	using MatricesSSBO = SSBOSPtr<glm::mat4>;
 }

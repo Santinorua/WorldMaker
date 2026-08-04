@@ -2,6 +2,7 @@
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include "RenderingConstants.h"
 #include "ShaderProgram.h"
 #include <map>
 #include <vector>
@@ -37,7 +38,7 @@ namespace WorldMaker
 	public:
 		static RendererConfig s_config;
 		static GLFWwindow* s_window;
-		static ShaderProgramSPtr s_shaderProgramsByType[2];
+		static ShaderProgramSPtr s_shaderProgramsByType[shadersAmount];
 		static bool s_inited;
 
 		static void Init();
@@ -60,7 +61,7 @@ namespace WorldMaker
 		static void PrepareToDrawNoise(NoiseRenderUnit& noise);
 		static void DrawNoise(const NoiseRenderUnit& noise);
 
-		static void PrepareToDrawChunk(ChunkRenderUnit& chunk);
-		static void DrawChunk(ChunkRenderUnit& chunk);
+		static void DrawChunkTerrain(ChunkRenderUnit& chunk);
+		static void DrawChunkModels(ChunkRenderUnit& chunk);
 	};
 }
