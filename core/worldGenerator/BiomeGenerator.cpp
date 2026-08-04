@@ -50,7 +50,7 @@ namespace WorldMaker {
         double distance = 0.0;
         double distanceVec[4];
         for (int i = 0; i < 4; i++) {
-            distanceVec[i] = 0.0;
+            distanceVec[i] = 0.5;
             if (m_idealConditions[i] != -2.0) {
                 distanceVec[i] = params[i] - m_idealConditions[i];
             }
@@ -95,7 +95,7 @@ namespace WorldMaker {
         std::vector<double> distances;
         distances.reserve(m_biomes.size());
         double bestDistance = std::numeric_limits<double>::max();
-        int bestBiome;
+        int bestBiome = 0;
         for (int i = 0; i < m_biomes.size(); i++) {
             bool conditionsMet = true;
             // Comprobar condiciones
@@ -125,7 +125,7 @@ namespace WorldMaker {
         Biome plains = Biome();
         plains.name = "Plains";
         plains.setIdealCondition(BiomeDeterminators::Continentalness, -0.4);
-        plains.setIdealCondition(BiomeDeterminators::Erosion, 1);
+        plains.setIdealCondition(BiomeDeterminators::Erosion, 0);
         plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
         plains.setIdealCondition(BiomeDeterminators::Humidity,0.5);
         plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
@@ -142,6 +142,15 @@ namespace WorldMaker {
 
         addBiome(desert);
 
+        Biome mountain = Biome();
+        mountain.name = "Mountain";
+        mountain.setIdealCondition(BiomeDeterminators::Continentalness, 0.8);
+        mountain.setIdealCondition(BiomeDeterminators::Erosion, 1);
+        mountain.setIdealCondition(BiomeDeterminators::Temperature, -2);
+        mountain.setIdealCondition(BiomeDeterminators::Humidity,-2);
+        mountain.biomeColor = Vec4(0.75, 0.75, 0.75, 1.0);
+
+        addBiome(mountain);
     }
 
 

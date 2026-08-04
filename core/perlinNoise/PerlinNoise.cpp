@@ -1,5 +1,6 @@
 #include "PerlinNoise.h"
 
+#include "mathUtils.h"
 #include "../rendering/DebugUtils.h"
 
 
