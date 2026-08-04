@@ -111,9 +111,7 @@ int main()
 		CoolTime::Update();
         Input::Update();
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+		ui::begin();
 
         ImGui::Text("FPS: %.1f",
                     ImGui::GetIO().Framerate);
@@ -129,7 +127,8 @@ int main()
 		auto y_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.y, render_distance);
         ImGui::Text("X Gen. Range: [%d; %d]", y_generation_range.x, y_generation_range.y);
 
-		GenerationWindow(chunk_size, world_width, seed, render_distance, chunks);
+		ui::GenerationWindow(chunk_size, world_width, seed, render_distance, chunks);
+		ui::BiomesWindow();
 
 		Camera::UpdateCameraTransform();
 
@@ -142,8 +141,7 @@ int main()
 			Renderer::DrawNoise(noise1);
 		}
 
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ui::end();
 		glfwSwapBuffers(Renderer::GetWindow());
 
 		glfwPollEvents();
