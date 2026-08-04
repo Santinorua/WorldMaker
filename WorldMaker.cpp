@@ -34,6 +34,7 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "ui.h"
 
 using namespace WorldMaker;
 
@@ -100,12 +101,7 @@ int main()
     ImGui::StyleColorsDark();
 
 	int chunk_size = ChunkRenderUnit::s_chunkSide;
-	int octaves = 4;
 	uint64_t seed = 1;
-	double frequency = 5;
-	double amplitude = 4;
-	double lacunarity = 2;
-	double persistence = 0.75;
 
 	while (!Renderer::WindowShouldClose())
 	{
@@ -118,8 +114,6 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-#define IMGUI_INPUT(var, type) (ImGui::InputScalar("##" #var, type, &var))
 
         ImGui::Text("FPS: %.1f",
                     ImGui::GetIO().Framerate);
@@ -135,39 +129,7 @@ int main()
 		auto y_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.y, render_distance);
         ImGui::Text("X Gen. Range: [%d; %d]", y_generation_range.x, y_generation_range.y);
 
-		if (ImGui::Begin("Generation"))	{
-			ImGui::Text("Mesh Size: ");
-			IMGUI_INPUT(chunk_size, ImGuiDataType_S32);
-
-			ImGui::Text("Mesh size: ");
-			IMGUI_INPUT(world_width, ImGuiDataType_S32);
-
-			ImGui::Text("x");
-			IMGUI_INPUT(world_height, ImGuiDataType_S32);
-
-			ImGui::Text("Noise:");
-			ImGui::Text("frequency:");
-			IMGUI_INPUT(frequency, ImGuiDataType_Double);
-
-			ImGui::Text("amplitude:");
-			IMGUI_INPUT(amplitude, ImGuiDataType_Double);
-
-			ImGui::Text("seed:");
-			IMGUI_INPUT(seed, ImGuiDataType_U64);
-
-			ImGui::Text("octaves:");
-			IMGUI_INPUT(octaves, ImGuiDataType_S32);
-
-			if (ImGui::Button("Generate mesh")) {
-				ChunkRenderUnit::s_chunkSide = chunk_size;
-				ChunkRenderUnit::s_chunkSide = chunk_size;
-
-				WorldGenerator generator(150,seed);
-
-				ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
-			}
-		}
-		ImGui::End();
+		GenerationWindow(chunk_size, world_width, seed, render_distance, chunks);
 
 		Camera::UpdateCameraTransform();
 
