@@ -13,7 +13,8 @@ namespace ChunkGeneration {
 using ChunkArray = std::vector<std::pair<glm::ivec2, ChunkRenderUnit*>>;
 
 ChunkRenderUnit* GenerateChunk(WorldGenerator& fractal, float x_offset, float z_offset);
-void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos);
+/* `force` forces regen even if the position is the same */
+void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos, bool force = false);
 
 /* Debug */
 glm::ivec2 GetGenerationRange(int pos, int render_distance);

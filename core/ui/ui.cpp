@@ -28,32 +28,38 @@ void end() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void GenerationWindow(int &chunk_size, int &world_width, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks) {
-	if (ImGui::Begin("Generation"))	{
-		ImGui::Text("Mesh Size: ");
-		IMGUI_INPUT(chunk_size, ImGuiDataType_S32);
+bool GenerationWindow(int &chunk_size, int &world_width, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks) {
+	bool redraw = false;
+	ImGui::Begin("Generation");
+	ImGui::Text("Mesh Size: ");
+	IMGUI_INPUT(chunk_size, ImGuiDataType_S32);
 
-		ImGui::Text("Mesh size: ");
-		IMGUI_INPUT(world_width, ImGuiDataType_S32);
+	ImGui::Text("Mesh size: ");
+	IMGUI_INPUT(world_width, ImGuiDataType_S32);
 
-		ImGui::Text("seed:");
-		IMGUI_INPUT(seed, ImGuiDataType_U64);
+	ImGui::Text("seed:");
+	IMGUI_INPUT(seed, ImGuiDataType_U64);
 
-		if (ImGui::Button("Biomes")) {
-			show_biomes = !show_biomes;
-			std::cout << "show_biomes = " << show_biomes << '\n';
+	if (ImGui::Button("Biomes")) {
+		show_biomes = !show_biomes;
+		std::cout << "show_biomes = " << show_biomes << '\n';
+	}
+
+	if (ImGui::Button("Generate mesh")) {
+		redraw = true;
+		ChunkRenderUnit::s_chunkSide = chunk_size;
+		ChunkRenderUnit::s_chunkSide = chunk_size;
+
+		WorldGenerator generator(150,seed);
+
+		for (auto &chunk : chunks) {
+			delete chunk.second;
 		}
-
-		if (ImGui::Button("Generate mesh")) {
-			ChunkRenderUnit::s_chunkSide = chunk_size;
-			ChunkRenderUnit::s_chunkSide = chunk_size;
-
-			WorldGenerator generator(150,seed);
-
-			ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
-		}
+		chunks.clear();
+		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position(), true);
 	}
 	ImGui::End();
+	return redraw;
 }
 
 void BiomeWindow(Biome *biome_ptr) {
@@ -80,11 +86,11 @@ void BiomeWindow(Biome *biome_ptr) {
 
 
 	ImGui::Begin(biome.name.c_str());
-	
-	ImGui::InputDouble("Erosion: ", &erosion);
-	ImGui::InputDouble("Continentalness: ", &continentalness);
-	ImGui::InputDouble("Temperature: ", &temperature);
-	ImGui::InputDouble("Humidity: ", &humidity);
+
+	ImGui::InputDouble("Erosion: ", &erosion, 0, 0, "%.3f");
+	ImGui::InputDouble("Continentalness: ", &continentalness, 0, 0, "%.3f");
+	ImGui::InputDouble("Temperature: ", &temperature, 0, 0, "%.3f");
+	ImGui::InputDouble("Humidity: ", &humidity, 0, 0, "%.3f");
 
 	ImGui::ColorPicker4("Color", (float*)&color);
 

@@ -85,13 +85,13 @@ glm::ivec2 GetGenerationRange(int pos, int render_distance) {
 	return {CLAMP0(pos - render_distance), pos + render_distance};
 }
 
-void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos)
+void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos, bool force)
 {
 	static glm::ivec2 last_pos = {INT_MAX, INT_MAX};
 	glm::ivec2 pos = GetChunkPos(camera_pos);
 
 	// TODO: Find if there's a better way
-	if (pos == last_pos) {
+	if (pos == last_pos && !force) {
 		return;
 	}
 	last_pos = pos;
