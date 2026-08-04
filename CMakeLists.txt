@@ -116,7 +116,7 @@ target_include_directories(Math PUBLIC ${CMAKE_SOURCE_DIR}/core/math)
 set(ASSIMP_BUILD_MINIZIP ON)
 set(ASSIMP_BUILD_ZLIB ON)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF) # Add this to prevent Assimp from treating warnings as errors
-
+set(BUILD_SHARED_LIBS OFF)
 FetchContent_Declare(
     assimp
     GIT_REPOSITORY https://github.com/assimp/assimp.git
@@ -128,7 +128,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
 endif()
 
 FetchContent_MakeAvailable(assimp)
-
+set(BUILD_SHARED_LIBS ON)
 # -----------------------------------------------------------------------------------------------------
 
 # ImGui
@@ -146,14 +146,14 @@ include(FetchContent)
 FetchContent_Declare(
     tinygltf
     GIT_REPOSITORY https://github.com/syoyo/tinygltf.git
-    GIT_TAG release
+    GIT_TAG v2.9.3
 )
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(TINYGLTF_HEADER_ONLY ON CACHE BOOL "" FORCE)
 set(TINYGLTF_INSTALL OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(tinygltf)
-
+message("${tinygltf_SOURCE_DIR}")
 add_library(TinyGltfImpl OBJECT vendor/tinygltf_impl.cpp)
 target_link_libraries(TinyGltfImpl PRIVATE tinygltf)
 
