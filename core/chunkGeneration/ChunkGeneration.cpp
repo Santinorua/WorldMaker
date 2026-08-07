@@ -8,7 +8,7 @@ namespace WorldMaker {
 
 namespace ChunkGeneration {
 
-ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float z_offset)
+ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_offset, int z_offset)
 {
 	int gridWidth = ChunkRenderUnit::s_chunkSide;
     int gridDepth = ChunkRenderUnit::s_chunkSide;
@@ -20,9 +20,9 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
 
     ChunkModels chunkModels;
     bool treeTest = false;
-    for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
+    for (int z = z_offset * ChunkRenderUnit::s_chunkSide - z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - z_offset; ++z)
     {
-        for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
+        for (int x = x_offset * ChunkRenderUnit::s_chunkSide - x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - x_offset; ++x)
         {
 
         	Vertex v;
@@ -50,10 +50,10 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
         }
     }
 
-	for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z) {
-		int localZ = z % ChunkRenderUnit::s_chunkSide;
-		for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x) {
-			int localX = x % ChunkRenderUnit::s_chunkSide;
+	for (int z = z_offset * ChunkRenderUnit::s_chunkSide - z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - z_offset; ++z) {
+		int localZ = (z + z_offset) % ChunkRenderUnit::s_chunkSide;
+		for (int x = x_offset * ChunkRenderUnit::s_chunkSide - x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - x_offset; ++x) {
+			int localX = (x + x_offset) % ChunkRenderUnit::s_chunkSide;
 			float hL = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position.y : generator.getVertex(x-1, z).m_position.y;
 			float hR = localX != ChunkRenderUnit::s_chunkSide - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position.y : generator.getVertex(x+1, z).m_position.y;
 			float hU = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position.y : generator.getVertex(x, z-1).m_position.y;

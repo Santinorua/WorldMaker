@@ -118,6 +118,12 @@ set(ASSIMP_BUILD_MINIZIP ON)
 set(ASSIMP_BUILD_ZLIB ON)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF) # Add this to prevent Assimp from treating warnings as errors
 
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+
 FetchContent_Declare(
     assimp
     GIT_REPOSITORY https://github.com/assimp/assimp.git
@@ -248,3 +254,11 @@ target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRN
 add_executable(WorldMaker WorldMaker.cpp)
 
 target_link_libraries(WorldMaker PUBLIC Core)
+
+if(WIN32 AND TARGET assimp)
+    add_custom_command(TARGET WorldMaker POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:assimp>
+            $<TARGET_FILE_DIR:WorldMaker>
+            COMMENT "Copying Assimp runtime next to WorldMaker.exe")
+endif()
