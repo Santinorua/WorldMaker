@@ -101,7 +101,7 @@ int main()
     ImGui::StyleColorsDark();
 
 	int chunk_size = ChunkRenderUnit::s_chunkSide;
-	uint64_t seed = 1;
+	uint64_t seed = 42;
 
 	while (!Renderer::WindowShouldClose())
 	{
@@ -127,12 +127,13 @@ int main()
 		auto y_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.y, render_distance);
         ImGui::Text("X Gen. Range: [%d; %d]", y_generation_range.x, y_generation_range.y);
 
-		bool redraw = ui::GenerationWindow(chunk_size, world_width, seed, render_distance, chunks);
+		ImGui::Text("Chunks Loaded: %lu", chunks.size());
+
+		bool redraw = ui::GenerationWindow(chunk_size, world_width, seed, render_distance, chunks, generator);
 		ui::BiomesWindow();
 
 		Camera::UpdateCameraTransform();
 
-		std::cout << "chunks.size() = " << chunks.size() << '\n';
 		for (auto& ck : chunks) {
 		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
 			Renderer::DrawChunkTerrain(*ck.second);
