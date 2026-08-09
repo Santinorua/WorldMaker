@@ -157,7 +157,7 @@ int main()
 		}
 		if (Input::GetKey(KeyCode::SpaceBar_Key))
 		{
-            WorldExporter::ExportChunkToGLB(chunks[0].get());
+            WorldExporter::ExportModelToGLB(chunks[0]->m_models.m_modelInstancesSSBO[0].first, "tree.glb");
 		}
 		ImGui::End();
 

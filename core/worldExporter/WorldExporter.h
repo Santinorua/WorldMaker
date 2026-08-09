@@ -16,7 +16,7 @@ namespace WorldMaker
     public:
         static void ExportWorld(std::vector<ChunkRenderUnitUPtr> chunks);
         static void ExportChunkToGLB(ChunkRenderUnit* chunk);
-
+        static void ExportModelToGLB(ModelSPtr model, const std::string& outPath);
         static int AddTextureImage(tinygltf::Model& model, BufferBuilder& bufferBuilder, Texture2DSPtr texture);
         static int AddTexture(tinygltf::Model& model, int imageIndex);
         static int AddMaterial(tinygltf::Model& model, BufferBuilder& bufferBuilder, MeshMaterialSPtr meshMaterial);

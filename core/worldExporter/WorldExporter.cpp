@@ -3,7 +3,6 @@
 #include "SSBO.h"
 #include "stb_image_write.h"
 #include "glm/common.hpp"
-
 namespace WorldMaker
 {
     void WorldExporter::ExportWorld(std::vector<ChunkRenderUnitUPtr> chunks)
@@ -11,6 +10,71 @@ namespace WorldMaker
 
     }
 
+    void WorldExporter::ExportModelToGLB(ModelSPtr model, const std::string &outPath)
+    {
+        tinygltf::Model gltfModel;
+        gltfModel.asset.version = "2.0";
+        gltfModel.asset.generator = "WorldMaker";
+
+        BufferBuilder bufferBuilder;
+        tinygltf::Node node;
+        node.name = "test_model";
+
+        for (MeshSPtr mesh : model->m_meshes)
+        {
+            std::cout << "Mesh: verts=" << mesh->m_vertices->m_data.size()
+                      << " indices=" << mesh->m_indices->m_data.size() << "\n";
+            std::vector<Vertex>& verticesData = mesh->m_vertices->m_data;
+            std::vector<unsigned int> indices = mesh->m_indices->m_data;
+            std::vector<float> positions = BuildPositionBuffer(verticesData);
+            std::vector<float> normals = BuildNormalBuffer(verticesData);
+            std::vector<float> uvs = BuildUVBuffer(verticesData);
+
+            size_t posOffset = bufferBuilder.AddBlock<float>(positions);
+            size_t idxOffset = bufferBuilder.AddBlock<unsigned int>(indices);
+            size_t normalOffset = bufferBuilder.AddBlock<float>(normals);
+            size_t uvOffset = bufferBuilder.AddBlock<float>(uvs);
+
+            int posIdx = SetPositionsForModel(posOffset, gltfModel, positions);
+            int idxIdx = SetIndicesForModel(idxOffset, gltfModel, indices);
+            int normalIdx = SetAttributeForModel(normalOffset, gltfModel, normals.size()/3, TINYGLTF_TYPE_VEC3);
+            int uvIdx = SetAttributeForModel(uvOffset, gltfModel, uvs.size()/2, TINYGLTF_TYPE_VEC2);
+
+            tinygltf::Primitive primitive;
+            primitive.indices = idxIdx;
+            primitive.attributes["POSITION"] = posIdx;
+            primitive.attributes["NORMAL"] = normalIdx;
+            primitive.attributes["TEXCOORD_0"] = uvIdx;
+            primitive.mode = TINYGLTF_MODE_TRIANGLES;
+
+            if (mesh->m_material)
+            {
+                primitive.material = AddMaterial(gltfModel, bufferBuilder, mesh->m_material);
+            }
+
+            tinygltf::Mesh gltfMesh;
+            gltfMesh.primitives.push_back(primitive);
+            gltfModel.meshes.push_back(gltfMesh);
+
+            tinygltf::Node meshNode;
+            meshNode.mesh = (int)gltfModel.meshes.size()-1;
+            gltfModel.nodes.push_back(meshNode);
+            node.children.push_back((int)gltfModel.nodes.size()-1);
+        }
+        gltfModel.nodes.push_back(node);
+
+        tinygltf::Scene scene;
+        scene.nodes.push_back((int)gltfModel.nodes.size()-1);
+        gltfModel.scenes.push_back(scene);
+        gltfModel.defaultScene = 0;
+
+        gltfModel.buffers.push_back(bufferBuilder.buffer);
+
+        tinygltf::TinyGLTF writer;
+        bool ok = writer.WriteGltfSceneToFile(&gltfModel, outPath, true, true, true, true); // false = .gltf en vez de .glb
+        if (!ok) std::cerr << "Failed exporting model\n";
+        else std::cout << "Model exported successfully!\n";
+    }
     void WorldExporter::ExportChunkToGLB(ChunkRenderUnit* chunk)
     {
         tinygltf::Model model;
@@ -82,7 +146,7 @@ namespace WorldMaker
         tinygltf::TinyGLTF writer;
         bool ok = writer.WriteGltfSceneToFile(
             &model,
-            "/home/coolfede97/chunk.glb",
+            "chunk.glb",
             true,
             true,
             true,
@@ -154,6 +218,7 @@ namespace WorldMaker
             material.pbrMetallicRoughness.baseColorTexture.index = textureIdx;
         }
 
+        material.doubleSided = true;
         model.materials.push_back(material);
         return (int)model.materials.size()-1;
     }
@@ -187,7 +252,7 @@ namespace WorldMaker
         model.bufferViews.push_back(view);
         model.accessors.push_back(accessor);
 
-        return (int)model.bufferViews.size()-1;
+        return (int)model.accessors.size()-1;
     }
     int WorldExporter::SetPositionsForModel(size_t offsetInBuffer, tinygltf::Model& model, std::vector<float>& positions)
     {
@@ -223,7 +288,7 @@ namespace WorldMaker
         model.bufferViews.push_back(view);
         model.accessors.push_back(accessor);
 
-        return (int)model.bufferViews.size()-1;
+        return (int)model.accessors.size()-1;
     }
 
     int WorldExporter::SetIndicesForModel(size_t offsetInBuffer, tinygltf::Model& model, std::vector<unsigned int>& indices)
@@ -244,7 +309,7 @@ namespace WorldMaker
         model.bufferViews.push_back(view);
         model.accessors.push_back(accessor);
 
-        return (int)model.bufferViews.size()-1;
+        return (int)model.accessors.size()-1;
     }
     std::vector<float> WorldExporter::BuildPositionBuffer(const std::vector<Vertex>& vertices)
     {

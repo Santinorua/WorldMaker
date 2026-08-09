@@ -11,7 +11,7 @@ namespace WorldMaker
         tinygltf::Buffer buffer;
 
         template <typename T>
-        size_t AddBlock(std::vector<T>& data)
+        size_t AddBlock(const std::vector<T>& data)
         {
             size_t offset = buffer.data.size();
             size_t byteLength = data.size() * sizeof(T);
