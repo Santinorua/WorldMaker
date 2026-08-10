@@ -28,27 +28,26 @@ namespace WorldMaker
 
 	std::vector<unsigned int> ChunkRenderUnit::GetIndicesForChunk()
 	{
-		std::vector<unsigned int> indices;
+        std::vector<unsigned int> indices;
+        for (int y = 0; y < s_chunkSide-1; y++)
+        {
+            for (int x = 0; x < s_chunkSide-1; x++)
+            {
+                unsigned int bottomLeft = y * s_chunkSide + x;
+                unsigned int bottomRight = y * s_chunkSide + (x + 1);
+                unsigned int topLeft = (y+1) * s_chunkSide + x;
+                unsigned int topRight = (y+1) * s_chunkSide + (x +1);
 
-		for (int y = 0; y < s_chunkSide-1; y++)
-		{
-			for (int x = 0; x < s_chunkSide-1; x++)
-			{
-				unsigned int bottomLeft = y * s_chunkSide + x;
-				unsigned int bottomRight = y * s_chunkSide + (x + 1);
-				unsigned int topLeft = (y+1) * s_chunkSide + x;
-				unsigned int topRight = (y+1) * s_chunkSide + (x +1);
+                indices.push_back(bottomLeft);
+                indices.push_back(topRight);
+                indices.push_back(bottomRight);
 
-				indices.push_back(bottomLeft);
-				indices.push_back(bottomRight);
-				indices.push_back(topRight);
-
-				indices.push_back(bottomLeft);
-				indices.push_back(topRight);
-				indices.push_back(topLeft);
-			}
-		}
-		return indices;
+                indices.push_back(bottomLeft);
+                indices.push_back(topLeft);
+                indices.push_back(topRight);
+            }
+        }
+        return indices;
 	}
 
 	void ChunkModels::addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot, glm::vec3 scale)

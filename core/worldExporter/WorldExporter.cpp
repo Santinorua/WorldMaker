@@ -22,8 +22,6 @@ namespace WorldMaker
 
         for (MeshSPtr mesh : model->m_meshes)
         {
-            std::cout << "Mesh: verts=" << mesh->m_vertices->m_data.size()
-                      << " indices=" << mesh->m_indices->m_data.size() << "\n";
             std::vector<Vertex>& verticesData = mesh->m_vertices->m_data;
             std::vector<unsigned int> indices = mesh->m_indices->m_data;
             std::vector<float> positions = BuildPositionBuffer(verticesData);
@@ -71,7 +69,7 @@ namespace WorldMaker
         gltfModel.buffers.push_back(bufferBuilder.buffer);
 
         tinygltf::TinyGLTF writer;
-        bool ok = writer.WriteGltfSceneToFile(&gltfModel, outPath, true, true, true, true); // false = .gltf en vez de .glb
+        bool ok = writer.WriteGltfSceneToFile(&gltfModel, outPath, true, true, true, true);
         if (!ok) std::cerr << "Failed exporting model\n";
         else std::cout << "Model exported successfully!\n";
     }
@@ -218,7 +216,6 @@ namespace WorldMaker
             material.pbrMetallicRoughness.baseColorTexture.index = textureIdx;
         }
 
-        material.doubleSided = true;
         model.materials.push_back(material);
         return (int)model.materials.size()-1;
     }

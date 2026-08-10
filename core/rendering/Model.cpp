@@ -28,7 +28,6 @@ namespace WorldMaker
 		const aiScene* scene = importer.ReadFile(
             path,
             aiProcess_Triangulate |
-            aiProcess_FlipWindingOrder |
             aiProcess_JoinIdenticalVertices |
             aiProcess_GenSmoothNormals |
             aiProcess_CalcTangentSpace |
