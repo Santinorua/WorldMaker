@@ -9,14 +9,27 @@
 #include "ChunkRenderUnit.h"
 #include "BiomeGenerator.h"
 
-#include <iostream>
+#include <cstdio>
 
 namespace WorldMaker {
 
 namespace ui {
 
-static bool show_biomes = false;
 static Biome *biome_edit = nullptr;
+
+static struct {
+	bool debug;
+	bool generation;
+	bool biomes;
+	bool biome_edit;
+} open_windows = {
+	.debug = true,
+	.generation = true,
+	.biomes = false,
+	.biome_edit = false,
+};
+
+static bool &show_biomes = open_windows.biomes;
 
 #define _HEX(r, g, b, a) { (float)(r)/255.0, (float)(g)/255.0, (float)(b)/255.0, (float)(a)/255.0 }
 #define HEX(hex) _HEX((((uint64_t)hex) >> 24) & 0xff, (((uint64_t)hex) >> 16) & 0xff, (((uint64_t)hex) >> 8) & 0xff, (uint64_t)hex & 0xff)
@@ -91,7 +104,9 @@ void DockSpace() {
 }
 
 void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks) {
-	ImGui::Begin("Debug");
+	if (!open_windows.debug) return;
+
+	ImGui::Begin("Debug", &open_windows.debug);
 
 	int w, h;
 	glfwGetWindowSize(Renderer::GetWindow(), &w, &h);
@@ -118,8 +133,10 @@ void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks
 
 bool GenerationWindow(int &chunk_size, int &world_width, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator) {
 	bool redraw = false;
-	
-	ImGui::Begin("Generation");
+
+	if (!open_windows.generation) return false;
+
+	ImGui::Begin("Generation", &open_windows.generation);
 
 	ImGui::PushItemWidth(100);
 
@@ -166,6 +183,13 @@ void BiomeWindow(Biome *biome_ptr) {
 	static double humidity = 0;
 	static glm::vec4 color = {0.5, 0.5, 0.5, 1.0};
 
+	static char biome_name_imgui[128] = {0};
+
+	if (!open_windows.biome_edit) {
+		biome_edit = nullptr;
+		return;
+	}
+
 	if (last_biome != biome_ptr) {
 		color = {biome.biomeColor.x, biome.biomeColor.y, biome.biomeColor.z, biome.biomeColor.w};
 
@@ -177,8 +201,9 @@ void BiomeWindow(Biome *biome_ptr) {
 		last_biome = biome_ptr;
 	}
 
+	snprintf(biome_name_imgui, 128, "%s###biome_edit", biome.name.c_str());
 
-	ImGui::Begin(biome.name.c_str());
+	ImGui::Begin(biome_name_imgui, &open_windows.biome_edit);
 
 	ImGui::Text("Erosion:");
 	ImGui::SameLine();
@@ -210,10 +235,6 @@ void BiomeWindow(Biome *biome_ptr) {
 		biome.biomeColor.w = color.w;
 	}
 
-	if (ImGui::Button("Close")) {
-		biome_edit = nullptr;
-	}
-
 	ImGui::End();
 }
 
@@ -221,7 +242,7 @@ void BiomesWindow() {
 	if (!show_biomes) return;
 
 	int biome_idx = 0;
-	ImGui::Begin("Biomes");
+	ImGui::Begin("Biomes", &open_windows.biomes);
 	for (auto& biome : BiomeGenerator::m_biomes) {
 		ImGui::Text("%s", biome.name.c_str());
 
@@ -230,6 +251,7 @@ void BiomesWindow() {
 		ImGui::PushID(biome.name.c_str());
 		if (ImGui::Button("Edit")) {
 			biome_edit = &biome;
+			open_windows.biome_edit = true;
 		}
 		ImGui::PopID();
 
