@@ -94,11 +94,8 @@ int main()
 		Renderer::PrepareToDrawNoise(noise1);
 	}
 
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui_ImplGlfw_InitForOpenGL(Renderer::GetWindow(), true);
-    ImGui_ImplOpenGL3_Init();
-    ImGui::StyleColorsDark();
+
+	ui::init();
 
 	int chunk_size = ChunkRenderUnit::s_chunkSide;
 	uint64_t seed = 42;
@@ -113,21 +110,9 @@ int main()
 
 		ui::begin();
 
-        ImGui::Text("FPS: %.1f",
-                    ImGui::GetIO().Framerate);
+		ui::DockSpace();
 
-		IMGUI_INPUT(render_distance, ImGuiDataType_S32);
-
-		auto chunk_pos = ChunkGeneration::GetChunkPos(Camera::Position());
-        ImGui::Text("Chunk Pos: (%d, %d)", chunk_pos.x, chunk_pos.y);
-
-		auto x_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.x, render_distance);
-        ImGui::Text("X Gen. Range: [%d; %d]", x_generation_range.x, x_generation_range.y);
-
-		auto y_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.y, render_distance);
-        ImGui::Text("X Gen. Range: [%d; %d]", y_generation_range.x, y_generation_range.y);
-
-		ImGui::Text("Chunks Loaded: %lu", chunks.size());
+		ui::DebugWindow(render_distance, chunks);
 
 		bool redraw = ui::GenerationWindow(chunk_size, world_width, seed, render_distance, chunks, generator);
 		ui::BiomesWindow();

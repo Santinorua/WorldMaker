@@ -21,12 +21,15 @@ static Biome *biome_edit = nullptr;
 #define _HEX(r, g, b, a) { (float)(r)/255.0, (float)(g)/255.0, (float)(b)/255.0, (float)(a)/255.0 }
 #define HEX(hex) _HEX((((uint64_t)hex) >> 24) & 0xff, (((uint64_t)hex) >> 16) & 0xff, (((uint64_t)hex) >> 8) & 0xff, (uint64_t)hex & 0xff)
 
-void begin() {
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
+void init() {
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui_ImplGlfw_InitForOpenGL(Renderer::GetWindow(), true);
+    ImGui_ImplOpenGL3_Init();
+    ImGui::StyleColorsDark();
 
 	ImGuiStyle &style = ImGui::GetStyle();
+
 	style.Colors[ImGuiCol_WindowBg] = HEX(Colors::Gruvbox::bg0);
 
 	style.Colors[ImGuiCol_ResizeGrip] = HEX(Colors::Gruvbox::bg1);
@@ -45,11 +48,72 @@ void begin() {
 	style.FrameRounding = 3.0;
 	style.WindowRounding = 5.0;
 
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+}
+
+void begin() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
 }
 
 void end() {
+	ImGui::End();
+
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void DockSpace() {
+	int w, h;
+	glfwGetWindowSize(Renderer::GetWindow(), &w, &h);
+
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(w, h));
+
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoNavFocus	|
+		ImGuiWindowFlags_NoDocking	|
+		ImGuiWindowFlags_NoTitleBar	|
+		ImGuiWindowFlags_NoResize	|
+		ImGuiWindowFlags_NoMove		|
+		ImGuiWindowFlags_NoCollapse	|
+		ImGuiWindowFlags_MenuBar	|
+		ImGuiWindowFlags_NoBackground;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	ImGui::Begin("Main", NULL, window_flags);
+
+	ImGui::PopStyleVar();
+
+	ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0, 0), ImGuiDockNodeFlags_PassthruCentralNode);
+}
+
+void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks) {
+	ImGui::Begin("Debug");
+
+	int w, h;
+	glfwGetWindowSize(Renderer::GetWindow(), &w, &h);
+	ImGui::Text("%dx%d", w, h);
+
+	ImGui::Text("FPS: %.1f",
+			ImGui::GetIO().Framerate);
+
+	IMGUI_INPUT(render_distance, ImGuiDataType_S32);
+
+	auto chunk_pos = ChunkGeneration::GetChunkPos(Camera::Position());
+	ImGui::Text("Chunk Pos: (%d, %d)", chunk_pos.x, chunk_pos.y);
+
+	auto x_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.x, render_distance);
+	ImGui::Text("X Gen. Range: [%d; %d]", x_generation_range.x, x_generation_range.y);
+
+	auto y_generation_range = ChunkGeneration::GetGenerationRange(chunk_pos.y, render_distance);
+	ImGui::Text("X Gen. Range: [%d; %d]", y_generation_range.x, y_generation_range.y);
+
+	ImGui::Text("Chunks Loaded: %lu", chunks.size());
+
+	ImGui::End();
 }
 
 bool GenerationWindow(int &chunk_size, int &world_width, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator) {
