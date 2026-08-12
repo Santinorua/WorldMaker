@@ -6,6 +6,7 @@
 #include "Pointers.h"
 #include "RenderUnit.h"
 #include "Renderer.h"
+#include "RenderingAssets.h"
 #include "ShaderProgram.h"
 #include "TerrainMaterial.h"
 #include "Texture2D.h"
@@ -33,7 +34,7 @@ namespace WorldMaker
         }
         // CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath);
         s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
-        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
+        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexEmptyPath, specularTexDefaultPath));
         s_inited = true;
     }
 

@@ -31,6 +31,7 @@ ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, flo
 
     ChunkModels chunkModels;
     bool treeTest = false;
+    int test = 0;
     for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
     {
         for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
@@ -38,6 +39,8 @@ ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, flo
 
         	Vertex v;
             v = generator.getVertex(x, z);
+            if (test<300) test++;
+            else v.m_materialLayer = 1;
             if (!treeTest)
             {
                 glm::quat rot = glm::identity<glm::quat>();
