@@ -12,7 +12,7 @@ void init();
 void begin();
 void end();
 
-void DockSpace();
+void DockSpace(bool &quit);
 
 void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks);
 

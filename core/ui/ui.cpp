@@ -9,6 +9,8 @@
 #include "ChunkRenderUnit.h"
 #include "BiomeGenerator.h"
 
+#include "Input.h"
+
 #include <cstdio>
 
 namespace WorldMaker {
@@ -49,8 +51,18 @@ void init() {
 	style.Colors[ImGuiCol_ResizeGripHovered] = HEX(Colors::Gruvbox::grey1);
 	style.Colors[ImGuiCol_ResizeGripActive] = HEX(Colors::Gruvbox::grey2);
 
-	style.Colors[ImGuiCol_TitleBg] = HEX(Colors::Gruvbox::bg1);
-	style.Colors[ImGuiCol_TitleBgActive] = HEX(Colors::Gruvbox::bg2); // TODO: Find better color
+	style.Colors[ImGuiCol_TitleBg] = HEX(Colors::Gruvbox::bg0);
+	style.Colors[ImGuiCol_TitleBgActive] = HEX(Colors::Gruvbox::bg1); // TODO: Find better color
+
+	style.Colors[ImGuiCol_Tab] = HEX(Colors::Gruvbox::bg1);
+	style.Colors[ImGuiCol_TabActive] = HEX(Colors::Gruvbox::bg2);
+	style.Colors[ImGuiCol_TabHovered] = HEX(Colors::Gruvbox::grey1);
+
+	style.Colors[ImGuiCol_TabUnfocused] = HEX(Colors::Gruvbox::bg1);
+	style.Colors[ImGuiCol_TabUnfocusedActive] = HEX(Colors::Gruvbox::bg1);
+
+	style.Colors[ImGuiCol_TabSelectedOverline] = HEX(Colors::Gruvbox::bg2);
+	style.Colors[ImGuiCol_TabDimmedSelectedOverline] = HEX(Colors::Gruvbox::bg1);
 
 	style.Colors[ImGuiCol_Button] = HEX(Colors::Gruvbox::bg2);
 	style.Colors[ImGuiCol_ButtonHovered] = HEX(Colors::Gruvbox::blue);
@@ -71,13 +83,11 @@ void begin() {
 }
 
 void end() {
-	ImGui::End();
-
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void DockSpace() {
+void DockSpace(bool &quit) {
 	int w, h;
 	glfwGetWindowSize(Renderer::GetWindow(), &w, &h);
 
@@ -101,6 +111,27 @@ void DockSpace() {
 	ImGui::PopStyleVar();
 
 	ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0, 0), ImGuiDockNodeFlags_PassthruCentralNode);
+
+	if (ImGui::BeginMenuBar()) {
+
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Exit")) {
+				quit = true;
+			}
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("View")) {
+			if (ImGui::MenuItem("Generation")) {
+				open_windows.generation = !open_windows.generation;
+			}
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenuBar();
+	}
+
+	ImGui::End();
 }
 
 void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks) {
@@ -199,11 +230,23 @@ void BiomeWindow(Biome *biome_ptr) {
 		humidity = biome.getIdealCondition(BiomeDeterminators::Humidity);
 
 		last_biome = biome_ptr;
+
+		Vec2 cursor_pos = Input::GetCursorPosPix();
+
+		cursor_pos.x -= 45;
+		cursor_pos.y -= 45;
+
+		ImGui::SetNextWindowPos(ImVec2(cursor_pos.x, cursor_pos.y));
 	}
 
 	snprintf(biome_name_imgui, 128, "%s###biome_edit", biome.name.c_str());
 
-	ImGui::Begin(biome_name_imgui, &open_windows.biome_edit);
+	ImGui::SetNextWindowSize(ImVec2(250, 325));
+
+	ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+	ImGui::Begin(biome_name_imgui, &open_windows.biome_edit, flags);
+
+	ImGui::PushItemWidth(75);
 
 	ImGui::Text("Erosion:");
 	ImGui::SameLine();
@@ -221,7 +264,13 @@ void BiomeWindow(Biome *biome_ptr) {
 	ImGui::SameLine();
 	ImGui::InputDouble("##Humidity: ", &humidity, 0, 0, "%.3f");
 
-	ImGui::ColorPicker4("Color", (float*)&color);
+	ImGui::PopItemWidth();
+
+	ImGui::PushItemWidth(175);
+
+	ImGuiColorEditFlags color_picker_flags = ImGuiColorEditFlags_DisplayHex;
+
+	ImGui::ColorPicker4("Color", (float*)&color, color_picker_flags);
 
 	if (ImGui::Button("Update Biome")) {
 		biome.setIdealCondition(BiomeDeterminators::Erosion, erosion);
@@ -235,6 +284,8 @@ void BiomeWindow(Biome *biome_ptr) {
 		biome.biomeColor.w = color.w;
 	}
 
+	ImGui::PopItemWidth();
+
 	ImGui::End();
 }
 
@@ -246,7 +297,7 @@ void BiomesWindow() {
 	for (auto& biome : BiomeGenerator::m_biomes) {
 		ImGui::Text("%s", biome.name.c_str());
 
-		ImGui::SameLine();
+		ImGui::SameLine(0, 10);
 
 		ImGui::PushID(biome.name.c_str());
 		if (ImGui::Button("Edit")) {

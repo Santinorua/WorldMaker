@@ -100,7 +100,8 @@ int main()
 	int chunk_size = ChunkRenderUnit::s_chunkSide;
 	uint64_t seed = 42;
 
-	while (!Renderer::WindowShouldClose())
+	bool quit = false;
+	while (!Renderer::WindowShouldClose() && !quit)
 	{
 		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -110,7 +111,7 @@ int main()
 
 		ui::begin();
 
-		ui::DockSpace();
+		ui::DockSpace(quit);
 
 		ui::DebugWindow(render_distance, chunks);
 
