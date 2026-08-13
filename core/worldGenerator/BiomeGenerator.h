@@ -52,6 +52,11 @@ namespace WorldMaker {
         void setIdealCondition(BiomeDeterminators determinator, double value) {
             m_idealConditions[(int)determinator] = value;
         }
+
+        double getIdealCondition(BiomeDeterminators determinator) {
+            return m_idealConditions[(int)determinator];
+        }
+
         void removeIdealCondition(BiomeDeterminators determinator) {
             m_idealConditions[(int)determinator] = -2.0;
         }

@@ -24,7 +24,7 @@ namespace WorldMaker
 		{
 			0,1,2,0,2,3
 		};
-		SSBOUPtr<Vertex> vertices = std::make_unique<SSBO<Vertex>>(maxVertexCount, GL_DYNAMIC_STORAGE_BIT);
-		SSBOUPtr<unsigned int> indices = std::make_unique<SSBO<unsigned int>>(maxIndexCount, GL_DYNAMIC_STORAGE_BIT);
+		SSBOUPtr<Vertex> vertices = std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
+		SSBOUPtr<unsigned int> indices = std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);
 	};
 }

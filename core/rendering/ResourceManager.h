@@ -1,18 +1,19 @@
 #pragma once
 
-#include "FileFunctions.h"
-#include "Renderer.h"
-#include "Texture.h"
-#include "Material.h"
+#include "Pointers.h"
+#include "ArrayTexture2D.h"
+#include "ModelMaterial.h"
+#include "Model.h"
+#include "TerrainMaterial.h"
+#include "Texture2D.h"
+
 #include <unordered_map>
 #include <string>
 #include <memory>
 
 namespace WorldMaker
 {
-    inline std::string diffuseTexDefaultPath = "core/rendering/assets/textures/defaultGrass.png";
-    inline std::string specularTexDefaultPath = "core/rendering/assets/textures/defaultSpecular.png";
-    inline std::string reflectionTexDefaultPath = "core/rendering/assets/textures/defaultReflection.png";
+    class TerrainMaterial;
 
     class ResourceManager
     {
@@ -20,89 +21,40 @@ namespace WorldMaker
         static void Init();
         static void Shutdown();
 
-
         // Textures handling ---------------------------------------------------------------------------------
-        template <typename T>
-        static Texture* LoadTexture(const std::string& relativePath)
-        {
-            auto it = m_textureCache.find(relativePath);
-            if (it != m_textureCache.end())
-            {
-                it->second.refCount++;
-                return it->second.texture.get();
-            }
+        static Texture2DSPtr LoadTexture(const std::string& relativePath);
+        static Texture2DSPtr LoadTexture(const std::string& modelTexPath, const aiTexture* tex);
+        static ArrayTexture2DSPtr LoadArrayTexture(const std::string& relativePath);
+        static TextureSPtr GetTexture2D(const std::string& relativePath);
+        static ArrayTexture2DSPtr GetArrayTexture2D(const std::string& relativePath);
+        // static TextureSPtr GetTexture(const std::vector<std::string>& relativePaths);
+        static void RemoveArrayTexture2DIfExpired(const std::string& relativePath, ArrayTexture2D* tex);
+        static void RemoveTexture2DIfExpired(const std::string& relativePath);
+        // static void RemoveTextureIfExpired(const std::vector<std::string>& relativePaths);
 
-            TextureUPtr newTexture = std::make_unique<T>(relativePath);
+        // Material handling ---------------------------------------------------------------------------------
+        static TerrainMaterialSPtr CreateTerrainMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath);
+        static TerrainMaterialSPtr GetTerrainMaterial(unsigned int materialId);
+        static void RemoveTerrainMaterialIfExpired(unsigned int materialId);
+        static ModelMaterialSPtr CreateModelMaterial(Texture2DSPtr diffuse, Texture2DSPtr specular);
+        static ModelMaterialSPtr GetModelMaterial(unsigned int materialId);
+        static void RemoveModelMaterialIfExpired(unsigned int materialId);
 
-            TextureEntry newEntry;
-            newEntry.texture = std::move(newTexture);
-            newEntry.refCount = 1;
-
-            m_textureCache[relativePath] = std::move(newEntry);
-            return m_textureCache[relativePath].texture.get();
-        }
-
-        template <typename T>
-        static Texture* LoadTextures(const std::vector<std::string>& relativePaths)
-        {
-            std::string unifiedPath = UnifyPaths(relativePaths);
-            auto it = m_textureCache.find(unifiedPath);
-            if (it != m_textureCache.end())
-            {
-                it->second.refCount++;
-                return it->second.texture.get();
-            }
-
-            TextureUPtr newTexture = std::make_unique<T>(relativePaths);
-
-            TextureEntry newEntry;
-            newEntry.texture = std::move(newTexture);
-            newEntry.refCount = 1;
-
-            m_textureCache[unifiedPath] = std::move(newEntry);
-            return m_textureCache[unifiedPath].texture.get();
-        }
-
-        template<typename T>
-        static void UnloadTexture(const std::string& relativePath)
-        {
-            auto it = m_textureCache.find(relativePath);
-            if (it == m_textureCache.end())
-            {
-                std::cout << "Warning: There is not such a texture with path " << relativePath << " to unload\n";
-                return;
-            }
-            it->second.refCount--;
-
-            if (it->second.refCount <=0)
-            {
-                m_textureCache.erase(it);
-            }
-
-        }
-        static Texture* GetTexture(const std::string& relativePath);
-        static Texture* GetTexture(const std::vector<std::string>& relativePaths);
-
-        static Material* CreateMaterial(const std::string& diffuseTexPath, const std::string& specularTexPath = diffuseTexDefaultPath, const std::string& reflectionTexPath = reflectionTexDefaultPath);
-        static void DestroyMaterial(unsigned int materialId);
-        static Material* GetMaterial(unsigned int materialId);
+        // Model handling ---------------------------------------------------------------------------------
+        static ModelSPtr LoadModel(const std::string& relativePath);
+        static ModelSPtr GetModel(const std::string& relativePath);
+        static void RemoveModelIfExpired(const std::string& relativePath);
 
     private:
 
-        struct TextureEntry
-        {
-			TextureUPtr texture;
-            unsigned int rendererIndex = 0; // No the OpenGL ID, but the index in the Renderer vector
-            int refCount = 0;
-        };
-
-        struct MaterialEntry
-        {
-        	MaterialUPtr material;
-         	int refCount = 0;
-        };
+        static bool s_inited;
+        static bool s_ended;
 public:
-        static std::unordered_map<std::string, TextureEntry> m_textureCache;
-        static std::unordered_map<unsigned int, MaterialEntry> m_materialCache;
+        static std::vector<TerrainMaterialSPtr> s_terrainMaterials; // SHOULD BE HANDLED BY THE UI AND EDITOR
+        static std::unordered_map<std::string, ArrayTexture2DWPtr> s_arrayTexture2DCache;
+        static std::unordered_map<std::string, Texture2DWPtr> s_texture2DCache;
+        static std::unordered_map<unsigned int, TerrainMaterialWPtr> s_terrainMaterialCache;
+        static std::unordered_map<unsigned int, ModelMaterialWPtr> s_modelMaterialCache;
+        static std::unordered_map<std::string, ModelWPtr> s_modelCache;
     };
 }

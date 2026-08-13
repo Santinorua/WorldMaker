@@ -66,7 +66,7 @@ namespace WorldMaker {
         if (continentalness >= -0.1) {
             v.m_color = biome.biomeColor;
         } else if (continentalness >= -0.6) {
-            v.m_color = {0.0, Lerp(0.0, 1.0, ((continentalness+0.6) * 2), true), Lerp(1.0, 0.0, ((continentalness+0.6) * 2), true), 1.0};
+            v.m_color = {Lerp(0.0, biome.biomeColor.x, ((continentalness+0.6) * 2), true), Lerp(0.0, biome.biomeColor.y, ((continentalness+0.6) * 2), true), Lerp(1.0, biome.biomeColor.z, ((continentalness+0.6) * 2), true), 1.0};
         } else {
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }

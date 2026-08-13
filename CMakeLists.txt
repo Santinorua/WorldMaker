@@ -81,12 +81,7 @@ add_library(glm::glm ALIAS glm)
 
 # IMGUI
 
-FetchContent_Declare(
-        imgui
-        GIT_REPOSITORY  https://github.com/ocornut/imgui.git
-        GIT_TAG         v1.92.3-docking
-)
-FetchContent_MakeAvailable(imgui)
+set(imgui_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vendor/imgui)
 
 message("${imgui_SOURCE_DIR}")
 
@@ -117,6 +112,12 @@ target_include_directories(Math PUBLIC ${CMAKE_SOURCE_DIR}/core/math)
 set(ASSIMP_BUILD_MINIZIP ON)
 set(ASSIMP_BUILD_ZLIB ON)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF) # Add this to prevent Assimp from treating warnings as errors
+
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
     assimp
@@ -222,6 +223,24 @@ target_include_directories(WorldGenerator INTERFACE ${CMAKE_SOURCE_DIR}/core/wor
 target_link_libraries(WorldGenerator PUBLIC Math PerlinNoise Rendering)
 
 # -----------------------------------------------------------------------------------------------------
+
+# Chunk Gen
+
+file (GLOB CHUNKGEN_SRC "${CMAKE_SOURCE_DIR}/core/chunkGeneration/*.cpp")
+add_library(ChunkGeneration STATIC ${CHUNKGEN_SRC})
+target_link_libraries(ChunkGeneration PUBLIC Rendering PerlinNoise Math WorldGenerator)
+target_include_directories(ChunkGeneration PUBLIC ${CMAKE_SOURCE_DIR}/core/chunkGeneration)
+
+# -----------------------------------------------------------------------------------------------------
+
+# UI
+
+file (GLOB UI_SRC "${CMAKE_SOURCE_DIR}/core/ui/*.cpp")
+add_library(ui STATIC ${UI_SRC})
+target_link_libraries(ui PUBLIC Rendering PerlinNoise Math WorldGenerator Vendor ChunkGeneration)
+target_include_directories(ui PUBLIC ${CMAKE_SOURCE_DIR}/core/ui)
+
+# -----------------------------------------------------------------------------------------------------
 #######################################################################################################
 #######################################################################################################
 # -----------------------------------------------------------------------------------------------------
@@ -229,7 +248,7 @@ target_link_libraries(WorldGenerator PUBLIC Math PerlinNoise Rendering)
 # Core
 
 add_library(Core INTERFACE)
-target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator)
+target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator ChunkGeneration ui)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
@@ -239,3 +258,11 @@ target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRN
 add_executable(WorldMaker WorldMaker.cpp)
 
 target_link_libraries(WorldMaker PUBLIC Core)
+
+if(WIN32 AND TARGET assimp)
+    add_custom_command(TARGET WorldMaker POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:assimp>
+            $<TARGET_FILE_DIR:WorldMaker>
+            COMMENT "Copying Assimp runtime next to WorldMaker.exe")
+endif()
