@@ -20,7 +20,7 @@ out vec4 final_color;
 
 smooth in vec4 frag_pos;
 smooth in vec4 frag_color;
-flat in double frag_materialIndex;
+smooth in float frag_materialIndex;
 smooth in vec3 frag_normal;
 smooth in vec2 frag_uv;
 

@@ -8,7 +8,7 @@ struct VertexData
 {
     double position[3];
     double color[4];
-    double materialIndex;
+    float materialIndex;
     double uv[2];
     double normal[3];
 };
@@ -45,7 +45,7 @@ vec4 GetColor(uint index)
     );
 }
 
-double GetMaterialIndex(uint index)
+float GetMaterialIndex(uint index)
 {
     return data[index].materialIndex;
 }
@@ -70,7 +70,7 @@ vec3 GetNormal(uint index)
 smooth out vec3 frag_normal;
 smooth out vec4 frag_pos;
 smooth out vec4 frag_color;
-flat out double frag_materialIndex;
+smooth out float frag_materialIndex;
 smooth out vec2 frag_uv;
 
 void main()
