@@ -13,7 +13,7 @@ namespace WorldMaker
 	{
 		Vec3 m_position;  // x, y, z
 		Vec4 m_color = {1,1,1,1};
-		float m_materialLayer = 0;
+		double m_materialLayer = 0;
 		Vec2 m_uv;
 		Vec3 m_normal;
 
