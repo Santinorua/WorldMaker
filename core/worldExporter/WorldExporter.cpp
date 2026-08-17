@@ -18,15 +18,17 @@ namespace WorldMaker
         tinygltf::Node rootNode;
         rootNode.name = "world";
 
-        tinygltf::Scene scene;
+        ModelMeshCache cache;
 
         for (auto& chunk : chunks)
         {
-            rootNode.children.push_back(AddChunkNode(gltfModel, bufferBuilder, chunk));
+            rootNode.children.push_back(AddChunkNode(gltfModel, bufferBuilder, chunk, cache));
         }
 
         gltfModel.nodes.push_back(rootNode);
         int rootNodeIdx = gltfModel.nodes.size()-1;
+
+        tinygltf::Scene scene;
         scene.nodes.push_back(rootNodeIdx);
 
         gltfModel.scenes.push_back(scene);
@@ -200,19 +202,71 @@ namespace WorldMaker
         else std::cout << "Chunk exported successfully!\n";
     }
 
-    int WorldExporter::AddChunkNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ChunkRenderUnit* chunk)
+    std::vector<int> WorldExporter::LoadModelMeshes(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ModelSPtr model, ModelMeshCache& cache)
+    {
+        auto it = cache.find(model->instanceId());
+        if (it != cache.end())
+        {
+            return it->second;
+        }
+
+        std::vector<int> meshes;
+
+        for (MeshSPtr mesh : model->m_meshes)
+        {
+            std::vector<Vertex>& verticesData = mesh->m_vertices->m_data;
+            std::vector<unsigned int> indices = mesh->m_indices->m_data;
+            std::vector<float> positions = BuildPositionBuffer(verticesData);
+            std::vector<float> normals = BuildNormalBuffer(verticesData);
+            std::vector<float> uvs = BuildUVBuffer(verticesData);
+
+            size_t posOffset = bufferBuilder.AddBlock<float>(positions);
+            size_t idxOffset = bufferBuilder.AddBlock<unsigned int>(indices);
+            size_t normalOffset = bufferBuilder.AddBlock<float>(normals);
+            size_t uvOffset = bufferBuilder.AddBlock<float>(uvs);
+
+            int posIdx = SetPositionsForModel(posOffset, gltfModel, positions);
+            int idxIdx = SetIndicesForModel(idxOffset, gltfModel, indices);
+            int normalIdx = SetAttributeForModel(normalOffset, gltfModel, normals.size()/3, TINYGLTF_TYPE_VEC3);
+            int uvIdx = SetAttributeForModel(uvOffset, gltfModel, uvs.size()/2, TINYGLTF_TYPE_VEC2);
+
+            tinygltf::Primitive primitive;
+            primitive.indices = idxIdx;
+            primitive.attributes["POSITION"] = posIdx;
+            primitive.attributes["NORMAL"] = normalIdx;
+            primitive.attributes["TEXCOORD_0"] = uvIdx;
+            primitive.mode = TINYGLTF_MODE_TRIANGLES;
+
+            if (mesh->m_material)
+            {
+                primitive.material = AddMaterial(gltfModel, bufferBuilder, mesh->m_material);
+            }
+
+            tinygltf::Mesh gltfMesh;
+            gltfMesh.primitives.push_back(primitive);
+            gltfModel.meshes.push_back(gltfMesh);
+            int meshIdx = gltfModel.meshes.size()-1;
+
+            meshes.push_back(meshIdx);
+        }
+        cache[model->instanceId()] = meshes;
+        return meshes;
+    }
+
+    int WorldExporter::AddChunkNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ChunkRenderUnit* chunk, ModelMeshCache& cache)
     {
         tinygltf::Node node;
 
         node.children.push_back(AddTerrainNode(gltfModel, bufferBuilder, chunk));
 
         tinygltf::Node modelNode;
+
         for (auto& [id, pair] : chunk->m_models.m_modelInstancesSSBO)
         {
             ModelSPtr model = pair.first;
             for (glm::mat4 modelMatrix : pair.second->m_data)
             {
-                modelNode.children.push_back(AddModelNode(gltfModel, bufferBuilder, model, modelMatrix));
+                modelNode.children.push_back(AddModelNode(gltfModel, bufferBuilder, model, modelMatrix, cache));
             }
         }
         gltfModel.nodes.push_back(modelNode);
@@ -297,7 +351,7 @@ namespace WorldMaker
 
         return nodeIdx;
     }
-    int WorldExporter::AddModelNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ModelSPtr model, glm::mat4 modelMatrix)
+    int WorldExporter::AddModelNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ModelSPtr model, glm::mat4 modelMatrix, ModelMeshCache& cache)
     {
         tinygltf::Node node;
         const float* data = glm::value_ptr(modelMatrix);
@@ -306,47 +360,18 @@ namespace WorldMaker
         {
             node.matrix[i] = static_cast<double>(data[i]);
         }
-        for (MeshSPtr mesh : model->m_meshes)
+
+        std::vector<int> meshes = LoadModelMeshes(gltfModel, bufferBuilder, model, cache);
+
+        for (int mesh : meshes)
         {
-            std::vector<Vertex>& verticesData = mesh->m_vertices->m_data;
-            std::vector<unsigned int> indices = mesh->m_indices->m_data;
-            std::vector<float> positions = BuildPositionBuffer(verticesData);
-            std::vector<float> normals = BuildNormalBuffer(verticesData);
-            std::vector<float> uvs = BuildUVBuffer(verticesData);
-
-            size_t posOffset = bufferBuilder.AddBlock<float>(positions);
-            size_t idxOffset = bufferBuilder.AddBlock<unsigned int>(indices);
-            size_t normalOffset = bufferBuilder.AddBlock<float>(normals);
-            size_t uvOffset = bufferBuilder.AddBlock<float>(uvs);
-
-            int posIdx = SetPositionsForModel(posOffset, gltfModel, positions);
-            int idxIdx = SetIndicesForModel(idxOffset, gltfModel, indices);
-            int normalIdx = SetAttributeForModel(normalOffset, gltfModel, normals.size()/3, TINYGLTF_TYPE_VEC3);
-            int uvIdx = SetAttributeForModel(uvOffset, gltfModel, uvs.size()/2, TINYGLTF_TYPE_VEC2);
-
-            tinygltf::Primitive primitive;
-            primitive.indices = idxIdx;
-            primitive.attributes["POSITION"] = posIdx;
-            primitive.attributes["NORMAL"] = normalIdx;
-            primitive.attributes["TEXCOORD_0"] = uvIdx;
-            primitive.mode = TINYGLTF_MODE_TRIANGLES;
-
-            if (mesh->m_material)
-            {
-                primitive.material = AddMaterial(gltfModel, bufferBuilder, mesh->m_material);
-            }
-
-            tinygltf::Mesh gltfMesh;
-            gltfMesh.primitives.push_back(primitive);
-            gltfModel.meshes.push_back(gltfMesh);
-            int meshIdx = gltfModel.meshes.size()-1;
-
             tinygltf::Node meshNode;
-            meshNode.mesh = meshIdx;
+            meshNode.mesh = mesh;
             gltfModel.nodes.push_back(meshNode);
             int meshNodeIdx = gltfModel.nodes.size()-1;
             node.children.push_back(meshNodeIdx);
         }
+
         gltfModel.nodes.push_back(node);
         int nodeIdx = gltfModel.nodes.size()-1;
 
@@ -411,6 +436,7 @@ namespace WorldMaker
             int textureIdx = AddTexture(model, imageIdx);
 
             material.pbrMetallicRoughness.baseColorTexture.index = textureIdx;
+            material.doubleSided = true;
         }
 
         model.materials.push_back(material);

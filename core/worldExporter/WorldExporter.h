@@ -14,13 +14,17 @@ namespace WorldMaker
     class WorldExporter
     {
     public:
+        using ModelMeshCache = std::unordered_map<unsigned int, std::vector<int>>;
+
         static void ExportWorld(std::vector<ChunkRenderUnit*> chunks);
         static void ExportChunkToGLB(ChunkRenderUnit* chunk);
         static void ExportModelToGLB(ModelSPtr model, const std::string& outPath);
 
-        static int AddChunkNode(tinygltf::Model& model, BufferBuilder& bufferBuilder, ChunkRenderUnit* chunk);
+        static std::vector<int> LoadModelMeshes(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ModelSPtr model, ModelMeshCache& cache);
+
+        static int AddChunkNode(tinygltf::Model& model, BufferBuilder& bufferBuilder, ChunkRenderUnit* chunk, ModelMeshCache& cache);
         static int AddTerrainNode(tinygltf::Model& model, BufferBuilder& bufferBuilder, ChunkRenderUnit* chunk);
-        static int AddModelNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ModelSPtr model, glm::mat4 modelMatrix);
+        static int AddModelNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ModelSPtr model, glm::mat4 modelMatrix, ModelMeshCache& cache);
         static int AddTextureImage(tinygltf::Model& model, BufferBuilder& bufferBuilder, Texture2DSPtr texture);
         static int AddTexture(tinygltf::Model& model, int imageIndex);
         static int AddMaterial(tinygltf::Model& model, BufferBuilder& bufferBuilder, MeshMaterialSPtr meshMaterial);
