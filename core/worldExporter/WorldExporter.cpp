@@ -1,13 +1,43 @@
 #include "WorldExporter.h"
 #include "BufferBuilder.h"
+#include "ChunkRenderUnit.h"
 #include "SSBO.h"
 #include "stb_image_write.h"
-#include "glm/common.hpp"
+#include <glm/gtc/type_ptr.hpp>
+
 namespace WorldMaker
 {
-    void WorldExporter::ExportWorld(std::vector<ChunkRenderUnitUPtr> chunks)
+    void WorldExporter::ExportWorld(std::vector<ChunkRenderUnit*> chunks)
     {
+        tinygltf::Model gltfModel;
+        gltfModel.asset.version = "2.0";
+        gltfModel.asset.generator = "WorldMaker";
 
+        BufferBuilder bufferBuilder;
+
+        tinygltf::Node rootNode;
+        rootNode.name = "world";
+
+        tinygltf::Scene scene;
+
+        for (auto& chunk : chunks)
+        {
+            rootNode.children.push_back(AddChunkNode(gltfModel, bufferBuilder, chunk));
+        }
+
+        gltfModel.nodes.push_back(rootNode);
+        int rootNodeIdx = gltfModel.nodes.size()-1;
+        scene.nodes.push_back(rootNodeIdx);
+
+        gltfModel.scenes.push_back(scene);
+        gltfModel.defaultScene = 0;
+
+        gltfModel.buffers.push_back(bufferBuilder.buffer);
+
+        tinygltf::TinyGLTF writer;
+        bool ok = writer.WriteGltfSceneToFile(&gltfModel, "world.glb", true, true, true, true);
+        if (!ok) std::cerr << "Failed when exporting world\n";
+        else std::cout << "World exported successfully!\n";
     }
 
     void WorldExporter::ExportModelToGLB(ModelSPtr model, const std::string &outPath)
@@ -82,7 +112,7 @@ namespace WorldMaker
         std::vector<float> positions = BuildPositionBuffer(chunk->m_vertices->m_data);
         std::vector<float> colors = BuildColorBuffer(chunk->m_vertices->m_data);
         std::vector<float> normals = BuildNormalBuffer(chunk->m_vertices->m_data);
-        std::vector<float> uvs = BuildUVBuffer(chunk->m_vertices->m_data);
+        std::vector<float> uvs = BuildBakedTerrainUVBuffer(chunk->m_vertices->m_data, glm::vec2(chunk->minPoint().x, chunk->minPoint().z), ChunkRenderUnit::s_chunkSide);
         std::vector<unsigned int>& indices = chunk->m_indices->m_data;
         BufferBuilder bufferBuilder;
 
@@ -114,6 +144,20 @@ namespace WorldMaker
             uvs.size()/2,
             TINYGLTF_TYPE_VEC2);
 
+        std::vector<unsigned char> rawPixels = Renderer::s_bakeFBO.BakeChunkTerrain(*chunk);
+
+        std::vector<unsigned char> pngBytes;
+        auto writeCallback = [](void* context, void* data, int size)
+        {
+            auto* buf = reinterpret_cast<std::vector<unsigned char>*>(context);
+            unsigned char* bytes = reinterpret_cast<unsigned char*>(data);
+            buf->insert(buf->end(), bytes, bytes + size);
+        };
+        int bakeSize = Renderer::s_bakeFBO.size;
+        stbi_write_png_to_func(writeCallback, &pngBytes, bakeSize, bakeSize, 4, rawPixels.data(), bakeSize * 4);
+
+        int materialIdx = AddMaterialFromPNGBytes(model, bufferBuilder, pngBytes);
+
         model.buffers.push_back(bufferBuilder.buffer);
 
         tinygltf::Primitive primitive;
@@ -122,6 +166,7 @@ namespace WorldMaker
         primitive.attributes["COLOR_0"] = colorIdx;
         primitive.attributes["NORMAL"] = normalIdx;
         primitive.attributes["TEXCOORD_0"] = uvIdx;
+        primitive.material = materialIdx;
 
         primitive.mode = TINYGLTF_MODE_TRIANGLES;
 
@@ -155,6 +200,158 @@ namespace WorldMaker
         else std::cout << "Chunk exported successfully!\n";
     }
 
+    int WorldExporter::AddChunkNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ChunkRenderUnit* chunk)
+    {
+        tinygltf::Node node;
+
+        node.children.push_back(AddTerrainNode(gltfModel, bufferBuilder, chunk));
+
+        tinygltf::Node modelNode;
+        for (auto& [id, pair] : chunk->m_models.m_modelInstancesSSBO)
+        {
+            ModelSPtr model = pair.first;
+            for (glm::mat4 modelMatrix : pair.second->m_data)
+            {
+                modelNode.children.push_back(AddModelNode(gltfModel, bufferBuilder, model, modelMatrix));
+            }
+        }
+        gltfModel.nodes.push_back(modelNode);
+        int modelNodeIdx = gltfModel.nodes.size()-1;
+        node.children.push_back(modelNodeIdx);
+
+        gltfModel.nodes.push_back(node);
+        int nodeIdx = gltfModel.nodes.size()-1;
+
+        return nodeIdx;
+    }
+    int WorldExporter::AddTerrainNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ChunkRenderUnit* chunk)
+    {
+        std::vector<float> positions = BuildPositionBuffer(chunk->m_vertices->m_data);
+        std::vector<float> colors = BuildColorBuffer(chunk->m_vertices->m_data);
+        std::vector<float> normals = BuildNormalBuffer(chunk->m_vertices->m_data);
+        std::vector<float> uvs = BuildBakedTerrainUVBuffer(chunk->m_vertices->m_data, glm::vec2(chunk->minPoint().x, chunk->minPoint().z), ChunkRenderUnit::s_chunkSide);
+        std::vector<unsigned int>& indices = chunk->m_indices->m_data;
+
+        size_t posOffset = bufferBuilder.AddBlock<float>(positions);
+        size_t idxOffset = bufferBuilder.AddBlock<unsigned int>(indices);
+        size_t colorOffset = bufferBuilder.AddBlock<float>(colors);
+        size_t normalOffset = bufferBuilder.AddBlock<float>(normals);
+        size_t uvOffset = bufferBuilder.AddBlock<float>(uvs);
+
+        int positionIdx = SetPositionsForModel(posOffset, gltfModel, positions);
+
+        int indexIdx = SetIndicesForModel(idxOffset, gltfModel, indices);
+
+        int colorIdx = SetAttributeForModel(
+            colorOffset,
+            gltfModel,
+            colors.size()/4,
+            TINYGLTF_TYPE_VEC4);
+
+        int normalIdx = SetAttributeForModel(
+            normalOffset,
+            gltfModel,
+            normals.size()/3,
+            TINYGLTF_TYPE_VEC3);
+
+        int uvIdx = SetAttributeForModel(
+            uvOffset,
+            gltfModel,
+            uvs.size()/2,
+            TINYGLTF_TYPE_VEC2);
+
+        std::vector<unsigned char> rawPixels = Renderer::s_bakeFBO.BakeChunkTerrain(*chunk);
+
+        std::vector<unsigned char> pngBytes;
+        auto writeCallback = [](void* context, void* data, int size)
+        {
+            auto* buf = reinterpret_cast<std::vector<unsigned char>*>(context);
+            unsigned char* bytes = reinterpret_cast<unsigned char*>(data);
+            buf->insert(buf->end(), bytes, bytes + size);
+        };
+        int bakeSize = Renderer::s_bakeFBO.size;
+        stbi_write_png_to_func(writeCallback, &pngBytes, bakeSize, bakeSize, 4, rawPixels.data(), bakeSize * 4);
+
+        int materialIdx = AddMaterialFromPNGBytes(gltfModel, bufferBuilder, pngBytes);
+
+        tinygltf::Primitive primitive;
+        primitive.attributes["POSITION"] = positionIdx;
+        primitive.indices = indexIdx;
+        primitive.attributes["COLOR_0"] = colorIdx;
+        primitive.attributes["NORMAL"] = normalIdx;
+        primitive.attributes["TEXCOORD_0"] = uvIdx;
+        primitive.material = materialIdx;
+
+        primitive.mode = TINYGLTF_MODE_TRIANGLES;
+
+        tinygltf::Mesh mesh;
+        mesh.primitives.push_back(primitive);
+        gltfModel.meshes.push_back(mesh);
+        int meshIdx = gltfModel.meshes.size()-1;
+
+        tinygltf::Node node;
+        node.mesh = meshIdx;
+        node.name = "Chunk"+std::to_string(meshIdx);
+        gltfModel.nodes.push_back(node);
+        int nodeIdx = gltfModel.nodes.size()-1;
+
+        return nodeIdx;
+    }
+    int WorldExporter::AddModelNode(tinygltf::Model& gltfModel, BufferBuilder& bufferBuilder, ModelSPtr model, glm::mat4 modelMatrix)
+    {
+        tinygltf::Node node;
+        const float* data = glm::value_ptr(modelMatrix);
+        node.matrix.resize(16);
+        for (int i = 0; i < 16; i++)
+        {
+            node.matrix[i] = static_cast<double>(data[i]);
+        }
+        for (MeshSPtr mesh : model->m_meshes)
+        {
+            std::vector<Vertex>& verticesData = mesh->m_vertices->m_data;
+            std::vector<unsigned int> indices = mesh->m_indices->m_data;
+            std::vector<float> positions = BuildPositionBuffer(verticesData);
+            std::vector<float> normals = BuildNormalBuffer(verticesData);
+            std::vector<float> uvs = BuildUVBuffer(verticesData);
+
+            size_t posOffset = bufferBuilder.AddBlock<float>(positions);
+            size_t idxOffset = bufferBuilder.AddBlock<unsigned int>(indices);
+            size_t normalOffset = bufferBuilder.AddBlock<float>(normals);
+            size_t uvOffset = bufferBuilder.AddBlock<float>(uvs);
+
+            int posIdx = SetPositionsForModel(posOffset, gltfModel, positions);
+            int idxIdx = SetIndicesForModel(idxOffset, gltfModel, indices);
+            int normalIdx = SetAttributeForModel(normalOffset, gltfModel, normals.size()/3, TINYGLTF_TYPE_VEC3);
+            int uvIdx = SetAttributeForModel(uvOffset, gltfModel, uvs.size()/2, TINYGLTF_TYPE_VEC2);
+
+            tinygltf::Primitive primitive;
+            primitive.indices = idxIdx;
+            primitive.attributes["POSITION"] = posIdx;
+            primitive.attributes["NORMAL"] = normalIdx;
+            primitive.attributes["TEXCOORD_0"] = uvIdx;
+            primitive.mode = TINYGLTF_MODE_TRIANGLES;
+
+            if (mesh->m_material)
+            {
+                primitive.material = AddMaterial(gltfModel, bufferBuilder, mesh->m_material);
+            }
+
+            tinygltf::Mesh gltfMesh;
+            gltfMesh.primitives.push_back(primitive);
+            gltfModel.meshes.push_back(gltfMesh);
+            int meshIdx = gltfModel.meshes.size()-1;
+
+            tinygltf::Node meshNode;
+            meshNode.mesh = meshIdx;
+            gltfModel.nodes.push_back(meshNode);
+            int meshNodeIdx = gltfModel.nodes.size()-1;
+            node.children.push_back(meshNodeIdx);
+        }
+        gltfModel.nodes.push_back(node);
+        int nodeIdx = gltfModel.nodes.size()-1;
+
+        return nodeIdx;
+    }
     int WorldExporter::AddTextureImage(tinygltf::Model& model, BufferBuilder& bufferBuilder, Texture2DSPtr texture)
     {
         std::vector<unsigned char> pngBytes;
@@ -219,7 +416,33 @@ namespace WorldMaker
         model.materials.push_back(material);
         return (int)model.materials.size()-1;
     }
+    int WorldExporter::AddMaterialFromPNGBytes(tinygltf::Model& model, BufferBuilder& bufferBuilder, const std::vector<unsigned char>& pngBytes)
+    {
+        int offset = bufferBuilder.AddBlock<unsigned char>(pngBytes);
 
+        tinygltf::BufferView view;
+        view.buffer = 0;
+        view.byteOffset = offset;
+        view.byteLength = pngBytes.size();
+        model.bufferViews.push_back(view);
+        int viewIdx = model.bufferViews.size()-1;
+
+        tinygltf::Image image;
+        image.mimeType = "image/png";
+        image.bufferView = viewIdx;
+        model.images.push_back(image);
+        int imageIdx = model.images.size()-1;
+
+        tinygltf::Texture texture;
+        texture.source = imageIdx;
+        model.textures.push_back(texture);
+        int textureIdx = model.textures.size()-1;
+
+        tinygltf::Material material;
+        material.pbrMetallicRoughness.baseColorTexture.index = textureIdx;
+        model.materials.push_back(material);
+        return (int)model.materials.size()-1;
+    }
     int WorldExporter::SetAttributeForModel(size_t offsetInBuffer, tinygltf::Model& model, size_t elementCount, int type)
     {
 
@@ -355,5 +578,18 @@ namespace WorldMaker
             UVs.push_back((float)vertex.m_uv.y);
         }
         return UVs;
+    }
+    std::vector<float> WorldExporter::BuildBakedTerrainUVBuffer(const std::vector<Vertex>& vertices, glm::vec2 chunkOrigin, int chunkSize)
+    {
+        std::vector<float> uvs;
+        uvs.reserve(vertices.size()*2);
+        for (Vertex vertex : vertices)
+        {
+            float u = ((float)vertex.m_position.x - chunkOrigin.x) / chunkSize;
+            float v = ((float)vertex.m_position.z - chunkOrigin.y) / chunkSize;
+            uvs.push_back(u);
+            uvs.push_back(v);
+        }
+        return uvs;
     }
 }

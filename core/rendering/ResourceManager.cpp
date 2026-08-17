@@ -4,7 +4,6 @@
 #include "GPUResourceManager.h"
 #include "MeshMaterial.h"
 #include "Pointers.h"
-#include "RenderUnit.h"
 #include "Renderer.h"
 #include "RenderingAssets.h"
 #include "ShaderProgram.h"
@@ -32,9 +31,8 @@ namespace WorldMaker
             std::cerr << "Error: Can't init resource manager because it has already been initialized!\n";
             return;
         }
-        // CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath);
         s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
-        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexEmptyPath, specularTexDefaultPath));
+        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultSandPath, specularTexDefaultPath));
         s_inited = true;
     }
 

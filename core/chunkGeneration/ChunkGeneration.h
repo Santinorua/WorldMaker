@@ -10,9 +10,8 @@ namespace WorldMaker {
 
 namespace ChunkGeneration {
 
-ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& fractal, float x_offset, float z_offset);
-void RegenerateChunks(std::vector<ChunkRenderUnitUPtr>& chunks, WorldGenerator& generator, int width, int height);
-
+ChunkRenderUnit* GenerateChunk(WorldGenerator& fractal, float x_offset, float z_offset);
+void RegenerateChunks(std::vector<ChunkRenderUnit*>& chunks, WorldGenerator& generator, int width, int height);
 }
 
 }

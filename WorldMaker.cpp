@@ -57,7 +57,7 @@ int main()
 
 	WorldGenerator generator(150, 42);
 
-	std::vector<ChunkRenderUnitUPtr> chunks;
+	std::vector<ChunkRenderUnit*> chunks;
 
 	ChunkGeneration::RegenerateChunks(chunks, generator, world_width, world_height);
 	bool doRender2D = false;
@@ -157,7 +157,10 @@ int main()
 		}
 		if (Input::GetKey(KeyCode::SpaceBar_Key))
 		{
-            WorldExporter::ExportModelToGLB(chunks[0]->m_models.m_modelInstancesSSBO[0].first, "tree.glb");
+		    // Renderer::s_bakeFBO.BakeChunkTerrain(*chunks[0]);
+            // WorldExporter::ExportModelToGLB(chunks[0]->m_models.m_modelInstancesSSBO[0].first, "tree.glb");
+            // WorldExporter::ExportChunkToGLB(chunks[0].get());
+            WorldExporter::ExportWorld(chunks);
 		}
 		ImGui::End();
 
@@ -177,7 +180,8 @@ int main()
         glfwSwapBuffers(Renderer::GetWindow());
 
         glfwPollEvents();
-	}
+    }
+	for (ChunkRenderUnit* chunk : chunks) delete chunk;
     chunks.clear();
 	ResourceManager::Shutdown();
 	GPUResourceManager::Shutdown();

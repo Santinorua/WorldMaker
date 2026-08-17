@@ -18,7 +18,8 @@ namespace WorldMaker
 	{
 		noise = 0,
 		terrain = 1,
-		model = 3,
+		model = 2,
+		baking = 3,
 	};
 
 	class ShaderProgram
@@ -34,7 +35,9 @@ namespace WorldMaker
 
 		// Set Uniforms
 		void setUniform1i(const std::string& name, int value);
+		void setUniform2i(const std::string& name, int v0, int v1);
 		void setUniform1f(const std::string& name, float value);
+		void setUniform2f(const std::string& name, float v0, float v1);
 		void setUniform3f(const std::string& name, float v0, float v1, float v2);
 		void setUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 		void setUniformMat4f(const std::string& name, glm::mat4 matrix);

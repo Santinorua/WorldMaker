@@ -1,12 +1,13 @@
 #include "ChunkGeneration.h"
 #include "ChunkRenderUnit.h"
+#include "CoreGenerator.h"
 #include <glm/gtc/quaternion.hpp>
 
 namespace WorldMaker {
 
 namespace ChunkGeneration {
 
-ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, float z_offset)
+ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float z_offset)
 {
 	int gridWidth = ChunkRenderUnit::s_chunkSide;
     int gridDepth = ChunkRenderUnit::s_chunkSide;
@@ -31,7 +32,6 @@ ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, flo
 
     ChunkModels chunkModels;
     bool treeTest = false;
-    int test = 0;
     for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
     {
         for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
@@ -39,8 +39,8 @@ ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, flo
 
         	Vertex v;
             v = generator.getVertex(x, z);
-            if (test<300) test++;
-            else v.m_materialLayer = 1;
+            v.m_color = {1,1,1,1};
+            v.m_materialLayer = (fmod(x, 20.0) < 10.0) ? 0 : 1;
             if (!treeTest)
             {
                 glm::quat rot = glm::identity<glm::quat>();
@@ -83,10 +83,9 @@ ChunkRenderUnitUPtr GenerateChunk(WorldGenerator& generator, float x_offset, flo
 			chunkVertices[(z % ChunkRenderUnit::s_chunkSide)*gridWidth + (x % ChunkRenderUnit::s_chunkSide)].m_normal = normal;
 		}
 	}
-    return std::make_unique<ChunkRenderUnit>(chunkVertices, tallestPoint, lowestPoint, chunkModels);
+    return new ChunkRenderUnit(chunkVertices, tallestPoint, lowestPoint, chunkModels);
 }
-
-void RegenerateChunks(std::vector<ChunkRenderUnitUPtr>& chunks, WorldGenerator& generator, int width, int height)
+void RegenerateChunks(std::vector<ChunkRenderUnit*>& chunks, WorldGenerator& generator, int width, int height)
 {
 	chunks.clear();
 

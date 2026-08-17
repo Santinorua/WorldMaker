@@ -20,6 +20,7 @@ namespace WorldMaker
 {
 	RendererConfig Renderer::s_config;
 	GLFWwindow* Renderer::s_window = nullptr;
+	BakeFBO Renderer::s_bakeFBO;
 	ShaderProgramSPtr Renderer::s_shaderProgramsByType[shadersAmount] = {};
 	bool Renderer::s_inited = false;
 
@@ -58,10 +59,13 @@ namespace WorldMaker
         GLCall(glEnable(GL_CULL_FACE));
         GLCall(glCullFace(GL_BACK));
         GLCall(glFrontFace(GL_CCW));
+
+        s_bakeFBO.Init(2048);
+
         s_shaderProgramsByType[ShaderProgramType::noise] = std::make_shared<ShaderProgram>("core/rendering/shaders/NoiseVertexShader.glsl", "core/rendering/shaders/NoiseFragmentShader.glsl");
         s_shaderProgramsByType[ShaderProgramType::terrain] = std::make_shared<ShaderProgram>("core/rendering/shaders/TerrainVertexShader.glsl", "core/rendering/shaders/TerrainFragmentShader.glsl");
         s_shaderProgramsByType[ShaderProgramType::model] = std::make_shared<ShaderProgram>("core/rendering/shaders/ModelVertexShader.glsl", "core/rendering/shaders/ModelFragmentShader.glsl");
-
+        s_shaderProgramsByType[ShaderProgramType::baking] = std::make_shared<ShaderProgram>("core/rendering/shaders/BakingVertexShader.glsl", "core/rendering/shaders/BakingFragmentShader.glsl");
         s_inited = true;
 	}
 
@@ -80,6 +84,23 @@ namespace WorldMaker
 	{
 		// Six indices are needed to draw a square
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
+	void Renderer::DrawBakedTerrain(ChunkRenderUnit& chunk)
+	{
+    	GLCall(glDisable(GL_DEPTH_TEST));
+        GLCall(glDisable(GL_CULL_FACE));
+		ShaderProgramSPtr shaderProgram = Renderer::s_shaderProgramsByType[ShaderProgramType::baking];
+		shaderProgram->bind();
+        shaderProgram->setUniform1f("u_chunkSize", ChunkRenderUnit::s_chunkSide);
+        shaderProgram->setUniform2f("u_chunkWorldOrigin", chunk.minPoint().x, chunk.minPoint().z);
+        GPUResourceManager::PrepareToDrawTerrain();
+		chunk.m_vertexArray->bind();
+		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
+		chunk.m_indices->bindBufferBase(SSBOType::indices);
+		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices->m_data.size());
+		GLCall(glEnable(GL_CULL_FACE));
+		GLCall(glEnable(GL_DEPTH_TEST));
 	}
 
 	void Renderer::DrawChunkTerrain(ChunkRenderUnit& chunk)
