@@ -29,22 +29,12 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chu
         	v = generator.getVertex(x, z);
             if (v.m_featureId != 0)
             {
-
                 chunkModels.addInstance(FeatureManager::m_features[v.m_featureId - 1].modelPath, {v.m_position.x, v.m_position.y + FeatureManager::m_features[v.m_featureId - 1].y_offset, v.m_position.z},
                                         FeatureManager::m_features[v.m_featureId - 1].rotation, FeatureManager::m_features[v.m_featureId - 1].scale);
             }
             tallestPoint = std::max(tallestPoint, v.m_position.y);
             lowestPoint = std::min(lowestPoint, v.m_position.y);
 
-   //          v.m_color = {0.5,0.5,0.5,1};
-   //
-			// if (x % ChunkRenderUnit::s_chunkSide == 0 || x % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
-			// 	v.m_color.x = 1;
-			// }
-   //
-			// if (z % ChunkRenderUnit::s_chunkSide == 0 || z % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
-			// 	v.m_color.y = 1;
-			// }
 			chunkVertices.push_back(v.toGraphicalVertex());
 			localX++;
         }

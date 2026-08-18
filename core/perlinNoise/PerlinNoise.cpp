@@ -158,6 +158,15 @@ namespace WorldMaker {
         m_seed = seed;
     }
 
+    bool FeatureNoise::getFeatureInGridSquare(int x, int y) {
+        int gridX = x / m_radius;
+        int gridY = y / m_radius;
+        if (PRNG::hash2D(gridX, gridY, m_seed) > m_probability * UINT32_MAX) {
+            return false;
+        }
+        return true;
+    }
+
     bool FeatureNoise::getNoise(int x, int y) {
         unsigned int numberOfRadiusVertices = m_radius * m_radius;
         int gridX = x / m_radius;
