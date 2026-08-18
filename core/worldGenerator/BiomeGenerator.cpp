@@ -50,9 +50,12 @@ namespace WorldMaker {
         double distance = 0.0;
         double distanceVec[4];
         for (int i = 0; i < 4; i++) {
-            distanceVec[i] = 0.0;
+            distanceVec[i] = 0.5;
             if (m_idealConditions[i] != -2.0) {
                 distanceVec[i] = params[i] - m_idealConditions[i];
+                // if (i == int(BiomeDeterminators::Erosion)) {
+                //     distanceVec[i] *= 2;
+                // }
             }
         }
         distance = Vec4(distanceVec[0], distanceVec[1], distanceVec[2], distanceVec[3]).Magnitude();
@@ -95,7 +98,7 @@ namespace WorldMaker {
         std::vector<double> distances;
         distances.reserve(m_biomes.size());
         double bestDistance = std::numeric_limits<double>::max();
-        int bestBiome;
+        int bestBiome = 0;
         for (int i = 0; i < m_biomes.size(); i++) {
             bool conditionsMet = true;
             // Comprobar condiciones
@@ -125,23 +128,42 @@ namespace WorldMaker {
         Biome plains = Biome();
         plains.name = "Plains";
         plains.setIdealCondition(BiomeDeterminators::Continentalness, -0.4);
-        plains.setIdealCondition(BiomeDeterminators::Erosion, 1);
+        plains.setIdealCondition(BiomeDeterminators::Erosion, 0);
         plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
-        plains.setIdealCondition(BiomeDeterminators::Humidity,0.5);
+        plains.setIdealCondition(BiomeDeterminators::Humidity,0.2);
         plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
 
         addBiome(plains);
 
         Biome desert = Biome();
         desert.name = "Desert";
-        desert.setIdealCondition(BiomeDeterminators::Continentalness, 0);
+        desert.setIdealCondition(BiomeDeterminators::Continentalness, 0.25);
         desert.setIdealCondition(BiomeDeterminators::Erosion, 0.5);
         desert.setIdealCondition(BiomeDeterminators::Temperature, 1);
-        desert.setIdealCondition(BiomeDeterminators::Humidity,0);
+        desert.setIdealCondition(BiomeDeterminators::Humidity,-1);
         desert.biomeColor = Vec4(1.0, 1.0, 0.0, 1.0);
 
         addBiome(desert);
 
+        // Biome mountain = Biome();
+        // mountain.name = "Mountain";
+        // mountain.setIdealCondition(BiomeDeterminators::Continentalness, 0.8);
+        // mountain.setIdealCondition(BiomeDeterminators::Erosion, 1);
+        // mountain.setIdealCondition(BiomeDeterminators::Temperature, -2);
+        // mountain.setIdealCondition(BiomeDeterminators::Humidity,-2);
+        // mountain.biomeColor = Vec4(0.42, 0.91, 0.42, 1.0);
+        //
+        // addBiome(mountain);
+
+        Biome forest = Biome();
+        forest.name = "Forest";
+        forest.setIdealCondition(BiomeDeterminators::Continentalness, 0);
+        forest.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
+        forest.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
+        forest.setIdealCondition(BiomeDeterminators::Humidity,0.6);
+        forest.biomeColor = Vec4(0.0, 0.57, 0.0, 1.0);
+
+        addBiome(forest);
     }
 
 

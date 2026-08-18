@@ -32,8 +32,8 @@ namespace WorldMaker
             return;
         }
         // CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath);
-        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
-        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath));
+        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultPath, specularTexDefaultPath));
+        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultPath, specularTexDefaultPath));
         s_inited = true;
     }
 

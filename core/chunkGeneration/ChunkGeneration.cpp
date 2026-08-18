@@ -1,6 +1,6 @@
 #include "ChunkGeneration.h"
 #include "ChunkRenderUnit.h"
-#include <glm/gtc/quaternion.hpp>
+	#include <glm/gtc/quaternion.hpp>
 
 #define CLAMP0(x) ((x) * ((x) > 0))
 
@@ -8,7 +8,7 @@ namespace WorldMaker {
 
 namespace ChunkGeneration {
 
-ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float z_offset)
+ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chunk)
 {
 	int gridWidth = ChunkRenderUnit::s_chunkSide;
     int gridDepth = ChunkRenderUnit::s_chunkSide;
@@ -19,19 +19,18 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
     double lowestPoint = 0;
 
     ChunkModels chunkModels;
-    bool treeTest = false;
-    for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z)
+    for (int z = z_chunk * ChunkRenderUnit::s_chunkSide - z_chunk; z < ChunkRenderUnit::s_chunkSide * (z_chunk + 1) - z_chunk; z++)
     {
-        for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x)
+    	int localX = 0;
+        for (int x = x_chunk * ChunkRenderUnit::s_chunkSide - x_chunk; x < ChunkRenderUnit::s_chunkSide * (x_chunk + 1) - x_chunk; x++)
         {
 
-        	Vertex v;
-            v = generator.getVertex(x, z);
-            if (!treeTest)
+            generatorVertex v;
+        	v = generator.getVertex(x, z);
+            if (v.m_featureId == 1)
             {
                 glm::quat rot = glm::identity<glm::quat>();
                 chunkModels.addInstance("core/rendering/assets/models/tree.glb", v.m_position, rot, {0.1, 0.1f, 0.1f});
-                treeTest = true;
             }
             tallestPoint = std::max(tallestPoint, v.m_position.y);
             lowestPoint = std::min(lowestPoint, v.m_position.y);
@@ -45,15 +44,16 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
 			// if (z % ChunkRenderUnit::s_chunkSide == 0 || z % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
 			// 	v.m_color.y = 1;
 			// }
-
-			chunkVertices.push_back(v);
+			chunkVertices.push_back(v.toGraphicalVertex());
+			localX++;
         }
     }
-
-	for (int z = z_offset * ChunkRenderUnit::s_chunkSide - (z_offset != 0) * z_offset; z < ChunkRenderUnit::s_chunkSide * (z_offset + 1) - (z_offset != 0) * z_offset; ++z) {
-		int localZ = z % ChunkRenderUnit::s_chunkSide;
-		for (int x = x_offset * ChunkRenderUnit::s_chunkSide - (x_offset != 0) * x_offset; x < ChunkRenderUnit::s_chunkSide * (x_offset + 1) - (x_offset != 0) * x_offset; ++x) {
-			int localX = x % ChunkRenderUnit::s_chunkSide;
+	int localZ = 0;
+	for (int z = z_chunk * ChunkRenderUnit::s_chunkSide - z_chunk; z < ChunkRenderUnit::s_chunkSide * (z_chunk + 1) - z_chunk; z++) {
+		// int localZ = (z + z_chunk) % ChunkRenderUnit::s_chunkSide;
+		int localX = 0;
+		for (int  x = x_chunk * ChunkRenderUnit::s_chunkSide - x_chunk; x < ChunkRenderUnit::s_chunkSide * (x_chunk + 1) - x_chunk; x++) {
+			// int localX = (x + x_chunk) % ChunkRenderUnit::s_chunkSide;
 			float hL = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position.y : generator.getVertex(x-1, z).m_position.y;
 			float hR = localX != ChunkRenderUnit::s_chunkSide - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position.y : generator.getVertex(x+1, z).m_position.y;
 			float hU = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position.y : generator.getVertex(x, z-1).m_position.y;
@@ -64,10 +64,25 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
 			normal.y = static_cast<float>(2.0 * 1);
 			normal.z = static_cast<float>(hD - hU);
 
+			// glm::vec3 R = localX != ChunkRenderUnit::s_chunkSide - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position : generator.getVertex(x+1, z).m_position;
+			// glm::vec3 L = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position : generator.getVertex(x-1, z).m_position;
+			// glm::vec3 U = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position : generator.getVertex(x, z-1).m_position;
+			// glm::vec3 D = localZ != ChunkRenderUnit::s_chunkSide - 1 ? chunkVertices[(localZ+1)*gridWidth + localX].m_position : generator.getVertex(x, z+1).m_position;
+			//
+			//
+			// glm::vec3 tangentX = R - L;
+			// glm::vec3 tangentY = D - U;
+			//
+			// glm::vec3 normal = ;
+
+
+
 			normal = glm::normalize(normal);
 
-			chunkVertices[(z % ChunkRenderUnit::s_chunkSide)*gridWidth + (x % ChunkRenderUnit::s_chunkSide)].m_normal = normal;
+			chunkVertices[localZ *gridWidth + localX].m_normal = normal;
+			localX++;
 		}
+		localZ++;
 	}
     return new ChunkRenderUnit(chunkVertices, tallestPoint, lowestPoint, chunkModels);
 }
