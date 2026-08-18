@@ -39,15 +39,13 @@ namespace WorldMaker {
     class Biome {
         double m_idealConditions[4] =  {-2.0, -2.0, -2.0, -2.0};
         std::vector<ConditionGroup> m_conditionGroups;
-        std::vector<Feature> m_features;
-        std::vector<double> m_featureProbabilities;
-        std::vector<Texture2D> m_featureTextures;
         double m_featureProbability = 0.1;
         std::vector<Modifier> m_modifiers;
 
     public:
         std::string name;
         Vec4 biomeColor;
+        std::vector<int> m_features;
 
         void setIdealCondition(BiomeDeterminators determinator, double value) {
             m_idealConditions[(int)determinator] = value;
@@ -60,11 +58,21 @@ namespace WorldMaker {
         void removeIdealCondition(BiomeDeterminators determinator) {
             m_idealConditions[(int)determinator] = -2.0;
         }
+
+        void addFeature(int featureId) {
+            m_features.push_back(featureId);
+        }
+        void removeFeature(int featureId) {
+            for (int i = 0; i < m_features.size(); i++) {
+                if (m_features[i] == featureId) {
+                    m_features.erase(m_features.begin() + i);
+                    break;
+                }
+            }
+        }
         double idealDistance(double params[4]);
         void addConditionGroup(const ConditionGroup &conditionGroup);
-        void removeConditionGroup(int index);
-        void addFeature(const Feature &feature, double probability, const Texture2D &texture);
-        void removeFeature(int index);
+        void removeConditionGroup(const int index);
         void moveModifierUp(int idx);
         void moveModifierDown(int idx);
 
@@ -77,6 +85,7 @@ namespace WorldMaker {
         static Biome getBiome(double params[4]);
         static void addBiome(const Biome &biome);
         static void removeBiome(int index);
+        static int getBiomeId(const std::string &name);
         static void addDefaultBiomes();
     };
 }
