@@ -46,6 +46,7 @@ int main()
 	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
 	BiomeGenerator::addDefaultBiomes();
+	FeatureManager::addDefaultFeatures();
 
 	int gridWidth = ChunkRenderUnit::s_chunkSide;
     int gridDepth = ChunkRenderUnit::s_chunkSide;

@@ -59,33 +59,47 @@ namespace WorldMaker {
 
         double params[4] = {erosion, continentalness, temperature, humidity};
         Biome biome = BiomeGenerator::getBiome(params);
-
+        int biomeId = BiomeGenerator::getBiomeId(biome.name);
 
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
 
         if (continentalness >= -0.1) {
             v.m_color = biome.biomeColor;
-            if (biome.name == "Forest") {
-                FeatureNoise forestTreeNoise = FeatureNoise(m_featureSeed, 20, 0.85);
-                v.m_featureId = forestTreeNoise.getNoise(x, z);
-            } else if (biome.name == "Plains") {
-                FeatureNoise plainsTreeNoise = FeatureNoise(m_featureSeed, 20, 0.05);
-                v.m_featureId = plainsTreeNoise.getNoise(x, z);
+            for (int featureId : biome.m_features) {
+                // Feature *currentFeature = &FeatureManager::m_features[i];
+                if (FeatureManager::m_features[featureId].terrestrialStatus != 0) {
+                    continue;
+                }
+                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
+                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
             }
         } else if (continentalness >= -0.6) {
+            for (int featureId : biome.m_features) {
+                // Feature *currentFeature = &FeatureManager::m_features[i];
+                if (FeatureManager::m_features[featureId].terrestrialStatus != 1) {
+                    continue;
+                }
+
+                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
+                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
+            }
             v.m_color = {Lerp(0.0, biome.biomeColor.x, ((continentalness+0.6) * 2), true), Lerp(0.0, biome.biomeColor.y, ((continentalness+0.6) * 2), true), Lerp(1.0, biome.biomeColor.z, ((continentalness+0.6) * 2), true), 1.0};
         } else {
+            for (int featureId : biome.m_features) {
+                // Feature *currentFeature = &FeatureManager::m_features[i];
+                if (FeatureManager::m_features[featureId].terrestrialStatus != 2) {
+                    continue;
+                }
+
+                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
+                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
+            }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
         
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
-
-
-
-
-
 
         return v;
     }

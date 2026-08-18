@@ -70,19 +70,6 @@ namespace WorldMaker {
         m_conditionGroups.erase(m_conditionGroups.begin() + index);
     }
 
-    void Biome::addFeature(const Feature &feature, double probability, const Texture2D &texture) {
-        m_features.push_back(feature);
-        m_featureProbabilities.push_back(probability);
-        m_featureTextures.push_back(texture);
-    }
-
-    void Biome::removeFeature(int index) {
-        m_features.erase(m_features.begin() + index);
-        m_featureProbabilities.erase(m_featureProbabilities.begin() + index);
-        m_featureTextures.erase(m_featureTextures.begin() + index);
-    }
-
-
     void Biome::moveModifierUp(int idx) {
         if (idx <= 0 || idx >= m_modifiers.size()) return;
         std::swap(m_modifiers[idx], m_modifiers[idx - 1]);
@@ -122,6 +109,16 @@ namespace WorldMaker {
         m_biomes.erase(m_biomes.begin() + index);
     }
 
+    int BiomeGenerator::getBiomeId(const std::string &name) {
+        for (int i = 0; i < m_biomes.size(); i++) {
+            if (m_biomes[i].name == name) {
+                return i;
+            }
+        }
+        return -1; // Biome not found
+    }
+
+
     void BiomeGenerator::addDefaultBiomes() {
         // Plains
 
@@ -145,6 +142,16 @@ namespace WorldMaker {
 
         addBiome(desert);
 
+        Biome forest = Biome();
+        forest.name = "Forest";
+        forest.setIdealCondition(BiomeDeterminators::Continentalness, 0);
+        forest.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
+        forest.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
+        forest.setIdealCondition(BiomeDeterminators::Humidity,0.6);
+        forest.biomeColor = Vec4(0.0, 0.57, 0.0, 1.0);
+
+        addBiome(forest);
+
         // Biome mountain = Biome();
         // mountain.name = "Mountain";
         // mountain.setIdealCondition(BiomeDeterminators::Continentalness, 0.8);
@@ -155,15 +162,7 @@ namespace WorldMaker {
         //
         // addBiome(mountain);
 
-        Biome forest = Biome();
-        forest.name = "Forest";
-        forest.setIdealCondition(BiomeDeterminators::Continentalness, 0);
-        forest.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
-        forest.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
-        forest.setIdealCondition(BiomeDeterminators::Humidity,0.6);
-        forest.biomeColor = Vec4(0.0, 0.57, 0.0, 1.0);
 
-        addBiome(forest);
     }
 
 

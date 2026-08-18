@@ -1,6 +1,6 @@
 #include "ChunkGeneration.h"
 #include "ChunkRenderUnit.h"
-	#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #define CLAMP0(x) ((x) * ((x) > 0))
 
@@ -27,10 +27,11 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chu
 
             generatorVertex v;
         	v = generator.getVertex(x, z);
-            if (v.m_featureId == 1)
+            if (v.m_featureId != 0)
             {
-                glm::quat rot = glm::identity<glm::quat>();
-                chunkModels.addInstance("core/rendering/assets/models/tree.glb", v.m_position, rot, {0.1, 0.1f, 0.1f});
+
+                chunkModels.addInstance(FeatureManager::m_features[v.m_featureId - 1].modelPath, {v.m_position.x, v.m_position.y + FeatureManager::m_features[v.m_featureId - 1].y_offset, v.m_position.z},
+                                        FeatureManager::m_features[v.m_featureId - 1].rotation, FeatureManager::m_features[v.m_featureId - 1].scale);
             }
             tallestPoint = std::max(tallestPoint, v.m_position.y);
             lowestPoint = std::min(lowestPoint, v.m_position.y);
