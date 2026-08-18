@@ -47,7 +47,7 @@ namespace WorldMaker {
         FractalNoise m_temperature;
         FractalNoise m_humidity;
         FractalNoise m_base;
-        FeatureNoise m_treeNoise;
+        uint64_t m_featureSeed;
     public:
         double getHeight(double erosion, double continentalness, double base);
         generatorVertex getVertex(float x, float z);

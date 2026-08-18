@@ -19,8 +19,7 @@ namespace WorldMaker {
         m_humidity = FractalNoise(20.0, 1.0, nextSeed, 4, 2.5, 0.25);
         nextSeed = PRNG::nextNumber64(nextSeed);
         m_base = FractalNoise(60.0, 1.5, nextSeed, 4, 2.0, 0.5);
-        nextSeed = PRNG::nextNumber64(nextSeed);
-        m_treeNoise = FeatureNoise(nextSeed, 20, 0.85);
+        m_featureSeed = PRNG::nextNumber64(nextSeed);
     }
 
     double WorldGenerator::getHeight(double erosion, double continentalness, double base) {
@@ -76,8 +75,14 @@ namespace WorldMaker {
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
 
+
+
         if (biome.name == "Forest") {
-            v.m_featureId = m_treeNoise.getNoise(x, z);
+            FeatureNoise forestTreeNoise = FeatureNoise(m_featureSeed, 20, 0.85);
+            v.m_featureId = forestTreeNoise.getNoise(x, z);
+        } else if (biome.name == "Plains") {
+            FeatureNoise plainsTreeNoise = FeatureNoise(m_featureSeed, 20, 0.05);
+            v.m_featureId = plainsTreeNoise.getNoise(x, z);
         }
 
 
