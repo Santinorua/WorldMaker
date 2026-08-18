@@ -53,6 +53,9 @@ namespace WorldMaker {
             distanceVec[i] = 0.5;
             if (m_idealConditions[i] != -2.0) {
                 distanceVec[i] = params[i] - m_idealConditions[i];
+                // if (i == int(BiomeDeterminators::Erosion)) {
+                //     distanceVec[i] *= 2;
+                // }
             }
         }
         distance = Vec4(distanceVec[0], distanceVec[1], distanceVec[2], distanceVec[3]).Magnitude();
@@ -126,7 +129,7 @@ namespace WorldMaker {
         plains.name = "Plains";
         plains.setIdealCondition(BiomeDeterminators::Continentalness, -0.4);
         plains.setIdealCondition(BiomeDeterminators::Erosion, 0);
-        plains.setIdealCondition(BiomeDeterminators::Temperature, 0);
+        plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
         plains.setIdealCondition(BiomeDeterminators::Humidity,0.2);
         plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
 
@@ -156,7 +159,7 @@ namespace WorldMaker {
         forest.name = "Forest";
         forest.setIdealCondition(BiomeDeterminators::Continentalness, 0);
         forest.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
-        forest.setIdealCondition(BiomeDeterminators::Temperature, 0);
+        forest.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
         forest.setIdealCondition(BiomeDeterminators::Humidity,0.6);
         forest.biomeColor = Vec4(0.0, 0.57, 0.0, 1.0);
 
