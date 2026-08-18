@@ -39,26 +39,8 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, float x_offset, float 
 
         	Vertex v;
             v = generator.getVertex(x, z);
-            v.m_color = {1,1,1,1};
-            v.m_materialLayer = (fmod(x, 20.0) < 10.0) ? 0 : 1;
-            if (!treeTest)
-            {
-                glm::quat rot = glm::identity<glm::quat>();
-                chunkModels.addInstance("core/rendering/assets/models/tree.glb", v.m_position, rot, {0.1, 0.1f, 0.1f});
-                treeTest = true;
-            }
             tallestPoint = std::max(tallestPoint, v.m_position.y);
             lowestPoint = std::min(lowestPoint, v.m_position.y);
-
-   //          v.m_color = {0.5,0.5,0.5,1};
-   //
-			// if (x % ChunkRenderUnit::s_chunkSide == 0 || x % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
-			// 	v.m_color.x = 1;
-			// }
-   //
-			// if (z % ChunkRenderUnit::s_chunkSide == 0 || z % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
-			// 	v.m_color.y = 1;
-			// }
 
 			chunkVertices.push_back(v);
         }
