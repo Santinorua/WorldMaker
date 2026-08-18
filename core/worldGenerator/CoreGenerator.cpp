@@ -66,6 +66,13 @@ namespace WorldMaker {
 
         if (continentalness >= -0.1) {
             v.m_color = biome.biomeColor;
+            if (biome.name == "Forest") {
+                FeatureNoise forestTreeNoise = FeatureNoise(m_featureSeed, 20, 0.85);
+                v.m_featureId = forestTreeNoise.getNoise(x, z);
+            } else if (biome.name == "Plains") {
+                FeatureNoise plainsTreeNoise = FeatureNoise(m_featureSeed, 20, 0.05);
+                v.m_featureId = plainsTreeNoise.getNoise(x, z);
+            }
         } else if (continentalness >= -0.6) {
             v.m_color = {Lerp(0.0, biome.biomeColor.x, ((continentalness+0.6) * 2), true), Lerp(0.0, biome.biomeColor.y, ((continentalness+0.6) * 2), true), Lerp(1.0, biome.biomeColor.z, ((continentalness+0.6) * 2), true), 1.0};
         } else {
@@ -77,13 +84,7 @@ namespace WorldMaker {
 
 
 
-        if (biome.name == "Forest") {
-            FeatureNoise forestTreeNoise = FeatureNoise(m_featureSeed, 20, 0.85);
-            v.m_featureId = forestTreeNoise.getNoise(x, z);
-        } else if (biome.name == "Plains") {
-            FeatureNoise plainsTreeNoise = FeatureNoise(m_featureSeed, 20, 0.05);
-            v.m_featureId = plainsTreeNoise.getNoise(x, z);
-        }
+
 
 
         return v;
