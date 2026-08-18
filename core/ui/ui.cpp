@@ -24,14 +24,17 @@ static struct {
 	bool generation;
 	bool biomes;
 	bool biome_edit;
+	bool new_biome;
 } open_windows = {
 	.debug = true,
 	.generation = true,
 	.biomes = false,
 	.biome_edit = false,
+	.new_biome = false,
 };
 
 static bool &show_biomes = open_windows.biomes;
+static bool create_new_biome = false;
 
 #define _HEX(r, g, b, a) { (float)(r)/255.0, (float)(g)/255.0, (float)(b)/255.0, (float)(a)/255.0 }
 #define HEX(hex) _HEX((((uint64_t)hex) >> 24) & 0xff, (((uint64_t)hex) >> 16) & 0xff, (((uint64_t)hex) >> 8) & 0xff, (uint64_t)hex & 0xff)
@@ -289,12 +292,109 @@ void BiomeWindow(Biome *biome_ptr) {
 	ImGui::End();
 }
 
+void NewBiomeWindow() {
+
+	static Biome *biome = new Biome();
+
+	static double erosion = 0;
+	static double continentalness = 0;
+	static double temperature = 0;
+	static double humidity = 0;
+	static glm::vec4 color = {0.5, 0.5, 0.5, 1.0};
+	static char biome_name[64] = {0};
+
+	if (!open_windows.new_biome) {
+		return;
+	}
+
+	if (create_new_biome) {
+		create_new_biome = false;
+
+		biome = new Biome();
+
+		biome->name = "";
+		color = {biome->biomeColor.x, biome->biomeColor.y, biome->biomeColor.z, 1};
+
+		erosion = 0;
+		continentalness = -1;
+		temperature = -1;
+		humidity = -1;
+
+		Vec2 cursor_pos = Input::GetCursorPosPix();
+
+		cursor_pos.x -= 45;
+		cursor_pos.y -= 45;
+
+		ImGui::SetNextWindowPos(ImVec2(cursor_pos.x, cursor_pos.y));
+	}
+
+	ImGui::SetNextWindowSize(ImVec2(250, 350));
+
+	ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+	ImGui::Begin("New Biome", &open_windows.new_biome, flags);
+
+	ImGui::PushItemWidth(75);
+
+
+	ImGui::Text("Name:");
+	ImGui::SameLine();
+	ImGui::InputText("##Name", biome_name, 64);
+
+	ImGui::Text("Erosion:");
+	ImGui::SameLine();
+	ImGui::InputDouble("##Erosion: ", &erosion, 0, 0, "%.3f");
+
+	ImGui::Text("Continentalness:");
+	ImGui::SameLine();
+	ImGui::InputDouble("##Continentalness: ", &continentalness, 0, 0, "%.3f");
+
+	ImGui::Text("Temperature:");
+	ImGui::SameLine();
+	ImGui::InputDouble("##Temperature: ", &temperature, 0, 0, "%.3f");
+
+	ImGui::Text("Humidity:");
+	ImGui::SameLine();
+	ImGui::InputDouble("##Humidity: ", &humidity, 0, 0, "%.3f");
+
+	ImGui::PopItemWidth();
+
+	ImGui::PushItemWidth(175);
+
+	ImGuiColorEditFlags color_picker_flags = ImGuiColorEditFlags_DisplayHex;
+
+	ImGui::ColorPicker4("Color", (float*)&color, color_picker_flags);
+
+	if (ImGui::Button("Create Biome")) {
+		biome->setIdealCondition(BiomeDeterminators::Erosion, erosion);
+		biome->setIdealCondition(BiomeDeterminators::Continentalness, continentalness);
+		biome->setIdealCondition(BiomeDeterminators::Temperature, temperature);
+		biome->setIdealCondition(BiomeDeterminators::Humidity, humidity);
+
+		biome->biomeColor.x = color.x;
+		biome->biomeColor.y = color.y;
+		biome->biomeColor.z = color.z;
+		biome->biomeColor.w = color.w;
+
+		biome->name = biome_name;
+
+		BiomeGenerator::addBiome(*biome);
+		delete biome;
+		biome = nullptr;
+		open_windows.new_biome = false;
+	}
+
+	ImGui::PopItemWidth();
+
+	ImGui::End();
+}
+
 void BiomesWindow() {
 	if (!show_biomes) return;
 
-	int biome_idx = 0;
+	char biome_buf[128] = {0};
 	ImGui::Begin("Biomes", &open_windows.biomes);
-	for (auto& biome : BiomeGenerator::m_biomes) {
+	for (int biome_idx = 0; biome_idx < BiomeGenerator::m_biomes.size(); biome_idx++) {
+		Biome &biome = BiomeGenerator::m_biomes[biome_idx];
 		ImGui::Text("%s", biome.name.c_str());
 
 		ImGui::SameLine(0, 10);
@@ -306,13 +406,45 @@ void BiomesWindow() {
 		}
 		ImGui::PopID();
 
-		biome_idx++;
+		ImGui::SameLine(0, 10);
+
+		sprintf(biome_buf, "%s##delete", biome.name.c_str());
+
+		ImGui::PushID(biome_buf);
+		if (ImGui::Button("Remove")) {
+			ImGui::OpenPopup("Remove Biome");
+		}
+
+		if (ImGui::BeginPopup("Remove Biome")) {
+			if (ImGui::Button("Remove")) {
+				BiomeGenerator::removeBiome(biome_idx--);
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::Button("Cancel")) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::PopID();
 	}
+
+	if (ImGui::Button("Add Biome")) {
+		open_windows.new_biome = true;
+		create_new_biome = true;
+	}
+
 	ImGui::End();
 
 	if (biome_edit) {
 		BiomeWindow(biome_edit);
 	}
+
+	if (open_windows.new_biome) {
+		NewBiomeWindow();
+	}
+
+	
 }
 
 }
