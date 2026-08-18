@@ -126,7 +126,7 @@ namespace WorldMaker {
         plains.name = "Plains";
         plains.setIdealCondition(BiomeDeterminators::Continentalness, -0.4);
         plains.setIdealCondition(BiomeDeterminators::Erosion, 0);
-        plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
+        plains.setIdealCondition(BiomeDeterminators::Temperature, 0);
         plains.setIdealCondition(BiomeDeterminators::Humidity,0.2);
         plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
 
@@ -134,7 +134,7 @@ namespace WorldMaker {
 
         Biome desert = Biome();
         desert.name = "Desert";
-        desert.setIdealCondition(BiomeDeterminators::Continentalness, 0.5);
+        desert.setIdealCondition(BiomeDeterminators::Continentalness, 0.25);
         desert.setIdealCondition(BiomeDeterminators::Erosion, 0.5);
         desert.setIdealCondition(BiomeDeterminators::Temperature, 1);
         desert.setIdealCondition(BiomeDeterminators::Humidity,-1);
@@ -156,7 +156,7 @@ namespace WorldMaker {
         forest.name = "Forest";
         forest.setIdealCondition(BiomeDeterminators::Continentalness, 0);
         forest.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
-        forest.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
+        forest.setIdealCondition(BiomeDeterminators::Temperature, 0);
         forest.setIdealCondition(BiomeDeterminators::Humidity,0.6);
         forest.biomeColor = Vec4(0.0, 0.57, 0.0, 1.0);
 
