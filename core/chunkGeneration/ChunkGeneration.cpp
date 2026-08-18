@@ -19,20 +19,18 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chu
     double lowestPoint = 0;
 
     ChunkModels chunkModels;
-    bool treeTest = false;
     for (int z = z_chunk * ChunkRenderUnit::s_chunkSide - z_chunk; z < ChunkRenderUnit::s_chunkSide * (z_chunk + 1) - z_chunk; z++)
     {
     	int localX = 0;
         for (int x = x_chunk * ChunkRenderUnit::s_chunkSide - x_chunk; x < ChunkRenderUnit::s_chunkSide * (x_chunk + 1) - x_chunk; x++)
         {
 
-        	Vertex v;
-            v = generator.getVertex(x, z);
-            if (!treeTest)
+            generatorVertex v;
+        	v = generator.getVertex(x, z);
+            if (v.m_featureId == 1)
             {
                 glm::quat rot = glm::identity<glm::quat>();
                 chunkModels.addInstance("core/rendering/assets/models/tree.glb", v.m_position, rot, {0.1, 0.1f, 0.1f});
-                treeTest = true;
             }
             tallestPoint = std::max(tallestPoint, v.m_position.y);
             lowestPoint = std::min(lowestPoint, v.m_position.y);
@@ -46,7 +44,7 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chu
 			// if (z % ChunkRenderUnit::s_chunkSide == 0 || z % ChunkRenderUnit::s_chunkSide == ChunkRenderUnit::s_chunkSide - 1) {
 			// 	v.m_color.y = 1;
 			// }
-			chunkVertices.push_back(v);
+			chunkVertices.push_back(v.toGraphicalVertex());
 			localX++;
         }
     }

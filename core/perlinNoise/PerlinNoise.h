@@ -65,4 +65,18 @@ namespace WorldMaker {
         double getNoise(float x, float y);
     };
 
+    class FeatureNoise {
+        uint64_t m_seed;
+        unsigned int m_radius;
+        double m_probability;
+    public:
+        FeatureNoise() {
+            m_seed = 0;
+            m_radius = 1;
+            m_probability = 0.0;
+        }
+        FeatureNoise(uint64_t seed, unsigned int radius, double probability);
+        bool getNoise(int x, int y);
+    };
+
 }

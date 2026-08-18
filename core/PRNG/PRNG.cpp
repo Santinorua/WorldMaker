@@ -26,6 +26,13 @@ namespace WorldMaker {
         return static_cast<uint32_t>(nextNumber64(seed) & 0xFFFFFFFF);
     }
 
+    uint32_t PRNG::hash2D(int32_t x, int32_t y, uint64_t seed) {
+        uint64_t h = seed;
+        h ^= static_cast<uint64_t>(static_cast<uint32_t>(x)) * 0x9E3779B185EBCA87ULL;
+        h ^= static_cast<uint64_t>(static_cast<uint32_t>(y)) * 0xC2B2AE3D27D4EB4FULL;
+        return static_cast<uint32_t>(nextNumber64(h));
+    }
+
     Vec2 PRNG::randomVector2(const int x, const int y, const uint64_t seed) {
         const uint64_t randomNumber = static_cast<uint64_t>(nextNumber32(seed));
         const uint64_t newSeed = static_cast<uint64_t>(randomNumber) * (((static_cast<uint64_t>(x) + randomNumber) * (static_cast<uint64_t>(y) - randomNumber)) ^ (x * y * randomNumber));

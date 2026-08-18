@@ -19,6 +19,8 @@ namespace WorldMaker {
         m_humidity = FractalNoise(20.0, 1.0, nextSeed, 4, 2.5, 0.25);
         nextSeed = PRNG::nextNumber64(nextSeed);
         m_base = FractalNoise(60.0, 1.5, nextSeed, 4, 2.0, 0.5);
+        nextSeed = PRNG::nextNumber64(nextSeed);
+        m_treeNoise = FeatureNoise(nextSeed, 20, 0.85);
     }
 
     double WorldGenerator::getHeight(double erosion, double continentalness, double base) {
@@ -47,7 +49,7 @@ namespace WorldMaker {
         return final;
     }
 
-    Vertex WorldGenerator::getVertex(float x, float z) {
+    generatorVertex WorldGenerator::getVertex(float x, float z) {
         double continentalness = m_continentalness.getNoise(x, z);
         double erosion = (m_erosion.getNoise(x, z) + 0.5);
         double temperature = m_temperature.getNoise(x, z);
@@ -60,7 +62,7 @@ namespace WorldMaker {
         Biome biome = BiomeGenerator::getBiome(params);
 
 
-        Vertex v;
+        generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
 
         if (continentalness >= -0.1) {
@@ -73,6 +75,11 @@ namespace WorldMaker {
         
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
+
+        if (biome.name == "Forest") {
+            v.m_featureId = m_treeNoise.getNoise(x, z);
+        }
+
 
         return v;
     }

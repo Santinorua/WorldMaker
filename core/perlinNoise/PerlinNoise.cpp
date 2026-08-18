@@ -151,4 +151,28 @@ namespace WorldMaker {
         double fractalValue = m_fractalNoise.getNoise(x, y) * 0.5 + 0.5;
         return 1 - std::abs(std::abs(fractalValue * 3) - 2);
     }
+
+    FeatureNoise::FeatureNoise(uint64_t seed, unsigned int radius, double probability) {
+        m_probability = probability;
+        m_radius = radius;
+        m_seed = seed;
+    }
+
+    bool FeatureNoise::getNoise(int x, int y) {
+        unsigned int numberOfRadiusVertices = m_radius * m_radius;
+        int gridX = x / m_radius;
+        int gridY = y / m_radius;
+        if (PRNG::hash2D(gridX, gridY, m_seed) > m_probability * UINT32_MAX) {
+            return false;
+        }
+        uint64_t newSeed = PRNG::nextNumber64(m_seed);
+        int featurePosition = PRNG::hash2D(gridX, gridY, newSeed) % numberOfRadiusVertices;
+
+        if (((x % m_radius) + (y % m_radius) * m_radius) == featurePosition) {
+            // std::cout << "FeaturePosition: " << featurePosition << std::endl;
+            // std::cout << "thisPosition: " << (x % m_radius) + (y % m_radius) * m_radius << std::endl;
+            return true;
+        }
+        return false;
+    }
 }
