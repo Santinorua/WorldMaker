@@ -9,7 +9,7 @@ namespace WorldMaker
 {
 	unsigned int Mesh::s_idCount = 0;
 
-	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, ModelMaterialSPtr material)
+	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MeshMaterialSPtr material)
 		: m_material(material), m_id(s_idCount++)
 	{
 	    pushData(vertices, indices);

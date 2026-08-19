@@ -1,6 +1,5 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
-#define STB_IMAGE_STATIC
 #include "DebugUtils.h"
 #include "OpenGLUtils.h"
 #include "Texture2D.h"
@@ -44,8 +43,8 @@ namespace WorldMaker
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
 		if (!m_unsignedCharLocalBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
-		ASSERT(m_unsignedCharLocalBuffer);
-		stbi_image_free(m_unsignedCharLocalBuffer);
+		// ASSERT(m_unsignedCharLocalBuffer);
+		// stbi_image_free(m_unsignedCharLocalBuffer);
 	}
 
 	Texture2D::Texture2D(const std::string& modelTexPath, const aiTexture* aiTex)
@@ -106,11 +105,11 @@ namespace WorldMaker
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
-		if (heightZero)
-		{
-    		ASSERT(m_unsignedCharLocalBuffer);
-    		stbi_image_free(m_unsignedCharLocalBuffer);
-		}
+		// if (heightZero)
+		// {
+  //   		ASSERT(m_unsignedCharLocalBuffer);
+  //   		stbi_image_free(m_unsignedCharLocalBuffer);
+		// }
 	}
 
 	Texture2D::Texture2D(int width, int height, float* data) : m_width(width), m_height(height), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)

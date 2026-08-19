@@ -23,8 +23,6 @@ layout(binding = SSBOType_indices, std430) readonly buffer ssbo1
     uint indices[];
 };
 
-uniform mat4 u_view;
-uniform mat4 u_projection;
 
 vec3 GetPosition(uint index)
 {
@@ -68,20 +66,21 @@ vec3 GetNormal(uint index)
 }
 
 smooth out vec3 frag_normal;
-smooth out vec4 frag_pos;
 smooth out vec4 frag_color;
 flat out double frag_materialIndex;
 smooth out vec2 frag_uv;
 flat out ivec3 frag_triMaterialIndices;
 smooth out vec3 frag_baryWeight;
+
+uniform vec2 u_chunkWorldOrigin;
+uniform float u_chunkSize;
+
 void main()
 {
     uint realIndex = indices[gl_VertexID];
-    mat4 vp = u_projection * u_view;
     vec4 position = vec4(GetPosition(realIndex), 1.0);
     frag_color = GetColor(realIndex);
     frag_materialIndex = GetMaterialIndex(realIndex);
-    frag_pos = position;
     frag_normal = normalize(GetNormal(realIndex));
     frag_uv = GetUV(realIndex);
 
@@ -104,5 +103,9 @@ void main()
     else if (localId == 1u) bary = vec3(0.0, 1.0, 0.0);
     else bary = vec3(0.0, 0.0, 1.0);
     frag_baryWeight = bary;
-    gl_Position = vp * position;
+
+    vec3 worldPos = GetPosition(realIndex);
+    vec2 bakeUV = (worldPos.xz - u_chunkWorldOrigin) / u_chunkSize;
+
+    gl_Position = vec4(bakeUV * 2 -1, 0.0, 1.0);
 };

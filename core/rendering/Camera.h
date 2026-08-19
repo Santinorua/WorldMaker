@@ -28,6 +28,8 @@ namespace WorldMaker
 		static inline float FarPlane() { return s_farPlane; }
 		static inline float FOV() { return s_fov; }
 		static inline float AspectRatio() { return s_aspectRatio; }
+		static void SetAspectRatio(float newAspectRatio);
+
 
 		static bool CanSeeSphere(glm::vec3 center, float radius);
 		static bool CanSeeBox(glm::vec3 min, glm::vec3 max);

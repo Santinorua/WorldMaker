@@ -2,10 +2,10 @@
 #include "ArrayTexture2D.h"
 #include "FileFunctions.h"
 #include "GPUResourceManager.h"
-#include "ModelMaterial.h"
+#include "MeshMaterial.h"
 #include "Pointers.h"
-#include "RenderUnit.h"
 #include "Renderer.h"
+#include "RenderingAssets.h"
 #include "ShaderProgram.h"
 #include "TerrainMaterial.h"
 #include "Texture2D.h"
@@ -16,7 +16,7 @@
 namespace WorldMaker
 {
     std::unordered_map<unsigned int, TerrainMaterialWPtr> ResourceManager::s_terrainMaterialCache = {};
-    std::unordered_map<unsigned int, ModelMaterialWPtr> ResourceManager::s_modelMaterialCache = {};
+    std::unordered_map<unsigned int, MeshMaterialWPtr> ResourceManager::s_MeshMaterialCache = {};
     std::unordered_map<std::string, ArrayTexture2DWPtr> ResourceManager::s_arrayTexture2DCache = {};
     std::unordered_map<std::string, Texture2DWPtr> ResourceManager::s_texture2DCache = {};
     std::unordered_map<std::string, ModelWPtr> ResourceManager::s_modelCache;
@@ -161,12 +161,12 @@ namespace WorldMaker
         }
         return nullptr;
     }
-    ModelMaterialSPtr ResourceManager::GetModelMaterial(unsigned int materialId)
+    MeshMaterialSPtr ResourceManager::GetMeshMaterial(unsigned int materialId)
     {
-        auto it = s_modelMaterialCache.find(materialId);
-        if (it != s_modelMaterialCache.end())
+        auto it = s_MeshMaterialCache.find(materialId);
+        if (it != s_MeshMaterialCache.end())
         {
-            if (!it->second.expired()) return GetShared<ModelMaterial>(it->second);
+            if (!it->second.expired()) return GetShared<MeshMaterial>(it->second);
         }
         return nullptr;
     }
@@ -184,20 +184,20 @@ namespace WorldMaker
         }
     }
 
-    ModelMaterialSPtr ResourceManager::CreateModelMaterial(Texture2DSPtr diffuse, Texture2DSPtr specular)
+    MeshMaterialSPtr ResourceManager::CreateMeshMaterial(Texture2DSPtr diffuse, Texture2DSPtr specular)
     {
-        ModelMaterialSPtr newMat = std::make_shared<ModelMaterial>(diffuse, specular);
-        s_modelMaterialCache[newMat->id()] = newMat;
+        MeshMaterialSPtr newMat = std::make_shared<MeshMaterial>(diffuse, specular);
+        s_MeshMaterialCache[newMat->id()] = newMat;
         return newMat;
     }
 
-    void ResourceManager::RemoveModelMaterialIfExpired(unsigned int materialId)
+    void ResourceManager::RemoveMeshMaterialIfExpired(unsigned int materialId)
     {
-        auto it = s_modelMaterialCache.find(materialId);
+        auto it = s_MeshMaterialCache.find(materialId);
 
-        if (it != s_modelMaterialCache.end() && it->second.expired())
+        if (it != s_MeshMaterialCache.end() && it->second.expired())
         {
-            s_modelMaterialCache.erase(materialId);
+            s_MeshMaterialCache.erase(materialId);
             std::cout << "Model Material of id " << materialId << " destroyed\n";
         }
     }

@@ -21,7 +21,7 @@ namespace WorldMaker
     public:
         static void Init();
         static void Shutdown();
-        static void PrepareToDraw();
+        static void PrepareToDrawTerrain();
         inline static Texture2DArray* GetTexture2DArray() { return s_texture2DArray.get();};
         static void CreateTerrainMaterial(TerrainMaterialSPtr mat);
         static void ResetMaterial(unsigned int matIndex, ArrayTexture2DSPtr diffuseTex, ArrayTexture2DSPtr specularTex);

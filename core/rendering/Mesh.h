@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelMaterial.h"
+#include "MeshMaterial.h"
 #include "VertexArray.h"
 #include "SSBO.h"
 #include "RenderingConstants.h"
@@ -13,10 +13,10 @@ namespace WorldMaker
 	class Mesh
 	{
 	public:
-		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, ModelMaterialSPtr material);
+		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MeshMaterialSPtr material);
 		~Mesh();
 
-		ModelMaterialSPtr m_material;
+		MeshMaterialSPtr m_material;
 
 		void submitData();
 		void bindBuffersBase();

@@ -122,9 +122,20 @@ namespace WorldMaker
 		GLCall(glUniform1i(getUniformLocation(name), value));
 	}
 
-	void ShaderProgram::setUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+	void ShaderProgram::setUniform2i(const std::string& name, int v0, int v1)
 	{
-		GLCall(glUniform4f(getUniformLocation(name), v0, v1, v2, v3));
+		GLCall(glUniform2i(getUniformLocation(name), v0, v1));
+	}
+
+
+	void ShaderProgram::setUniform1f(const std::string& name, float value)
+	{
+		GLCall(glUniform1f(getUniformLocation(name), value));
+	}
+
+	void ShaderProgram::setUniform2f(const std::string& name, float v0, float v1)
+	{
+	    GLCall(glUniform2f(getUniformLocation(name), v0, v1));
 	}
 
 	void ShaderProgram::setUniform3f(const std::string& name, float v0, float v1, float v2)
@@ -132,9 +143,9 @@ namespace WorldMaker
 		GLCall(glUniform3f(getUniformLocation(name), v0, v1, v2));
 	}
 
-	void ShaderProgram::setUniform1f(const std::string& name, float value)
+	void ShaderProgram::setUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 	{
-		GLCall(glUniform1f(getUniformLocation(name), value));
+		GLCall(glUniform4f(getUniformLocation(name), v0, v1, v2, v3));
 	}
 
 	void ShaderProgram::setUniformMat4f(const std::string& name, glm::mat4 matrix)
@@ -162,7 +173,7 @@ namespace WorldMaker
 		setUniform1i("u_texture2DArray", 0);
 	}
 
-	void ShaderProgram::loadMaterial(ModelMaterial* mat)
+	void ShaderProgram::loadMeshMaterial(MeshMaterial* mat)
 	{
         bind();
         // setUniform4f("u_baseColor", mat->baseColor.x, mat->baseColor.y, material->baseColor.z, material->baseColor.w);

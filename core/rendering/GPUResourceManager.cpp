@@ -52,7 +52,7 @@ namespace WorldMaker
         s_materialsSSBO->flush();
         s_ended = true;
     }
-    void GPUResourceManager::PrepareToDraw()
+    void GPUResourceManager::PrepareToDrawTerrain()
     {
         s_materialsSSBO->bindBufferBase(SSBOType::materials);
         ShaderProgram::s_boundShader->loadTexture2DArray(s_texture2DArray.get()->glName());

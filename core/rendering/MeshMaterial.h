@@ -3,11 +3,11 @@
 #include "Vec4.h"
 namespace WorldMaker
 {
-    class ModelMaterial
+    class MeshMaterial
     {
     public:
-        ModelMaterial(Texture2DSPtr diffuseTex, Texture2DSPtr specularTex);
-        ~ModelMaterial();
+        MeshMaterial(Texture2DSPtr diffuseTex, Texture2DSPtr specularTex);
+        ~MeshMaterial();
         float m_shininess = 1.0f;
 
         Texture2DSPtr m_diffuseTexture = nullptr;
@@ -18,7 +18,7 @@ namespace WorldMaker
         unsigned int m_id;
 		static unsigned int s_idCount;
     };
-    using ModelMaterialUPtr = std::unique_ptr<ModelMaterial>;
-    using ModelMaterialSPtr = std::shared_ptr<ModelMaterial>;
-    using ModelMaterialWPtr = std::weak_ptr<ModelMaterial>;
+    using MeshMaterialUPtr = std::unique_ptr<MeshMaterial>;
+    using MeshMaterialSPtr = std::shared_ptr<MeshMaterial>;
+    using MeshMaterialWPtr = std::weak_ptr<MeshMaterial>;
 }
