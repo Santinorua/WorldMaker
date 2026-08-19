@@ -66,5 +66,7 @@ namespace WorldMaker
 		static void DrawBakedTerrain(ChunkRenderUnit& chunk);
 		static void DrawChunkTerrain(ChunkRenderUnit& chunk);
 		static void DrawChunkModels(ChunkRenderUnit& chunk);
+
+		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 	};
 }

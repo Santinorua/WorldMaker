@@ -41,6 +41,8 @@ namespace WorldMaker
 
         glfwMakeContextCurrent(s_window);
 
+        glfwSetFramebufferSizeCallback(s_window, framebuffer_size_callback);
+
         glfwSwapInterval(1);
 
         ASSERT(glewInit() == GLEW_OK);
@@ -136,4 +138,14 @@ namespace WorldMaker
             }
     	}
 	}
+
+	void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int height)
+    {
+        s_config.windowWidth = width;
+        s_config.windowHeight = height;
+        glViewport(0, 0, width, height);
+        if (height==0) height = 1;
+        float newAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        Camera::SetAspectRatio(newAspectRatio);
+    }
 }
