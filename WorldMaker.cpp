@@ -110,6 +110,11 @@ int main()
 		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		if (Input::GetKey(KeyCode::SpaceBar_Key))
+		{
+            WorldExporter::ExportWorld(chunks);
+		}
+
 		CoolTime::Update();
         Input::Update();
 

@@ -4,10 +4,9 @@
 #include "SSBO.h"
 #include "stb_image_write.h"
 #include <glm/gtc/type_ptr.hpp>
-
 namespace WorldMaker
 {
-    void WorldExporter::ExportWorld(std::vector<ChunkRenderUnit*> chunks)
+    void WorldExporter::ExportWorld(ChunkGeneration::ChunkArray chunks)
     {
         tinygltf::Model gltfModel;
         gltfModel.asset.version = "2.0";
@@ -20,7 +19,7 @@ namespace WorldMaker
 
         ModelMeshCache cache;
 
-        for (auto& chunk : chunks)
+        for (auto& [pos, chunk] : chunks)
         {
             rootNode.children.push_back(AddChunkNode(gltfModel, bufferBuilder, chunk, cache));
         }

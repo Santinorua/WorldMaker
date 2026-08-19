@@ -174,7 +174,7 @@ target_compile_definitions(Utils PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
 file (GLOB WORLD_EXPORTER_SRC "${CMAKE_SOURCE_DIR}/core/worldExporter/*.cpp")
 add_library(WorldExporter STATIC ${WORLD_EXPORTER_SRC})
-target_link_libraries(WorldExporter PUBLIC Vendor glm Rendering Utils Utilities)
+target_link_libraries(WorldExporter PUBLIC Vendor glm Rendering Utils Utilities ChunkGeneration)
 target_link_libraries(WorldExporter PUBLIC STB_Image)
 target_include_directories(WorldExporter PUBLIC ${CMAKE_SOURCE_DIR}/core/worldExporter)
 target_sources(WorldExporter PRIVATE $<TARGET_OBJECTS:TinyGltfImpl>)

@@ -3,6 +3,7 @@
 #include "ArrayTexture2D.h"
 #include "BufferBuilder.h"
 #include "ChunkRenderUnit.h"
+#include "ChunkGeneration.h"
 
 #include <vector>
 #include "MeshMaterial.h"
@@ -16,7 +17,7 @@ namespace WorldMaker
     public:
         using ModelMeshCache = std::unordered_map<unsigned int, std::vector<int>>;
 
-        static void ExportWorld(std::vector<ChunkRenderUnit*> chunks);
+        static void ExportWorld(ChunkGeneration::ChunkArray chunks);
         static void ExportChunkToGLB(ChunkRenderUnit* chunk);
         static void ExportModelToGLB(ModelSPtr model, const std::string& outPath);
 
