@@ -5,3 +5,4 @@ cmake-build-debug
 compile_commands.json
 .vs/
 .zed/
+__cmake_systeminformation/
