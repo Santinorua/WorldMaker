@@ -7,36 +7,45 @@ namespace WorldMaker
 
 	glm::vec3 ChunkRenderUnit::center()
 	{
-	    glm::vec3 point = m_vertices->m_data[0].m_position; // First vertex pos
+	    glm::vec3 point = m_vertices[m_current_lod]->m_data[0].m_position; // First vertex pos
 		point.y = (m_tallestPoint+m_lowestPoint)/2; // Y coordinate in the center
 		point+=glm::vec3(s_chunkSide/2 ,0 ,s_chunkSide/2); // X and Z coordinates in the center
 	    return point;
 	}
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels)
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<std::vector<Vertex>>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels)
 	{
-	    m_models = chunkModels;
-        m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
-        m_tallestPoint = std::max(tallestPoint, chunkModels.tallestPoint);
-        std::vector<unsigned int > indices = GetIndicesForChunk(); // TODO: Change so no need to calculate indices every time
-		m_vertices->pushData(vertices);
-		m_vertices->submitData();
+		m_current_lod = 4;
+		for (int i = 0; i < vertices.size(); i++) {
+			std::vector<unsigned int> indices = GetIndicesForChunk(i); // TODO: Change so no need to calculate indices every time
 
-		m_indices->pushData(indices);
-		m_indices->submitData();
+			m_vertices.push_back(std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT));
+			m_indices.push_back(std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT));
+
+			m_vertices[i]->pushData(vertices[i]);
+
+			m_indices[i]->pushData(indices);
+		}
+		m_vertices[m_current_lod]->submitData();
+		m_indices[m_current_lod]->submitData();
+
+		m_models = chunkModels;
+		m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
+		m_tallestPoint = std::max(tallestPoint, chunkModels.tallestPoint);
 	}
 
-	std::vector<unsigned int> ChunkRenderUnit::GetIndicesForChunk()
+	std::vector<unsigned int> ChunkRenderUnit::GetIndicesForChunk(int lod)
 	{
         std::vector<unsigned int> indices;
-        for (int y = 0; y < s_chunkSide-1; y++)
+		int side = (s_chunkSide >> lod) + (lod != 0);
+        for (int y = 0; y < side-1; y++)
         {
-            for (int x = 0; x < s_chunkSide-1; x++)
+            for (int x = 0; x < side-1; x++)
             {
-                unsigned int bottomLeft = y * s_chunkSide + x;
-                unsigned int bottomRight = y * s_chunkSide + (x + 1);
-                unsigned int topLeft = (y+1) * s_chunkSide + x;
-                unsigned int topRight = (y+1) * s_chunkSide + (x +1);
+                unsigned int bottomLeft = y * side + x;
+                unsigned int bottomRight = y * side + (x + 1);
+                unsigned int topLeft = (y+1) * side + x;
+                unsigned int topRight = (y+1) * side + (x +1);
 
                 indices.push_back(bottomLeft);
                 indices.push_back(topRight);

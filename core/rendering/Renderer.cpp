@@ -98,9 +98,9 @@ namespace WorldMaker
         shaderProgram->setUniform2f("u_chunkWorldOrigin", chunk.minPoint().x, chunk.minPoint().z);
         GPUResourceManager::PrepareToDrawTerrain();
 		chunk.m_vertexArray->bind();
-		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
-		chunk.m_indices->bindBufferBase(SSBOType::indices);
-		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices->m_data.size());
+		chunk.m_vertices[chunk.m_current_lod]->bindBufferBase(SSBOType::vertices);
+		chunk.m_indices[chunk.m_current_lod]->bindBufferBase(SSBOType::indices);
+		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size());
 		GLCall(glEnable(GL_CULL_FACE));
 		GLCall(glEnable(GL_DEPTH_TEST));
 	}
@@ -113,9 +113,9 @@ namespace WorldMaker
         GlobalLight::LoadLightSettings();
         GPUResourceManager::PrepareToDrawTerrain();
 		chunk.m_vertexArray->bind();
-		chunk.m_vertices->bindBufferBase(SSBOType::vertices);
-		chunk.m_indices->bindBufferBase(SSBOType::indices);
-		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices->m_data.size());
+		chunk.m_vertices[chunk.m_current_lod]->bindBufferBase(SSBOType::vertices);
+		chunk.m_indices[chunk.m_current_lod]->bindBufferBase(SSBOType::indices);
+		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size());
 	}
 	void Renderer::DrawChunkModels(ChunkRenderUnit& chunk)
 	{
