@@ -50,8 +50,6 @@ int main()
 	int gridWidth = ChunkRenderUnit::s_chunkSide;
     int gridDepth = ChunkRenderUnit::s_chunkSide;
 
-	int world_width = 4;
-	int world_height = 4;
 	int render_distance = 4;
 
 	WorldGenerator generator(150, 42);
@@ -115,7 +113,7 @@ int main()
 
 		ui::DebugWindow(render_distance, chunks);
 
-		bool redraw = ui::GenerationWindow(chunk_size, world_width, seed, render_distance, chunks, generator);
+		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator);
 		ui::BiomesWindow();
 
 		Camera::UpdateCameraTransform();

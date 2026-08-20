@@ -165,7 +165,7 @@ void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks
 	ImGui::End();
 }
 
-bool GenerationWindow(int &chunk_size, int &world_width, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator) {
+bool GenerationWindow(int &chunk_size, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator) {
 	bool redraw = false;
 
 	if (!open_windows.generation) return false;
@@ -176,9 +176,6 @@ bool GenerationWindow(int &chunk_size, int &world_width, uint64_t &seed, int& re
 
 	ImGui::Text("Mesh Size: ");
 	IMGUI_INPUT(chunk_size, ImGuiDataType_S32);
-
-	ImGui::Text("Mesh size: ");
-	IMGUI_INPUT(world_width, ImGuiDataType_S32);
 
 	ImGui::Text("seed:");
 	IMGUI_INPUT(seed, ImGuiDataType_U64);
