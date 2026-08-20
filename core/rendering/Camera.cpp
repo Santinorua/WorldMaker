@@ -26,6 +26,11 @@ namespace WorldMaker
 		return glm::lookAt(s_pos, s_pos + Front(), s_globalUp);
 	};
 
+	void Camera::SetAspectRatio(float newAspectRatio)
+	{
+	    s_aspectRatio = newAspectRatio;
+	}
+
 	glm::vec3 Camera::Front()
 	{
         float pitch = glm::radians(s_rot.x);

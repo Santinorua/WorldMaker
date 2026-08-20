@@ -1,6 +1,7 @@
 #include "WorldMaker.h"
 #include "Camera.h"
 #include "GPUResourceManager.h"
+#include "KeyCode.h"
 #include "PerlinNoise.h"
 #include "RenderingConstants.h"
 #include "Renderer.h"
@@ -17,6 +18,7 @@
 #include "ChunkRenderUnit.h"
 
 #include "ChunkGeneration.h"
+#include "WorldExporter.h"
 
 #include "Camera.h"
 #include "GlobalLight.h"
@@ -31,6 +33,7 @@
 #include "CoreGenerator.h"
 #include "BiomeGenerator.h"
 
+#include "core/worldExporter/WorldExporter.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -46,6 +49,7 @@ int main()
 	ResourceManager::Init();
 	Input::SetUp(Renderer::GetWindow());
 	BiomeGenerator::addDefaultBiomes();
+	FeatureManager::addDefaultFeatures();
 
 	int gridWidth = ChunkRenderUnit::s_chunkSide;
     int gridDepth = ChunkRenderUnit::s_chunkSide;
@@ -103,6 +107,11 @@ int main()
 	{
 		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		if (Input::GetKey(KeyCode::SpaceBar_Key))
+		{
+            WorldExporter::ExportWorld(chunks);
+		}
 
 		CoolTime::Update();
         Input::Update();

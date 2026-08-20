@@ -34,10 +34,9 @@ target_include_directories(Vendor INTERFACE
         #   ${CMAKE_SOURCE_DIR}/vendor/IMGUI
 )
 
-target_compile_definitions(Vendor INTERFACE STB_IMAGE_IMPLEMENTATION)
 target_compile_definitions(Vendor INTERFACE GLEW_STATIC)
 
-target_link_libraries(Vendor INTERFACE ImGui)
+target_link_libraries(Vendor INTERFACE ImGui tinygltf)
 
 # -----------------------------------------------------------------------------------------------------
 
@@ -130,7 +129,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
 endif()
 
 FetchContent_MakeAvailable(assimp)
-
+set(BUILD_SHARED_LIBS ON)
 # -----------------------------------------------------------------------------------------------------
 
 # ImGui
@@ -139,6 +138,25 @@ file (GLOB STB_IMAGE_SRC "${CMAKE_SOURCE_DIR}/vendor/stb_image/*.cpp")
 add_library(STB_Image STATIC ${STB_IMAGE_SRC})
 # target_link_libraries(STB_Image PUBLIC )
 target_include_directories(STB_Image PUBLIC ${CMAKE_SOURCE_DIR}/vendor/stb_image)
+
+# -----------------------------------------------------------------------------------------------------
+
+# Tiny GLTF
+
+include(FetchContent)
+FetchContent_Declare(
+    tinygltf
+    GIT_REPOSITORY https://github.com/syoyo/tinygltf.git
+    GIT_TAG v2.9.3
+)
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(TINYGLTF_HEADER_ONLY ON CACHE BOOL "" FORCE)
+set(TINYGLTF_INSTALL OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(tinygltf)
+message("${tinygltf_SOURCE_DIR}")
+add_library(TinyGltfImpl OBJECT vendor/tinygltf_impl.cpp)
+target_link_libraries(TinyGltfImpl PRIVATE tinygltf)
 
 # -----------------------------------------------------------------------------------------------------
 
@@ -152,11 +170,21 @@ target_compile_definitions(Utils PUBLIC PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}")
 
 # -----------------------------------------------------------------------------------------------------
 
+# World Exporter
+
+file (GLOB WORLD_EXPORTER_SRC "${CMAKE_SOURCE_DIR}/core/worldExporter/*.cpp")
+add_library(WorldExporter STATIC ${WORLD_EXPORTER_SRC})
+target_link_libraries(WorldExporter PUBLIC Vendor glm Rendering Utils Utilities ChunkGeneration)
+target_link_libraries(WorldExporter PUBLIC STB_Image)
+target_include_directories(WorldExporter PUBLIC ${CMAKE_SOURCE_DIR}/core/worldExporter)
+target_sources(WorldExporter PRIVATE $<TARGET_OBJECTS:TinyGltfImpl>)
+# -----------------------------------------------------------------------------------------------------
+
 # Rendering
 
 file (GLOB RENDERING_SRC "${CMAKE_SOURCE_DIR}/core/rendering/*.cpp")
 add_library(Rendering STATIC ${RENDERING_SRC})
-target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities)
+target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities STB_Image)
 target_include_directories(Rendering PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering)
 
 # -----------------------------------------------------------------------------------------------------
@@ -248,7 +276,7 @@ target_include_directories(ui PUBLIC ${CMAKE_SOURCE_DIR}/core/ui)
 # Core
 
 add_library(Core INTERFACE)
-target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator ChunkGeneration ui)
+target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator WorldExporter ChunkGeneration ui)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
