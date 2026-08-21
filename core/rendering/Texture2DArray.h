@@ -11,6 +11,7 @@ namespace WorldMaker
         Texture2DArray(int width, int height, int layers);
         unsigned int pushTexture(ArrayTexture2D* texture);
         void resetTextureLayer(ArrayTexture2D* tex);
+        void resetTextureLayer(ArrayTexture2D* tex, ArrayTexture2D* newTex);
         void bind();
         inline unsigned int glName() const { return m_glName; }
     private:

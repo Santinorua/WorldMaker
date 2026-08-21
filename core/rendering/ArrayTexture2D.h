@@ -15,7 +15,7 @@ namespace WorldMaker
 	public:
 		float* m_floatLocalBuffer;
 		unsigned char* m_unsignedCharLocalBuffer;
-		ArrayTexture2D(const std::string& relativePath); // Relative path from the project root directory
+		ArrayTexture2D(const std::string& relativePath, int layer = -1); // Relative path from the project root directory
 		ArrayTexture2D(int width, int height, float* data);
 		~ArrayTexture2D();
 

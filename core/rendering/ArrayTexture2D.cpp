@@ -9,7 +9,7 @@
 
 namespace WorldMaker
 {
-	ArrayTexture2D::ArrayTexture2D(const std::string& relativePath)
+	ArrayTexture2D::ArrayTexture2D(const std::string& relativePath, int layer)
 		: m_width(0), m_height(0), m_unsignedCharLocalBuffer(nullptr), m_floatLocalBuffer(nullptr)
 	{
 	    m_path = relativePath;

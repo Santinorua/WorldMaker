@@ -53,6 +53,22 @@ namespace WorldMaker
             emptyTex->m_unsignedCharLocalBuffer));
         m_freeLayers.push_back(layer);
     }
+    void Texture2DArray::resetTextureLayer(ArrayTexture2D* tex, ArrayTexture2D* newTex)
+    {
+        unsigned int layer = tex->texture2DArrayLayer();
+        ASSERT(layer < m_nextLayer);
+        ASSERT(layer >= 0);
+        GLCall(glTexSubImage3D(
+            GL_TEXTURE_2D_ARRAY,
+            0,
+            0,0,layer,
+            newTex->width(),
+            newTex->height(),
+            1,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            newTex->m_unsignedCharLocalBuffer));
+    }
     void Texture2DArray::bind()
     {
         GLCall(glBindTexture(GL_TEXTURE_2D_ARRAY, m_glName));
