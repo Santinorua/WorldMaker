@@ -26,15 +26,21 @@ namespace WorldMaker
 	};
 	struct ChunkRenderUnit
 	{
+		static const int MAX_LOD = 4;
 		static int s_chunkSide; // Amount of pixels per chunk
 		double m_tallestPoint = 0;
 		double m_lowestPoint = 0;
 		size_t m_current_lod = 0;
-		ChunkRenderUnit(std::vector<std::vector<Vertex>>& p_vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels);
+		ChunkRenderUnit(std::vector<std::vector<Vertex>>& p_vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod=0);
 		glm::vec3 center();
+
+		void setLOD(int lod);
+
 		inline glm::vec3 minPoint() { return glm::vec3(center().x-s_chunkSide/2.0, m_lowestPoint, center().z - s_chunkSide/2.0);}
 		inline glm::vec3 maxPoint() { return glm::vec3(center().x+s_chunkSide/2.0, m_tallestPoint, center().z + s_chunkSide/2.0);}
+
 		static std::vector<unsigned int> GetIndicesForChunk(int lod);
+
 		const ShaderProgramType shaderProgramType = ShaderProgramType::terrain;
 		VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
 		std::vector<SSBOUPtr<Vertex>> m_vertices; //= { std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT) };

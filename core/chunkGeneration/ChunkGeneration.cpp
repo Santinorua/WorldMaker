@@ -2,6 +2,7 @@
 #include "ChunkRenderUnit.h"
 #include "CoreGenerator.h"
 #include <glm/gtc/quaternion.hpp>
+#include <glm/geometric.hpp>
 
 #define LOD_LEVELS 5
 
@@ -107,23 +108,10 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 	static glm::ivec2 last_pos = {INT_MAX, INT_MAX};
 	glm::ivec2 pos = GetChunkPos(camera_pos);
 
-	// TODO: Find if there's a better way
 	if (pos == last_pos && !force) {
 		return;
 	}
 	last_pos = pos;
-
-	for (int i = 0; i < chunks.size(); i++) {
-		auto& chunk = chunks[i];
-
-		auto ck_pos = chunk.first;
-		if (glm::abs(pos.x - ck_pos.x) > render_distance || glm::abs(pos.y - ck_pos.y) > render_distance) {
-			//printf("Deleting (%d, %d)\n", ck_pos.x, ck_pos.y);
-			delete chunk.second;
-			chunks.erase(std::next(chunks.begin(), i));
-			i--;
-		}
-	}
 
 	glm::ivec2 x_generation_range = GetGenerationRange(pos.x, render_distance);
 	glm::ivec2 y_generation_range = GetGenerationRange(pos.y, render_distance);
@@ -134,6 +122,36 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 			if (found != chunks.end()) continue;
 			chunks.push_back({{x, y}, GenerateChunk(generator, x, y)});
 		}
+	}
+
+	for (int i = 0; i < chunks.size(); i++) {
+		auto& chunk = chunks[i];
+
+		auto ck_pos = chunk.first;
+		auto ck_dist = glm::abs(pos - ck_pos);
+		if (ck_dist.x > render_distance || ck_dist.y > render_distance) {
+			//printf("Deleting (%d, %d)\n", ck_pos.x, ck_pos.y);
+			delete chunk.second;
+			chunks.erase(std::next(chunks.begin(), i));
+			i--;
+			continue;
+		}
+
+		if ((float)ck_dist.x / render_distance > 0.80) {
+			chunk.second->setLOD(4);
+			continue;
+		}
+
+		if ((float)ck_dist.x / render_distance > 0.60) {
+			chunk.second->setLOD(3);
+			continue;
+		}
+
+		if ((float)ck_dist.x / render_distance > 0.45) {
+			chunk.second->setLOD(2);
+			continue;
+		}
+		chunk.second->setLOD(1);
 	}
 }
 

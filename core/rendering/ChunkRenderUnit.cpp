@@ -13,9 +13,15 @@ namespace WorldMaker
 	    return point;
 	}
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<std::vector<Vertex>>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels)
+	void ChunkRenderUnit::setLOD(int lod)
 	{
-		m_current_lod = 4;
+		m_current_lod = lod;
+		m_vertices[m_current_lod]->submitData();
+		m_indices[m_current_lod]->submitData();
+	}
+
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<std::vector<Vertex>>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod)
+	{
 		for (int i = 0; i < vertices.size(); i++) {
 			std::vector<unsigned int> indices = GetIndicesForChunk(i); // TODO: Change so no need to calculate indices every time
 
@@ -26,8 +32,8 @@ namespace WorldMaker
 
 			m_indices[i]->pushData(indices);
 		}
-		m_vertices[m_current_lod]->submitData();
-		m_indices[m_current_lod]->submitData();
+
+		setLOD(lod);
 
 		m_models = chunkModels;
 		m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
