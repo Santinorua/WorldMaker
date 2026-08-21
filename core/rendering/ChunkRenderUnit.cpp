@@ -13,25 +13,38 @@ namespace WorldMaker
 	    return point;
 	}
 
+	bool ChunkRenderUnit::hasLOD(int lod) {
+		return m_vertices.contains(lod);
+	}
+
 	void ChunkRenderUnit::setLOD(int lod)
 	{
 		m_current_lod = lod;
 		m_vertices[m_current_lod]->submitData();
 		m_indices[m_current_lod]->submitData();
+		// TODO: Delete buffers when unused
 	}
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<std::vector<Vertex>>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod)
+	void ChunkRenderUnit::uploadLOD(std::vector<Vertex>& vertices, int lod)
 	{
-		for (int i = 0; i < vertices.size(); i++) {
-			std::vector<unsigned int> indices = GetIndicesForChunk(i); // TODO: Change so no need to calculate indices every time
+		std::vector<unsigned int> indices = GetIndicesForChunk(lod);
+		m_vertices.insert({lod, std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT)});
+		m_indices.insert({lod, std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT)});
 
-			m_vertices.push_back(std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT));
-			m_indices.push_back(std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT));
+		m_vertices[lod]->pushData(vertices);
 
-			m_vertices[i]->pushData(vertices[i]);
+		m_indices[lod]->pushData(indices);
+	}
 
-			m_indices[i]->pushData(indices);
-		}
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod)
+	{
+		std::vector<unsigned int> indices = GetIndicesForChunk(lod);
+		m_vertices.insert({lod, std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT)});
+		m_indices.insert({lod, std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT)});
+
+		m_indices[lod]->pushData(indices);
+
+		m_vertices[lod]->pushData(vertices);
 
 		setLOD(lod);
 
