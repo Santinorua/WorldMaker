@@ -58,6 +58,7 @@ namespace WorldMaker
         unsigned int layer = tex->texture2DArrayLayer();
         ASSERT(layer < m_nextLayer);
         ASSERT(layer >= 0);
+        ASSERT(tex->width() == newTex->width() && tex->height() == newTex->height());
         GLCall(glTexSubImage3D(
             GL_TEXTURE_2D_ARRAY,
             0,

@@ -42,7 +42,12 @@ namespace WorldMaker
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
 		GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
-		m_texture2DArrayLayer = GPUResourceManager::GetTexture2DArray()->pushTexture(this);
+		if (layer < -1) std::cerr << "Error: Created array texture with layer < -1! The path was: "<< relativePath << "\n";
+		if (layer == -1) m_texture2DArrayLayer = GPUResourceManager::GetTexture2DArray()->pushTexture(this);
+		else
+		{
+		    m_texture2DArrayLayer = layer;
+		}
 
 		if (!m_unsignedCharLocalBuffer) std::cout << "Error: image not found at relative path: " << relativePath  << "\n";
 		ASSERT(m_unsignedCharLocalBuffer);
