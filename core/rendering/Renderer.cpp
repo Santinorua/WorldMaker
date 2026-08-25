@@ -94,7 +94,7 @@ namespace WorldMaker
         GLCall(glDisable(GL_CULL_FACE));
 		ShaderProgramSPtr shaderProgram = Renderer::s_shaderProgramsByType[ShaderProgramType::baking];
 		shaderProgram->bind();
-        shaderProgram->setUniform1f("u_chunkSize", ChunkRenderUnit::s_chunkSide);
+        shaderProgram->setUniform1f("u_chunkSize", ChunkRenderUnit::s_chunkRes);
         shaderProgram->setUniform2f("u_chunkWorldOrigin", chunk.minPoint().x, chunk.minPoint().z);
         GPUResourceManager::PrepareToDrawTerrain();
 		chunk.m_vertexArray->bind();

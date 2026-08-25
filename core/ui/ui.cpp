@@ -25,12 +25,14 @@ static struct {
 	bool biomes;
 	bool biome_edit;
 	bool new_biome;
+	bool preferences;
 } open_windows = {
 	.debug = true,
 	.generation = true,
 	.biomes = false,
 	.biome_edit = false,
 	.new_biome = false,
+	.preferences = false,
 };
 
 static bool &show_biomes = open_windows.biomes;
@@ -188,8 +190,7 @@ bool GenerationWindow(int &chunk_size, uint64_t &seed, int& render_distance, Chu
 
 	if (ImGui::Button("Generate mesh")) {
 		redraw = true;
-		ChunkRenderUnit::s_chunkSide = chunk_size;
-		ChunkRenderUnit::s_chunkSide = chunk_size;
+		ChunkRenderUnit::s_chunkRes = chunk_size;
 
 		generator = WorldGenerator(150, seed);
 

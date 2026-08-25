@@ -1,15 +1,17 @@
 #include "ChunkRenderUnit.h"
 #include "Vertex.h"
 
+
 namespace WorldMaker
 {
-	int ChunkRenderUnit::s_chunkSide = 64; // Amount of pixels per chunk
+	int ChunkRenderUnit::s_chunkRes = 64; // Amount of pixels per chunk
+	double ChunkRenderUnit::s_chunkScale = 64; // Amount of pixels per chunk
 
 	glm::vec3 ChunkRenderUnit::center()
 	{
 	    glm::vec3 point = m_vertices[m_current_lod]->m_data[0].m_position; // First vertex pos
 		point.y = (m_tallestPoint+m_lowestPoint)/2; // Y coordinate in the center
-		point+=glm::vec3(s_chunkSide/2 ,0 ,s_chunkSide/2); // X and Z coordinates in the center
+		point+=glm::vec3((s_chunkRes * s_chunkScale) /2 ,0 ,(s_chunkRes * s_chunkScale)/2); // X and Z coordinates in the center
 	    return point;
 	}
 
@@ -56,7 +58,7 @@ namespace WorldMaker
 	std::vector<unsigned int> ChunkRenderUnit::GetIndicesForChunk(int lod)
 	{
         std::vector<unsigned int> indices;
-		int side = (s_chunkSide >> lod) + (lod != 0);
+		int side = (s_chunkRes >> lod) + 1;
         for (int y = 0; y < side-1; y++)
         {
             for (int x = 0; x < side-1; x++)

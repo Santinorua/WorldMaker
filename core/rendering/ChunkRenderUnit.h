@@ -27,7 +27,8 @@ namespace WorldMaker
 	struct ChunkRenderUnit
 	{
 		static const int MAX_LOD = 4;
-		static int s_chunkSide; // Amount of pixels per chunk
+		static int s_chunkRes; // Amount of pixels per chunk
+		static double s_chunkScale;
 		double m_tallestPoint = 0;
 		double m_lowestPoint = 0;
 		int m_current_lod = 0;
@@ -38,8 +39,8 @@ namespace WorldMaker
 		void setLOD(int lod);
 		bool hasLOD(int lod);
 
-		inline glm::vec3 minPoint() { return glm::vec3(center().x-s_chunkSide/2.0, m_lowestPoint, center().z - s_chunkSide/2.0);}
-		inline glm::vec3 maxPoint() { return glm::vec3(center().x+s_chunkSide/2.0, m_tallestPoint, center().z + s_chunkSide/2.0);}
+		inline glm::vec3 minPoint() { return glm::vec3(center().x-s_chunkRes/2.0, m_lowestPoint, center().z - s_chunkRes/2.0);}
+		inline glm::vec3 maxPoint() { return glm::vec3(center().x+s_chunkRes/2.0, m_tallestPoint, center().z + s_chunkRes/2.0);}
 
 		static std::vector<unsigned int> GetIndicesForChunk(int lod);
 

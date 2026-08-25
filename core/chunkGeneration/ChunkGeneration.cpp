@@ -5,8 +5,9 @@
 #include <glm/geometric.hpp>
 
 #define LOD_LEVELS 5
-
 #define CLAMP0(x) ((x) * ((x) > 0))
+
+#define GENERATION_COORD(v) (((float)(v) / ChunkRenderUnit::s_chunkRes) * ChunkRenderUnit::s_chunkScale)
 
 #define CHECK_LOD_DIST(ck_dist, render_distance, thresh) (((float)(ck_dist).x / (render_distance) > (thresh)) || ((float)(ck_dist).y / (render_distance) > (thresh)))
 
@@ -15,11 +16,12 @@ namespace WorldMaker {
 
 	namespace ChunkGeneration {
 
-void GenerateVertices(WorldGenerator& generator, int x_chunk, int z_chunk, int lod, ChunkModels *chunkModels, std::vector<Vertex> &chunkVertices)
+
+void GenerateVertices(WorldGenerator& generator, int x_chunk, int z_chunk, int lod, ChunkModels *chunkModels, std::vector<Vertex> &chunkVertices, double &tallest_point, double &lowest_point)
 {
 	chunkVertices.clear();
 
-	int side = (ChunkRenderUnit::s_chunkSide >> lod) + (lod != 0); // Resolution change
+	int side = (ChunkRenderUnit::s_chunkRes >> lod) + 1; // Resolution change
 	int gridWidth = side; // other names because they were used
 	int gridDepth = side;
 
@@ -34,7 +36,11 @@ void GenerateVertices(WorldGenerator& generator, int x_chunk, int z_chunk, int l
 		{
 
 			generatorVertex v;
-			v = generator.getVertex(x<<lod, z<<lod);
+			v = generator.getVertex(GENERATION_COORD(x<<lod), GENERATION_COORD(z<<lod));
+
+			tallest_point = glm::max(v.m_position.y, tallest_point);
+			lowest_point = glm::max(v.m_position.y, lowest_point);
+
 			if (v.m_featureId != 0 && chunkModels != nullptr)
 			{
 				chunkModels->addInstance(FeatureManager::m_features[v.m_featureId - 1].modelPath, {v.m_position.x, v.m_position.y + FeatureManager::m_features[v.m_featureId - 1].y_offset, v.m_position.z},
@@ -51,10 +57,10 @@ void GenerateVertices(WorldGenerator& generator, int x_chunk, int z_chunk, int l
 		int localX = 0;
 		for (int  x = x_chunk * side - x_chunk; x < side * (x_chunk + 1) - x_chunk; x++) {
 			// int localX = (x + x_chunk) % side;
-			float hL = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position.y : generator.getVertex((x-1)<<lod, z<<lod).m_position.y;
-			float hR = localX != side - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position.y : generator.getVertex((x+1)<<lod, z<<lod).m_position.y;
-			float hU = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position.y : generator.getVertex(x<<lod, (z-1)<<lod).m_position.y;
-			float hD = localZ != side - 1 ? chunkVertices[(localZ+1)*gridWidth + localX].m_position.y : generator.getVertex(x<<lod, (z+1)<<lod).m_position.y;
+			float hL = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position.y : generator.getVertex(GENERATION_COORD((x-1)<<lod), GENERATION_COORD(z<<lod)).m_position.y;
+			float hR = localX != side - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position.y : generator.getVertex(GENERATION_COORD((x+1)<<lod), GENERATION_COORD(z<<lod)).m_position.y;
+			float hU = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position.y : generator.getVertex(GENERATION_COORD(x<<lod), GENERATION_COORD((z-1)<<lod)).m_position.y;
+			float hD = localZ != side - 1 ? chunkVertices[(localZ+1)*gridWidth + localX].m_position.y : generator.getVertex(GENERATION_COORD(x<<lod), GENERATION_COORD((z+1)<<lod)).m_position.y;
 
 			glm::vec3 normal;
 			normal.x = static_cast<float>(hL - hR);
@@ -88,7 +94,7 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chu
 	ChunkModels chunkModels;
 	double tallestPoint = 0;
 	double lowestPoint = 0;
-	int side = (ChunkRenderUnit::s_chunkSide >> lod) + (lod != 0); // Resolution change
+	int side = (ChunkRenderUnit::s_chunkRes >> lod) + (lod != 0); // Resolution change
 	int gridWidth = side; // other names because they were used
 	int gridDepth = side;
 
@@ -97,14 +103,14 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chu
 
 	// TODO: Add scale for chunks
 
-	GenerateVertices(generator, x_chunk, z_chunk, lod, &chunkModels, chunkVertices);
+	GenerateVertices(generator, x_chunk, z_chunk, lod, &chunkModels, chunkVertices, tallestPoint, lowestPoint);
 
 	return new ChunkRenderUnit(chunkVertices, tallestPoint, lowestPoint, chunkModels, lod);
 }
 
 glm::ivec2 GetChunkPos(glm::vec3 pos) {
-	int x = (pos.x - 1) / (ChunkRenderUnit::s_chunkSide - 1);
-	int y = (pos.z - 1) / (ChunkRenderUnit::s_chunkSide - 1);
+	int x = (pos.x - 1) / ChunkRenderUnit::s_chunkScale;
+	int y = (pos.z - 1) / ChunkRenderUnit::s_chunkScale;
 	if (pos.x < 0) x--;
 	if (pos.z < 0) y--;
 
@@ -148,10 +154,11 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 			i--;
 			continue;
 		}
+		double tmp;
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.80)) {
 			if (!chunk.second->hasLOD(4)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 4, nullptr, vertices);
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 4, nullptr, vertices, tmp, tmp);
 				chunk.second->uploadLOD(vertices, 4);
 			}
 			chunk.second->setLOD(4);
@@ -161,7 +168,7 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.60)) {
 			if (!chunk.second->hasLOD(3)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, nullptr, vertices);
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, nullptr, vertices, tmp, tmp);
 				chunk.second->uploadLOD(vertices, 3);
 			}
 			chunk.second->setLOD(3);
@@ -171,7 +178,7 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.45)) {
 			if (!chunk.second->hasLOD(2)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, nullptr, vertices);
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, nullptr, vertices, tmp, tmp);
 				chunk.second->uploadLOD(vertices, 2);
 			}
 			chunk.second->setLOD(2);
@@ -182,12 +189,12 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 			printf("Generating lod 1\n");
 		}
 
-		if (!chunk.second->hasLOD(1)) {
+		if (!chunk.second->hasLOD(0)) {
 			std::vector<Vertex> vertices;
-			GenerateVertices(generator, ck_pos.x, ck_pos.y, 1, nullptr, vertices);
-			chunk.second->uploadLOD(vertices, 1);
+			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, nullptr, vertices, tmp, tmp);
+			chunk.second->uploadLOD(vertices, 0);
 		}
-		chunk.second->setLOD(1);
+		chunk.second->setLOD(0);
 	}
 }
 

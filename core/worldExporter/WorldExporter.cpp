@@ -113,7 +113,7 @@ namespace WorldMaker
         std::vector<float> positions = BuildPositionBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data);
         std::vector<float> colors = BuildColorBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data);
         std::vector<float> normals = BuildNormalBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data);
-        std::vector<float> uvs = BuildBakedTerrainUVBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data, glm::vec2(chunk->minPoint().x, chunk->minPoint().z), ChunkRenderUnit::s_chunkSide);
+        std::vector<float> uvs = BuildBakedTerrainUVBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data, glm::vec2(chunk->minPoint().x, chunk->minPoint().z), ChunkRenderUnit::s_chunkRes);
         std::vector<unsigned int>& indices = chunk->m_indices[chunk->m_current_lod]->m_data;
         BufferBuilder bufferBuilder;
 
@@ -282,7 +282,7 @@ namespace WorldMaker
         std::vector<float> positions = BuildPositionBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data);
         std::vector<float> colors = BuildColorBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data);
         std::vector<float> normals = BuildNormalBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data);
-        std::vector<float> uvs = BuildBakedTerrainUVBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data, glm::vec2(chunk->minPoint().x, chunk->minPoint().z), ChunkRenderUnit::s_chunkSide);
+        std::vector<float> uvs = BuildBakedTerrainUVBuffer(chunk->m_vertices[chunk->m_current_lod]->m_data, glm::vec2(chunk->minPoint().x, chunk->minPoint().z), ChunkRenderUnit::s_chunkRes);
         std::vector<unsigned int>& indices = chunk->m_indices[chunk->m_current_lod]->m_data;
 
         size_t posOffset = bufferBuilder.AddBlock<float>(positions);

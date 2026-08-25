@@ -51,8 +51,8 @@ int main()
 	BiomeGenerator::addDefaultBiomes();
 	FeatureManager::addDefaultFeatures();
 
-	int gridWidth = ChunkRenderUnit::s_chunkSide;
-    int gridDepth = ChunkRenderUnit::s_chunkSide;
+	int gridWidth = ChunkRenderUnit::s_chunkRes;
+    int gridDepth = ChunkRenderUnit::s_chunkRes;
 
 	int render_distance = 4;
 
@@ -99,7 +99,7 @@ int main()
 
 	ui::init();
 
-	int chunk_size = ChunkRenderUnit::s_chunkSide;
+	int chunk_size = ChunkRenderUnit::s_chunkRes;
 	uint64_t seed = 42;
 
 	bool quit = false;
@@ -128,7 +128,7 @@ int main()
 		Camera::UpdateCameraTransform();
 
 		for (auto& ck : chunks) {
-		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
+		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) ;//continue;
 			Renderer::DrawChunkTerrain(*ck.second);
 			Renderer::DrawChunkModels(*ck.second);
 		}
