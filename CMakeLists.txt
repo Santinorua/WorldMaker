@@ -180,12 +180,31 @@ target_include_directories(WorldExporter PUBLIC ${CMAKE_SOURCE_DIR}/core/worldEx
 target_sources(WorldExporter PRIVATE $<TARGET_OBJECTS:TinyGltfImpl>)
 # -----------------------------------------------------------------------------------------------------
 
+# Elements
+
+file (GLOB RENDERING_ELEMENTS_SRC "${CMAKE_SOURCE_DIR}/core/rendering/elements/*.cpp")
+add_library(RenderingElements STATIC ${RENDERING_ELEMENTS_SRC})
+target_link_libraries(RenderingElements PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities STB_Image RenderingStructures RenderingManagers)
+target_include_directories(RenderingElements PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/elements)
+
+# Structures
+
+file (GLOB RENDERING_STRUCTURES_SRC "${CMAKE_SOURCE_DIR}/core/rendering/structures/*.cpp")
+add_library(RenderingStructures STATIC ${RENDERING_STRUCTURES_SRC})
+target_link_libraries(RenderingStructures PUBLIC RenderingElements RenderingManagers)
+target_include_directories(RenderingStructures PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/structures)
+
+# Managers
+
+file (GLOB RENDERING_MANAGERS_SRC "${CMAKE_SOURCE_DIR}/core/rendering/managers/*.cpp")
+add_library(RenderingManagers STATIC ${RENDERING_MANAGERS_SRC})
+target_link_libraries(RenderingManagers PUBLIC RenderingElements RenderingStructures)
+target_include_directories(RenderingManagers PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/managers)
+
 # Rendering
 
-file (GLOB RENDERING_SRC "${CMAKE_SOURCE_DIR}/core/rendering/*.cpp")
-add_library(Rendering STATIC ${RENDERING_SRC})
-target_link_libraries(Rendering PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities STB_Image)
-target_include_directories(Rendering PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering)
+add_library(Rendering INTERFACE ${RENDERING_SRC})
+target_link_libraries(Rendering INTERFACE RenderingElements RenderingStructures RenderingManagers)
 
 # -----------------------------------------------------------------------------------------------------
 
