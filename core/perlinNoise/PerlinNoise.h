@@ -77,6 +77,7 @@ namespace WorldMaker {
         }
         FeatureNoise(uint64_t seed, unsigned int radius, double probability);
         bool getFeatureInGridSquare(int x, int y);
+        glm::vec2 getFeaturePosition(int x, int y);
         bool getNoise(int x, int y);
     };
 

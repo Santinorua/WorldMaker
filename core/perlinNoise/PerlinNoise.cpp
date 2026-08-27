@@ -167,6 +167,17 @@ namespace WorldMaker {
         return true;
     }
 
+    glm::vec2 FeatureNoise::getFeaturePosition(int x, int y) {
+        uint64_t newSeed = PRNG::nextNumber64(m_seed);
+        unsigned int numberOfRadiusVertices = m_radius * m_radius;
+        int gridX = x / m_radius;
+        int gridY = y / m_radius;
+        int pos = PRNG::hash2D(gridX, gridY, newSeed) % numberOfRadiusVertices;
+        int posX = pos % m_radius + gridX * m_radius;
+        int posY = pos / m_radius + gridY * m_radius;
+        return glm::vec2(posX, posY);
+    }
+
     bool FeatureNoise::getNoise(int x, int y) {
         unsigned int numberOfRadiusVertices = m_radius * m_radius;
         int gridX = x / m_radius;
@@ -174,14 +185,14 @@ namespace WorldMaker {
         if (PRNG::hash2D(gridX, gridY, m_seed) > m_probability * UINT32_MAX) {
             return false;
         }
+
         uint64_t newSeed = PRNG::nextNumber64(m_seed);
         int featurePosition = PRNG::hash2D(gridX, gridY, newSeed) % numberOfRadiusVertices;
 
         if (((x % m_radius) + (y % m_radius) * m_radius) == featurePosition) {
-            // std::cout << "FeaturePosition: " << featurePosition << std::endl;
-            // std::cout << "thisPosition: " << (x % m_radius) + (y % m_radius) * m_radius << std::endl;
             return true;
         }
         return false;
     }
+
 }

@@ -92,17 +92,8 @@ namespace WorldMaker {
                     continue;
                 }
                 FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
+
                 v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
-                // if (v.m_featureId != 0) {
-                //     if (featureNoise.getFeatureInGridSquare(x - FeatureManager::m_features[featureId].radius[biomeId], z) == 0) {
-                //         v.m_featureId = 0;
-                //     }
-                //     for (int i = -1; i <= 1; i++) {
-                //         if (featureNoise.getFeatureInGridSquare(x - FeatureManager::m_features[featureId].radius[biomeId] * i, z - FeatureManager::m_features[featureId].radius[biomeId]) == 0) {
-                //             v.m_featureId = 0;
-                //         }
-                //     }
-                // }
             }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
