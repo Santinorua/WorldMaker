@@ -181,28 +181,28 @@ target_sources(WorldExporter PRIVATE $<TARGET_OBJECTS:TinyGltfImpl>)
 
 # -----------------------------------------------------------------------------------------------------
 
-# Elements
+# Rendering Elements
 
 file (GLOB RENDERING_ELEMENTS_SRC "${CMAKE_SOURCE_DIR}/core/rendering/elements/*.cpp")
 add_library(RenderingElements STATIC ${RENDERING_ELEMENTS_SRC})
 target_link_libraries(RenderingElements PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities STB_Image RenderingStructures RenderingManagers RenderingUtils RenderingMain)
 target_include_directories(RenderingElements PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/elements)
 
-# Structures
+# Rendering Structures
 
 file (GLOB RENDERING_STRUCTURES_SRC "${CMAKE_SOURCE_DIR}/core/rendering/structures/*.cpp")
 add_library(RenderingStructures STATIC ${RENDERING_STRUCTURES_SRC})
-target_link_libraries(RenderingStructures PUBLIC RenderingElements RenderingManagers Math)
+target_link_libraries(RenderingStructures PUBLIC RenderingElements RenderingManagers Math ChunkGeneration)
 target_include_directories(RenderingStructures PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/structures)
 
-# Managers
+# Rendering Managers
 
 file (GLOB RENDERING_MANAGERS_SRC "${CMAKE_SOURCE_DIR}/core/rendering/managers/*.cpp")
 add_library(RenderingManagers STATIC ${RENDERING_MANAGERS_SRC})
 target_link_libraries(RenderingManagers PUBLIC RenderingElements RenderingStructures)
 target_include_directories(RenderingManagers PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/managers)
 
-# Utils
+# Rendering Utils
 
 add_library(RenderingUtils INTERFACE)
 target_include_directories(RenderingUtils INTERFACE ${CMAKE_SOURCE_DIR}/core/rendering/utils)
