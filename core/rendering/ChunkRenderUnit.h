@@ -39,8 +39,8 @@ namespace WorldMaker
 		void setLOD(int lod);
 		bool hasLOD(int lod);
 
-		inline glm::vec3 minPoint() { return glm::vec3(center().x-s_chunkRes/2.0, m_lowestPoint, center().z - s_chunkRes/2.0);}
-		inline glm::vec3 maxPoint() { return glm::vec3(center().x+s_chunkRes/2.0, m_tallestPoint, center().z + s_chunkRes/2.0);}
+		inline glm::vec3 minPoint() { return glm::vec3(center().x-(s_chunkRes * s_chunkScale)/2.0, m_lowestPoint, center().z - (s_chunkRes * s_chunkScale)/2.0);}
+		inline glm::vec3 maxPoint() { return glm::vec3(center().x+(s_chunkRes * s_chunkScale)/2.0, m_tallestPoint, center().z + (s_chunkRes * s_chunkScale)/2.0);}
 
 		static std::vector<unsigned int> GetIndicesForChunk(int lod);
 

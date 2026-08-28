@@ -146,14 +146,18 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 		auto& chunk = chunks[i];
 
 		auto ck_pos = chunk.first;
-		auto ck_dist = glm::abs(pos - ck_pos);
-		if (ck_dist.x > render_distance || ck_dist.y > render_distance) {
+		auto ck_dist = pos - ck_pos;
+
+// || glm::abs(ck_dist.x) > render_distance - 1 || glm::abs(ck_dist.y) > render_distance - 1
+		if (ck_dist.x > render_distance || ck_dist.y > render_distance || ck_dist.x < -render_distance + 1 || ck_dist.y < -render_distance + 1) {
 			//printf("Deleting (%d, %d)\n", ck_pos.x, ck_pos.y);
 			delete chunk.second;
 			chunks.erase(std::next(chunks.begin(), i));
 			i--;
 			continue;
 		}
+
+		ck_dist = glm::abs(ck_dist);
 		double tallest, lowest;
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.80)) {
 			if (!chunk.second->hasLOD(4)) {
