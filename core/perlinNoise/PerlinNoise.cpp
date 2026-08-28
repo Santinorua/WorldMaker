@@ -1,7 +1,7 @@
 #include "PerlinNoise.h"
 
 #include "mathUtils.h"
-#include "../rendering/DebugUtils.h"
+#include "DebugUtils.h"
 
 
 namespace WorldMaker {

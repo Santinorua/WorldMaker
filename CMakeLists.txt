@@ -161,7 +161,7 @@ target_link_libraries(TinyGltfImpl PRIVATE tinygltf)
 # -----------------------------------------------------------------------------------------------------
 
 # Utils
-#
+
 file (GLOB UTILS_SRC "${CMAKE_SOURCE_DIR}/core/utils/*.cpp")
 add_library(Utils STATIC ${UTILS_SRC})
 # target_link_libraries(STB_Image PUBLIC )
@@ -178,20 +178,21 @@ target_link_libraries(WorldExporter PUBLIC Vendor glm Rendering Utils Utilities 
 target_link_libraries(WorldExporter PUBLIC STB_Image)
 target_include_directories(WorldExporter PUBLIC ${CMAKE_SOURCE_DIR}/core/worldExporter)
 target_sources(WorldExporter PRIVATE $<TARGET_OBJECTS:TinyGltfImpl>)
+
 # -----------------------------------------------------------------------------------------------------
 
 # Elements
 
 file (GLOB RENDERING_ELEMENTS_SRC "${CMAKE_SOURCE_DIR}/core/rendering/elements/*.cpp")
 add_library(RenderingElements STATIC ${RENDERING_ELEMENTS_SRC})
-target_link_libraries(RenderingElements PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities STB_Image RenderingStructures RenderingManagers)
+target_link_libraries(RenderingElements PUBLIC Vendor glm Math Utils glfw glew_s Input Time assimp Utilities STB_Image RenderingStructures RenderingManagers RenderingUtils RenderingMain)
 target_include_directories(RenderingElements PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/elements)
 
 # Structures
 
 file (GLOB RENDERING_STRUCTURES_SRC "${CMAKE_SOURCE_DIR}/core/rendering/structures/*.cpp")
 add_library(RenderingStructures STATIC ${RENDERING_STRUCTURES_SRC})
-target_link_libraries(RenderingStructures PUBLIC RenderingElements RenderingManagers)
+target_link_libraries(RenderingStructures PUBLIC RenderingElements RenderingManagers Math)
 target_include_directories(RenderingStructures PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/structures)
 
 # Managers
@@ -201,10 +202,27 @@ add_library(RenderingManagers STATIC ${RENDERING_MANAGERS_SRC})
 target_link_libraries(RenderingManagers PUBLIC RenderingElements RenderingStructures)
 target_include_directories(RenderingManagers PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/managers)
 
+# Utils
+
+add_library(RenderingUtils INTERFACE)
+target_include_directories(RenderingUtils INTERFACE ${CMAKE_SOURCE_DIR}/core/rendering/utils)
+
+# Rendering Constants
+
+add_library(RenderingConstants INTERFACE)
+target_include_directories(RenderingConstants INTERFACE ${CMAKE_SOURCE_DIR}/core/rendering/constants)
+
+# Rendering Main
+
+file (GLOB RENDERING_MAIN_SRC "${CMAKE_SOURCE_DIR}/core/rendering/main/*.cpp")
+add_library(RenderingMain STATIC ${RENDERING_MAIN_SRC})
+target_link_libraries(RenderingMain PUBLIC RenderingElements RenderingStructures RenderingManagers RenderingUtils RenderingConstants)
+target_include_directories(RenderingMain PUBLIC ${CMAKE_SOURCE_DIR}/core/rendering/main)
+
 # Rendering
 
-add_library(Rendering INTERFACE ${RENDERING_SRC})
-target_link_libraries(Rendering INTERFACE RenderingElements RenderingStructures RenderingManagers)
+add_library(Rendering INTERFACE)
+target_link_libraries(Rendering INTERFACE RenderingElements RenderingStructures RenderingManagers RenderingUtils RenderingConstants)
 
 # -----------------------------------------------------------------------------------------------------
 
@@ -249,7 +267,7 @@ target_link_libraries(PRNG PUBLIC Math)
 file (GLOB PERLINNOISE_SRC "${CMAKE_SOURCE_DIR}/core/perlinNoise/*.cpp")
 add_library(PerlinNoise STATIC ${PERLINNOISE_SRC})
 target_include_directories(PerlinNoise INTERFACE ${CMAKE_SOURCE_DIR}/core/perlinNoise)
-target_link_libraries(PerlinNoise PUBLIC Math PRNG Utilities)
+target_link_libraries(PerlinNoise PUBLIC Math PRNG Utilities RenderingUtils)
 
 # -----------------------------------------------------------------------------------------------------
 

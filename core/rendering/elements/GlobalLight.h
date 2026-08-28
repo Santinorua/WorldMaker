@@ -17,7 +17,7 @@ namespace WorldMaker
 		static Vec4 s_color;
 		static float s_lightOffset;
 	public:
-		static Vec3 s_pos;
+		static Vec3 s_lightDir;
 		static void SetLightColor(Vec4 color);
 
 		static void SetLightOffset(float offset);

@@ -11,7 +11,7 @@ smooth in vec3 frag_normal;
 smooth in vec2 frag_uv;
 
 uniform vec4 u_globalLightColor;
-uniform vec3 u_globalLightPos;
+uniform vec3 u_globalLightDir;
 uniform float u_lightOffset;
 uniform float u_shininess;
 
@@ -23,10 +23,7 @@ void main()
 
     vec4 lightColor = vec4(u_globalLightColor[0], u_globalLightColor[1], u_globalLightColor[2], u_globalLightColor[3]);
 
-    vec3 lightPos = vec3(u_globalLightPos[0], u_globalLightPos[1], u_globalLightPos[2]);
-    vec3 lightDir = normalize(vec3(frag_pos) - lightPos);
-
-    float similarity = -dot(lightDir, frag_normal);
+    float similarity = normalize(-dot(u_globalLightDir, frag_normal));
     float lambert = clamp(((similarity + 1.0) * 0.5) * u_shininess, 0.0, 1.0);
     float intensity = mix(u_lightOffset, 1.0, lambert);
     vec4 intensityVec = vec4(intensity, intensity, intensity, 1.0);
