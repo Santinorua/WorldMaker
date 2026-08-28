@@ -33,6 +33,7 @@ namespace WorldMaker
         }
         // CreateTerrainMaterial(diffuseTexDefaultGrassPath, specularTexDefaultPath);
         s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultPath, specularTexDefaultPath));
+        s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultWaterPath, specularTexDefaultPath));
         s_terrainMaterials.push_back(CreateTerrainMaterial(diffuseTexDefaultPath, specularTexDefaultPath));
         s_inited = true;
     }

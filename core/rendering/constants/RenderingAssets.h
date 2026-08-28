@@ -9,4 +9,5 @@ namespace WorldMaker
     inline std::string specularTexDefaultPath = "core/rendering/assets/textures/default.png";
     inline std::string diffuseTexDefaultGrassPath = "core/rendering/assets/textures/defaultGrass.png";
     inline std::string diffuseTexDefaultSandPath = "core/rendering/assets/textures/defaultSand.jpg";
+    inline std::string diffuseTexDefaultWaterPath = "core/rendering/assets/textures/water.png";
 }

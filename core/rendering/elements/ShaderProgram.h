@@ -20,6 +20,7 @@ namespace WorldMaker
 		terrain = 1,
 		model = 2,
 		baking = 3,
+		water = 4
 	};
 
 	class ShaderProgram

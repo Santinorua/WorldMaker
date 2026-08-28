@@ -33,6 +33,7 @@
 #include "CoreGenerator.h"
 #include "BiomeGenerator.h"
 
+#include "WorldWater.h"
 #include "core/worldExporter/WorldExporter.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -66,8 +67,6 @@ int main()
 
 	std::vector<double> colors;
 
-
-
 	if (doRender2D) {
 		colors.reserve(gridWidth * gridDepth);
 	}
@@ -76,8 +75,6 @@ int main()
     {
         for (int x = 0; x < gridWidth; ++x)
         {
-
-
 			if (doRender2D) {
 				double color = generator.getVertex(x, z).m_position.y / generator.m_yScale;
 				colors.push_back(color);
@@ -127,6 +124,8 @@ int main()
 
 		Camera::UpdateCameraTransform();
 
+		WorldWater::UpdateWaterTransform(chunks);
+		Renderer::DrawWater();
 		for (auto& ck : chunks) {
 		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
 			Renderer::DrawChunkTerrain(*ck.second);

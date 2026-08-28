@@ -61,8 +61,9 @@ namespace WorldMaker
 		static int WindowShouldClose() { return glfwWindowShouldClose(s_window); }
 
 		static void PrepareToDrawNoise(NoiseRenderUnit& noise);
-		static void DrawNoise(const NoiseRenderUnit& noise);
 
+		static void DrawWater();
+		static void DrawNoise(const NoiseRenderUnit& noise);
 		static void DrawBakedTerrain(ChunkRenderUnit& chunk);
 		static void DrawChunkTerrain(ChunkRenderUnit& chunk);
 		static void DrawChunkModels(ChunkRenderUnit& chunk);
