@@ -35,6 +35,8 @@ namespace WorldMaker
 		static glm::mat4 ProjectionMatrix();
 		static glm::mat4 ViewMatrix();
 		static glm::vec3 Front();
+		static glm::vec2 FrontXZ();
+		static glm::vec2 BackXZ();
 		static glm::vec3 Back();
 		static glm::vec3 Up();
 		static glm::vec3 Down();

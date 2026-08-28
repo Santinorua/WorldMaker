@@ -42,6 +42,16 @@ namespace WorldMaker
 	{
 	    return -Front();
 	}
+
+	glm::vec2 Camera::FrontXZ() {
+		float yaw = glm::radians(s_rot.y);
+		return glm::normalize(glm::vec2(sin(yaw), cos(yaw)));
+	}
+
+	glm::vec2 Camera::BackXZ() {
+		return -FrontXZ();
+	}
+
 	glm::vec3 Camera::Up()
 	{
         return glm::normalize(
@@ -99,11 +109,16 @@ namespace WorldMaker
        	glm::vec3 horizontalDirection = {0, 0, 0};
        	if (Input::GetKey(KeyCode::W_Key)) horizontalDirection.z += 1;
        	if (Input::GetKey(KeyCode::S_Key)) horizontalDirection.z -= 1;
-       	if (Input::GetKey(KeyCode::A_Key)) horizontalDirection.x -= 1;
-       	if (Input::GetKey(KeyCode::D_Key)) horizontalDirection.x += 1;
+       	if (Input::GetKey(KeyCode::A_Key)) horizontalDirection.x += 1;
+       	if (Input::GetKey(KeyCode::D_Key)) horizontalDirection.x -= 1;
+		if (Input::GetKey(KeyCode::E_Key)) horizontalDirection.y += 1;
+		if (Input::GetKey(KeyCode::Q_Key)) horizontalDirection.y -= 1;
+
 
         float moveSpeed = Input::GetKey(KeyCode::LeftShift_Key) ? s_speed*2 : s_speed;
-       	s_pos += static_cast<glm::vec3>(Front() * horizontalDirection.z * CoolTime::DeltaTime() * moveSpeed);
-       	s_pos += static_cast<glm::vec3>(Left() * horizontalDirection.x * CoolTime::DeltaTime() * moveSpeed);
+       	glm::vec2 forwardMovement = FrontXZ() * horizontalDirection.z * CoolTime::DeltaTime() * moveSpeed;
+		s_pos += glm::vec3(forwardMovement.x, 0, forwardMovement.y);
+		s_pos += glm::vec3(0, horizontalDirection.y * CoolTime::DeltaTime() * moveSpeed, 0);
+		s_pos += static_cast<glm::vec3>(Right() * horizontalDirection.x * CoolTime::DeltaTime() * moveSpeed);
     }
 }
