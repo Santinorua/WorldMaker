@@ -154,12 +154,12 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 			i--;
 			continue;
 		}
-		double tmp;
+		double tallest, lowest;
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.80)) {
 			if (!chunk.second->hasLOD(4)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 4, nullptr, vertices, tmp, tmp);
-				chunk.second->uploadLOD(vertices, 4);
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 4, nullptr, vertices, tallest, lowest);
+				chunk.second->uploadLOD(vertices, 4, tallest, lowest);
 			}
 			chunk.second->setLOD(4);
 			continue;
@@ -168,8 +168,8 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.60)) {
 			if (!chunk.second->hasLOD(3)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, nullptr, vertices, tmp, tmp);
-				chunk.second->uploadLOD(vertices, 3);
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, nullptr, vertices, tallest, lowest);
+				chunk.second->uploadLOD(vertices, 3, tallest, lowest);
 			}
 			chunk.second->setLOD(3);
 			continue;
@@ -178,8 +178,8 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.45)) {
 			if (!chunk.second->hasLOD(2)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, nullptr, vertices, tmp, tmp);
-				chunk.second->uploadLOD(vertices, 2);
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, nullptr, vertices, tallest, lowest);
+				chunk.second->uploadLOD(vertices, 2, tallest, lowest);
 			}
 			chunk.second->setLOD(2);
 			continue;
@@ -191,8 +191,8 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 
 		if (!chunk.second->hasLOD(0)) {
 			std::vector<Vertex> vertices;
-			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, nullptr, vertices, tmp, tmp);
-			chunk.second->uploadLOD(vertices, 0);
+			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, nullptr, vertices, tallest, lowest);
+			chunk.second->uploadLOD(vertices, 0, tallest, lowest);
 		}
 		chunk.second->setLOD(0);
 	}

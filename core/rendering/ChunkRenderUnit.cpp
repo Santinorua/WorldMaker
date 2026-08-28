@@ -10,6 +10,9 @@ namespace WorldMaker
 	glm::vec3 ChunkRenderUnit::center()
 	{
 	    glm::vec3 point = m_vertices[m_current_lod]->m_data[0].m_position; // First vertex pos
+		if (m_vertices.contains(0)) {
+			point = m_vertices[0]->m_data[0].m_position; // First vertex pos
+		}
 		point.y = (m_tallestPoint+m_lowestPoint)/2; // Y coordinate in the center
 		point+=glm::vec3((s_chunkRes * s_chunkScale) /2 ,0 ,(s_chunkRes * s_chunkScale)/2); // X and Z coordinates in the center
 	    return point;
@@ -27,7 +30,7 @@ namespace WorldMaker
 		// TODO: Delete buffers when unused
 	}
 
-	void ChunkRenderUnit::uploadLOD(std::vector<Vertex>& vertices, int lod)
+	void ChunkRenderUnit::uploadLOD(std::vector<Vertex>& vertices, int lod, double tallest_point, double lowest_point)
 	{
 		std::vector<unsigned int> indices = GetIndicesForChunk(lod);
 		m_vertices.insert({lod, std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT)});
@@ -36,6 +39,9 @@ namespace WorldMaker
 		m_vertices[lod]->pushData(vertices);
 
 		m_indices[lod]->pushData(indices);
+
+		m_tallestPoint = tallest_point;
+		m_lowestPoint = lowest_point;
 	}
 
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod)

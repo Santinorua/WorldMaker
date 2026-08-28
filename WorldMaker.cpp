@@ -103,6 +103,7 @@ int main()
 	uint64_t seed = 42;
 
 	bool quit = false;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	while (!Renderer::WindowShouldClose() && !quit)
 	{
 		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
@@ -128,7 +129,7 @@ int main()
 		Camera::UpdateCameraTransform();
 
 		for (auto& ck : chunks) {
-		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) ;//continue;
+		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
 			Renderer::DrawChunkTerrain(*ck.second);
 			Renderer::DrawChunkModels(*ck.second);
 		}
