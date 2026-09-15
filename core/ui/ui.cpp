@@ -25,12 +25,14 @@ static struct {
 	bool biomes;
 	bool biome_edit;
 	bool new_biome;
+	bool preferences;
 } open_windows = {
 	.debug = true,
 	.generation = true,
 	.biomes = false,
 	.biome_edit = false,
 	.new_biome = false,
+	.preferences = false,
 };
 
 static bool &show_biomes = open_windows.biomes;
@@ -118,6 +120,9 @@ void DockSpace(bool &quit) {
 	if (ImGui::BeginMenuBar()) {
 
 		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Preferences...")) {
+				open_windows.preferences = true;
+			}
 			if (ImGui::MenuItem("Exit")) {
 				quit = true;
 			}
@@ -125,7 +130,7 @@ void DockSpace(bool &quit) {
 		}
 
 		if (ImGui::BeginMenu("View")) {
-			if (ImGui::MenuItem("Generation")) {
+			if (ImGui::MenuItem((open_windows.generation) ? "Generation *" : "Generation")) {
 				open_windows.generation = !open_windows.generation;
 			}
 			ImGui::EndMenu();
@@ -188,8 +193,7 @@ bool GenerationWindow(int &chunk_size, uint64_t &seed, int& render_distance, Chu
 
 	if (ImGui::Button("Generate mesh")) {
 		redraw = true;
-		ChunkRenderUnit::s_chunkSide = chunk_size;
-		ChunkRenderUnit::s_chunkSide = chunk_size;
+		ChunkRenderUnit::s_chunkRes = chunk_size;
 
 		generator = WorldGenerator(150, seed);
 
@@ -440,8 +444,70 @@ void BiomesWindow() {
 	if (open_windows.new_biome) {
 		NewBiomeWindow();
 	}
+}
 
-	
+bool PreferencesWindow(Preferences &preferences) {
+	if (!open_windows.preferences) return false;
+
+	ImGui::Begin("Preferences", &open_windows.preferences);
+
+	ImGui::PushItemWidth(100);
+
+	ImGui::LabelText("RenderingTitle", "Rendering");
+
+	ImGui::Checkbox("Frustrum Culling", &preferences.frustrum_culling_enabled);
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+		ImGui::SetTooltip("WARNING: WIP, visual glitches may occur");
+	}
+
+	const std::array<const char*, 2> polygon_options = {"Fill", "Wireframe"};
+
+	int selected = static_cast<int>(preferences._current_polygon_mode);
+	if (ImGui::BeginCombo("Polygon Mode", polygon_options[selected])) {
+		if (ImGui::Selectable("Fill")) {
+			selected = 0;
+			preferences.polygon_mode = PolygonMode::Fill;
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				ImGui::SetTooltip("Default polygon mode");
+			}
+		}
+
+		if (ImGui::Selectable("Wireframe")) {
+			selected = 1;
+			preferences.polygon_mode = PolygonMode::Wireframe;
+
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				ImGui::SetTooltip("Debug purposes mainly, renders only the lines between vertices");
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+
+
+	ImGui::LabelText("Misc. Title", "Misc.");
+
+	ImGui::Text("Camera Speed: ");
+	ImGui::SameLine();
+	IMGUI_INPUT(*preferences.camera_speed, ImGuiDataType_Float);
+
+	ImGui::PopItemWidth();
+
+	ImGui::End();
+
+	if (preferences._current_polygon_mode != preferences.polygon_mode) {
+		preferences._current_polygon_mode = preferences.polygon_mode;
+		switch (preferences._current_polygon_mode) {
+			case PolygonMode::Wireframe:
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				break;
+			case PolygonMode::Fill:
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				break;
+		}
+	}
+
+	return true;
 }
 
 }

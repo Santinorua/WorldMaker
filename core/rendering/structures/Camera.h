@@ -18,7 +18,6 @@ namespace WorldMaker
 		static float s_aspectRatio;
 		static glm::vec3 s_pos;
 		static glm::vec3 s_rot;
-		static float s_speed;
 		static float s_rotationSpeed;
 		static Frustum s_frustum;
 	public:
@@ -41,5 +40,7 @@ namespace WorldMaker
 		static glm::vec3 Down();
 		static glm::vec3 Left();
 		static glm::vec3 Right();
+
+		static float s_speed;
 	};
 }

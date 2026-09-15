@@ -21,7 +21,7 @@ namespace WorldMaker
     {
         s_vertices->flush();
 
-        int radius = ChunkRenderUnit::s_chunkSide * chunks.size();
+        int radius = ChunkRenderUnit::s_chunkRes * chunks.size();
         float test = 10.0f;
         Vertex vertexA;
         vertexA.m_position = Camera::Position()+glm::vec3(-radius, 0, -radius);
