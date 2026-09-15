@@ -39,7 +39,7 @@ void GenerateVertices(WorldGenerator& generator, int x_chunk, int z_chunk, int l
 			v = generator.getVertex(GENERATION_COORD(x<<lod), GENERATION_COORD(z<<lod));
 
 			tallest_point = glm::max(v.m_position.y, tallest_point);
-			lowest_point = glm::max(v.m_position.y, lowest_point);
+			lowest_point = glm::min(v.m_position.y, lowest_point);
 
 			if (v.m_featureId != 0 && chunkModels != nullptr)
 			{

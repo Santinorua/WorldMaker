@@ -1,5 +1,6 @@
 #include "ChunkRenderUnit.h"
 #include "Vertex.h"
+#include <iostream>
 
 
 namespace WorldMaker
@@ -42,6 +43,9 @@ namespace WorldMaker
 
 		m_tallestPoint = tallest_point;
 		m_lowestPoint = lowest_point;
+
+		std::cout << "New tallest for " << this << ": " << tallest_point << '\n';
+		std::cout << "New lowest for " << this << ": " << lowest_point << '\n';
 	}
 
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod)
@@ -55,6 +59,9 @@ namespace WorldMaker
 		m_vertices[lod]->pushData(vertices);
 
 		setLOD(lod);
+
+		std::cout << "Original tallest for " << this << ": " << tallestPoint << '\n';
+		std::cout << "Original lowest for " << this << ": " << lowestPoint << '\n';
 
 		m_models = chunkModels;
 		m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
