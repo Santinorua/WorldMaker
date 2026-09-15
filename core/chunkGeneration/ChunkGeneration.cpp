@@ -189,10 +189,6 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 			continue;
 		}
 
-		if (pos == ck_pos && !chunk.second->hasLOD(1)) {
-			printf("Generating lod 1\n");
-		}
-
 		if (!chunk.second->hasLOD(0)) {
 			std::vector<Vertex> vertices;
 			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, nullptr, vertices, tallest, lowest);

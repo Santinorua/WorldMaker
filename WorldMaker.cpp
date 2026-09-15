@@ -51,6 +51,8 @@ int main()
 	BiomeGenerator::addDefaultBiomes();
 	FeatureManager::addDefaultFeatures();
 
+	Preferences preferences = {.camera_speed = &Camera::s_speed};
+
 	int gridWidth = ChunkRenderUnit::s_chunkRes;
     int gridDepth = ChunkRenderUnit::s_chunkRes;
 
@@ -72,23 +74,6 @@ int main()
 		colors.reserve(gridWidth * gridDepth);
 	}
 
-	for (int z = 0; z < gridDepth; ++z)
-    {
-        for (int x = 0; x < gridWidth; ++x)
-        {
-
-
-			if (doRender2D) {
-				double color = generator.getVertex(x, z).m_position.y / generator.m_yScale;
-				colors.push_back(color);
-				colors.push_back(color);
-				colors.push_back(color);
-				colors.push_back(1.0);
-			}
-        }
-    }
-
-
 	NoiseRenderUnit noise1 = NoiseRenderUnit(gridWidth, gridDepth, colors);
 
 
@@ -103,7 +88,6 @@ int main()
 	uint64_t seed = 42;
 
 	bool quit = false;
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	while (!Renderer::WindowShouldClose() && !quit)
 	{
 		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
@@ -121,6 +105,7 @@ int main()
 
 		ui::DockSpace(quit);
 
+		ui::PreferencesWindow(preferences);
 		ui::DebugWindow(render_distance, chunks);
 
 		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator);
@@ -129,7 +114,7 @@ int main()
 		Camera::UpdateCameraTransform();
 
 		for (auto& ck : chunks) {
-		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint())) continue;
+		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
 			Renderer::DrawChunkTerrain(*ck.second);
 			Renderer::DrawChunkModels(*ck.second);
 		}
