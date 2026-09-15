@@ -14,13 +14,14 @@ namespace WorldMaker
 {
     class Material;
 
-	enum ShaderProgramType
+	enum class ShaderProgramType
 	{
 		noise = 0,
 		terrain = 1,
 		model = 2,
 		baking = 3,
-		water = 4
+		water = 4,
+		picking = 5
 	};
 
 	class ShaderProgram
@@ -42,6 +43,7 @@ namespace WorldMaker
 		void setUniform3f(const std::string& name, float v0, float v1, float v2);
 		void setUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 		void setUniformMat4f(const std::string& name, glm::mat4 matrix);
+		void setUniform1ui(const std::string& name, unsigned int value);
 		void setUniformTextureSlots(const std::string& name);
 		void loadTexture2DArray(unsigned int texture2DArray);
 		void loadMeshMaterial(MeshMaterial* mat);

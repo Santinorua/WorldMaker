@@ -122,6 +122,11 @@ namespace WorldMaker
 		GLCall(glUniform1i(getUniformLocation(name), value));
 	}
 
+	void ShaderProgram::setUniform1ui(const std::string& name, unsigned int value)
+	{
+		GLCall(glUniform1ui(getUniformLocation(name), value));
+	}
+
 	void ShaderProgram::setUniform2i(const std::string& name, int v0, int v1)
 	{
 		GLCall(glUniform2i(getUniformLocation(name), v0, v1));

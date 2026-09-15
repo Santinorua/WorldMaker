@@ -29,10 +29,12 @@ namespace WorldMaker
 		static const int MAX_LOD = 4;
 		static int s_chunkRes; // Amount of pixels per chunk
 		static double s_chunkScale;
+		static uint32_t s_nextID;
 		double m_tallestPoint = 0;
 		double m_lowestPoint = 0;
 		int m_current_lod = 0;
-		ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod);
+		uint32_t m_ID;
+		ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod, int id);
 		glm::vec3 center();
 
 		void uploadLOD(std::vector<Vertex>& vertices, int lod, double tallest_point, double lowest_point);

@@ -42,6 +42,7 @@ namespace WorldMaker
 		static BakeFBO s_bakeFBO;
 		static ShaderProgramSPtr s_shaderProgramsByType[shadersAmount];
 		static bool s_inited;
+		const int emptySelection = 0;
 
 		static void Init();
 
@@ -67,6 +68,13 @@ namespace WorldMaker
 		static void DrawBakedTerrain(ChunkRenderUnit& chunk);
 		static void DrawChunkTerrain(ChunkRenderUnit& chunk);
 		static void DrawChunkModels(ChunkRenderUnit& chunk);
+
+		static void BeginSelectionDraw();
+		static void EndSelectionDraw();
+		static void SelectionDrawChunkTerrain(ChunkRenderUnit& chunk);
+		// Returns Chunk ID
+		static int SelectPos(int mouse_x, int mouse_y);
+
 
 		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 	};

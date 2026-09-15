@@ -111,16 +111,36 @@ int main()
 
 		Camera::UpdateCameraTransform();
 
+		Renderer::BeginSelectionDraw();
+		for (auto& ck : chunks) {
+		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
+			Renderer::SelectionDrawChunkTerrain(*ck.second);
+		}
+		double mouse_x;
+		double mouse_y;
+		glfwGetCursorPos(Renderer::s_window, &mouse_x, &mouse_y);
+		mouse_x = glm::floor(mouse_x);
+		mouse_y = glm::floor(mouse_y);
+		const int res = Renderer::SelectPos(mouse_x, mouse_y);
+		const uint8_t *res_colors = (uint8_t*)&res;
+		printf("(%d, %d, %d) #%d\n", res_colors[0], res_colors[1], res_colors[2], res);
+
+		Renderer::EndSelectionDraw();
+
 		WorldWater::UpdateWaterTransform(chunks);
 		Renderer::DrawWater();
 		for (auto& ck : chunks) {
-		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
+			if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
+
 			Renderer::DrawChunkTerrain(*ck.second);
 			Renderer::DrawChunkModels(*ck.second);
 		}
 		if (doRender2D) {
 			Renderer::DrawNoise(noise1);
 		}
+
+
+
 
 		ui::end();
 		glfwSwapBuffers(Renderer::GetWindow());

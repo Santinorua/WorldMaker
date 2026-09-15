@@ -11,6 +11,8 @@
 
 #define CHECK_LOD_DIST(ck_dist, render_distance, thresh) (((float)(ck_dist).x / (render_distance) > (thresh)) || ((float)(ck_dist).y / (render_distance) > (thresh)))
 
+#define CHUNK_ID(x, z) (((x) << 16) | ((z) & 0xffff))
+
 
 namespace WorldMaker {
 
@@ -105,7 +107,7 @@ ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chu
 
 	GenerateVertices(generator, x_chunk, z_chunk, lod, &chunkModels, chunkVertices, tallestPoint, lowestPoint);
 
-	return new ChunkRenderUnit(chunkVertices, tallestPoint, lowestPoint, chunkModels, lod);
+	return new ChunkRenderUnit(chunkVertices, tallestPoint, lowestPoint, chunkModels, lod, CHUNK_ID(x_chunk, z_chunk));
 }
 
 glm::ivec2 GetChunkPos(glm::vec3 pos) {
