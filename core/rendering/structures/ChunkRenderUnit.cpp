@@ -31,7 +31,7 @@ namespace WorldMaker
 		// TODO: Delete buffers when unused
 	}
 
-	void ChunkRenderUnit::uploadLOD(std::vector<Vertex>& vertices, int lod, double tallest_point, double lowest_point)
+	void ChunkRenderUnit::uploadLOD(std::vector<Vertex>& vertices, int lod, double tallest_point, double lowest_point, ChunkModels *chunkModels)
 	{
 		std::vector<unsigned int> indices = GetIndicesForChunk(lod);
 		m_vertices.insert({lod, std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT)});
@@ -41,11 +41,12 @@ namespace WorldMaker
 
 		m_indices[lod]->pushData(indices);
 
+		if (chunkModels != nullptr) {
+			m_models = *chunkModels;
+		}
+
 		m_tallestPoint = tallest_point;
 		m_lowestPoint = lowest_point;
-
-		std::cout << "New tallest for " << this << ": " << tallest_point << '\n';
-		std::cout << "New lowest for " << this << ": " << lowest_point << '\n';
 	}
 
 	ChunkRenderUnit::ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod)

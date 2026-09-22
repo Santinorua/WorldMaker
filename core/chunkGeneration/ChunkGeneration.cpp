@@ -172,7 +172,8 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.60)) {
 			if (!chunk.second->hasLOD(3)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, nullptr, vertices, tallest, lowest);
+				ChunkModels models;
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, &models, vertices, tallest, lowest);
 				chunk.second->uploadLOD(vertices, 3, tallest, lowest);
 			}
 			chunk.second->setLOD(3);
@@ -182,7 +183,8 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.45)) {
 			if (!chunk.second->hasLOD(2)) {
 				std::vector<Vertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, nullptr, vertices, tallest, lowest);
+				ChunkModels models;
+				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, &models, vertices, tallest, lowest);
 				chunk.second->uploadLOD(vertices, 2, tallest, lowest);
 			}
 			chunk.second->setLOD(2);
@@ -191,8 +193,9 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 
 		if (!chunk.second->hasLOD(0)) {
 			std::vector<Vertex> vertices;
-			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, nullptr, vertices, tallest, lowest);
-			chunk.second->uploadLOD(vertices, 0, tallest, lowest);
+			ChunkModels models;
+			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, &models, vertices, tallest, lowest);
+			chunk.second->uploadLOD(vertices, 0, tallest, lowest, &models);
 		}
 		chunk.second->setLOD(0);
 	}
