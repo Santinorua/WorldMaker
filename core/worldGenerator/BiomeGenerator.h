@@ -83,6 +83,7 @@ namespace WorldMaker {
     public:
         static std::vector<Biome> m_biomes;
         static Biome getBiome(double params[4]);
+        static std::pair<Biome, std::pair<Biome, double>> getBiomes(double params[4]);
         static void addBiome(const Biome &biome);
         static void removeBiome(int index);
         static int getBiomeId(const std::string &name);

@@ -101,6 +101,35 @@ namespace WorldMaker {
         return m_biomes[bestBiome];
     }
 
+    std::pair<Biome, std::pair<Biome, double>> BiomeGenerator::getBiomes(double params[4]) {
+        assert(m_biomes.size() > 0);
+        std::vector<double> distances;
+        distances.reserve(m_biomes.size());
+        double bestDistance = std::numeric_limits<double>::max();
+        double secondBestDistance = std::numeric_limits<double>::max();
+        int bestBiome = 0;
+        int secondBestBiome = -1;
+        for (int i = 0; i < m_biomes.size(); i++) {
+            bool conditionsMet = true;
+            // Comprobar condiciones
+            if (conditionsMet) {
+                double distance = m_biomes[i].idealDistance(params);
+                distances.push_back(distance);
+                if (distance < bestDistance) {
+                    secondBestDistance = bestDistance;
+                    secondBestBiome = bestBiome;
+                    bestDistance = distance;
+                    bestBiome = i;
+                } else if (distance < secondBestDistance) {
+                    secondBestDistance = distance;
+                    secondBestBiome = i;
+                }
+            }
+        }
+        double secondWeight = 1 - (bestDistance - secondBestDistance) / bestDistance;
+        return std::make_pair(m_biomes[bestBiome], std::make_pair(m_biomes[secondBestBiome], secondWeight));
+    }
+
     void BiomeGenerator::addBiome(const Biome &biome) {
         m_biomes.push_back(biome);
     }

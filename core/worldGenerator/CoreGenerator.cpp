@@ -58,7 +58,9 @@ namespace WorldMaker {
         double height = getHeight(erosion, continentalness, base);
 
         double params[4] = {erosion, continentalness, temperature, humidity};
-        Biome biome = BiomeGenerator::getBiome(params);
+
+        auto [biome, secondaryData] = BiomeGenerator::getBiomes(params);
+        auto [secondaryBiome, secondaryWeight] = secondaryData;
         int biomeId = BiomeGenerator::getBiomeId(biome.name);
 
         generatorVertex v;
@@ -74,6 +76,7 @@ namespace WorldMaker {
                 FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
                 v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
             }
+            // v.m_color =
         } else if (continentalness >= -0.6) {
             for (int featureId : biome.m_features) {
                 // Feature *currentFeature = &FeatureManager::m_features[i];
