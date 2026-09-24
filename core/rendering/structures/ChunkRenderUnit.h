@@ -35,7 +35,8 @@ namespace WorldMaker
 		ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod);
 		glm::vec3 center();
 
-		void uploadLOD(std::vector<MeshVertex>& vertices, int lod, double tallest_point, double lowest_point);
+		void uploadLOD(std::vector<MeshVertex>& vertices, int lod, double tallest_point, double lowest_point, ChunkModels *models = nullptr);
+
 		void setLOD(int lod);
 		bool hasLOD(int lod);
 
