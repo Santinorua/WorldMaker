@@ -10,9 +10,10 @@ namespace WorldMaker
     {
     public:
         static float s_yPos;
-        static void UpdateWaterTransform(ChunkGeneration::ChunkArray chunks);
+        static glm::ivec2 s_lastPlayerChunkPos;
+        static void UpdateWaterTransform(int renderDistance);
         static SSBOUPtr<unsigned int> s_indices;
-        static SSBOUPtr<Vertex> s_vertices;
+        static SSBOUPtr<MeshVertex> s_vertices;
         static const ShaderProgramType s_shaderProgramType;
 		static VertexArrayUPtr s_vertexArray;
         static void Init();

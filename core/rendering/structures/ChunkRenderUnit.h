@@ -32,10 +32,10 @@ namespace WorldMaker
 		double m_tallestPoint = 0;
 		double m_lowestPoint = 0;
 		int m_current_lod = 0;
-		ChunkRenderUnit(std::vector<Vertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod);
+		ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod);
 		glm::vec3 center();
 
-		void uploadLOD(std::vector<Vertex>& vertices, int lod, double tallest_point, double lowest_point);
+		void uploadLOD(std::vector<MeshVertex>& vertices, int lod, double tallest_point, double lowest_point);
 		void setLOD(int lod);
 		bool hasLOD(int lod);
 
@@ -46,7 +46,7 @@ namespace WorldMaker
 
 		const ShaderProgramType shaderProgramType = ShaderProgramType::terrain;
 		VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
-		std::unordered_map<int, SSBOUPtr<Vertex>> m_vertices; //= { std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT) };
+		std::unordered_map<int, SSBOUPtr<MeshVertex>> m_vertices; //= { std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT) };
 		std::unordered_map<int, SSBOUPtr<unsigned int>> m_indices; //= std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);
 		ChunkModels m_models = {};
 	};

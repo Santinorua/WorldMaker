@@ -90,13 +90,13 @@ namespace WorldMaker
     		else std::cout << "No materials\n";
 		}
 
-		std::vector<Vertex> vertices;
+		std::vector<MeshVertex> vertices;
 		std::vector<unsigned int> indices;
 
 		for (unsigned int  i = 0; i < mesh->mNumVertices; i++)
 		{
 
-			Vertex vertex;
+			MeshVertex vertex;
 			vertex.m_materialLayer = sharedMeshMaterial->id();
 			glm::vec3 vector;
 

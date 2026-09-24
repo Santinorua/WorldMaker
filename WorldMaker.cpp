@@ -111,7 +111,7 @@ int main()
 
 		Camera::UpdateCameraTransform();
 
-		WorldWater::UpdateWaterTransform(chunks);
+		WorldWater::UpdateWaterTransform(render_distance);
 		Renderer::DrawWater();
 		for (auto& ck : chunks) {
 		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;

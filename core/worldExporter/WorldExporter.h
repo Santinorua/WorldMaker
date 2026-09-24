@@ -36,10 +36,10 @@ namespace WorldMaker
         static int SetAttributeForModel(size_t offsetInBuffer, tinygltf::Model& model, size_t elementCount,
             int type);
 
-        static std::vector<float> BuildPositionBuffer(const std::vector<Vertex>& vertices);
-        static std::vector<float> BuildColorBuffer(const std::vector<Vertex>& vertices);
-        static std::vector<float> BuildNormalBuffer(const std::vector<Vertex>& vertices);
-        static std::vector<float> BuildUVBuffer(const std::vector<Vertex>& vertices);
-        static std::vector<float> BuildBakedTerrainUVBuffer(const std::vector<Vertex>& vertices, glm::vec2 chunkOrigin, int chunkSize);
+        static std::vector<float> BuildPositionBuffer(const std::vector<MeshVertex>& vertices);
+        static std::vector<float> BuildColorBuffer(const std::vector<MeshVertex>& vertices);
+        static std::vector<float> BuildNormalBuffer(const std::vector<MeshVertex>& vertices);
+        static std::vector<float> BuildUVBuffer(const std::vector<MeshVertex>& vertices);
+        static std::vector<float> BuildBakedTerrainUVBuffer(const std::vector<MeshVertex>& vertices, glm::vec2 chunkOrigin, int chunkSize);
     };
 }

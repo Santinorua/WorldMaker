@@ -53,7 +53,7 @@ namespace WorldMaker
 
         for (MeshSPtr mesh : model->m_meshes)
         {
-            std::vector<Vertex>& verticesData = mesh->m_vertices->m_data;
+            std::vector<MeshVertex>& verticesData = mesh->m_vertices->m_data;
             std::vector<unsigned int> indices = mesh->m_indices->m_data;
             std::vector<float> positions = BuildPositionBuffer(verticesData);
             std::vector<float> normals = BuildNormalBuffer(verticesData);
@@ -213,7 +213,7 @@ namespace WorldMaker
 
         for (MeshSPtr mesh : model->m_meshes)
         {
-            std::vector<Vertex>& verticesData = mesh->m_vertices->m_data;
+            std::vector<MeshVertex>& verticesData = mesh->m_vertices->m_data;
             std::vector<unsigned int> indices = mesh->m_indices->m_data;
             std::vector<float> positions = BuildPositionBuffer(verticesData);
             std::vector<float> normals = BuildNormalBuffer(verticesData);
@@ -556,11 +556,11 @@ namespace WorldMaker
 
         return (int)model.accessors.size()-1;
     }
-    std::vector<float> WorldExporter::BuildPositionBuffer(const std::vector<Vertex>& vertices)
+    std::vector<float> WorldExporter::BuildPositionBuffer(const std::vector<MeshVertex>& vertices)
     {
         std::vector<float> positions;
         positions.reserve(vertices.size()*3);
-        for (Vertex vertex : vertices)
+        for (MeshVertex vertex : vertices)
         {
             positions.push_back((float)vertex.m_position.x);
             positions.push_back((float)vertex.m_position.y);
@@ -568,11 +568,11 @@ namespace WorldMaker
         }
         return positions;
     }
-    std::vector<float> WorldExporter::BuildColorBuffer(const std::vector<Vertex>& vertices)
+    std::vector<float> WorldExporter::BuildColorBuffer(const std::vector<MeshVertex>& vertices)
     {
         std::vector<float> colors;
         colors.reserve(vertices.size()*4);
-        for (Vertex vertex : vertices)
+        for (MeshVertex vertex : vertices)
         {
             colors.push_back((float)vertex.m_color.x);
             colors.push_back((float)vertex.m_color.y);
@@ -581,11 +581,11 @@ namespace WorldMaker
         }
         return colors;
     }
-    std::vector<float> WorldExporter::BuildNormalBuffer(const std::vector<Vertex>& vertices)
+    std::vector<float> WorldExporter::BuildNormalBuffer(const std::vector<MeshVertex>& vertices)
     {
         std::vector<float> normals;
         normals.reserve(vertices.size()*3);
-        for (Vertex vertex : vertices)
+        for (MeshVertex vertex : vertices)
         {
             normals.push_back((float)vertex.m_normal.x);
             normals.push_back((float)vertex.m_normal.y);
@@ -593,22 +593,22 @@ namespace WorldMaker
         }
         return normals;
     }
-    std::vector<float> WorldExporter::BuildUVBuffer(const std::vector<Vertex>& vertices)
+    std::vector<float> WorldExporter::BuildUVBuffer(const std::vector<MeshVertex>& vertices)
     {
         std::vector<float> UVs;
         UVs.reserve(vertices.size()*2);
-        for (Vertex vertex : vertices)
+        for (MeshVertex vertex : vertices)
         {
             UVs.push_back((float)vertex.m_uv.x);
             UVs.push_back((float)vertex.m_uv.y);
         }
         return UVs;
     }
-    std::vector<float> WorldExporter::BuildBakedTerrainUVBuffer(const std::vector<Vertex>& vertices, glm::vec2 chunkOrigin, int chunkSize)
+    std::vector<float> WorldExporter::BuildBakedTerrainUVBuffer(const std::vector<MeshVertex>& vertices, glm::vec2 chunkOrigin, int chunkSize)
     {
         std::vector<float> uvs;
         uvs.reserve(vertices.size()*2);
-        for (Vertex vertex : vertices)
+        for (MeshVertex vertex : vertices)
         {
             float u = ((float)vertex.m_position.x - chunkOrigin.x) / chunkSize;
             float v = ((float)vertex.m_position.z - chunkOrigin.y) / chunkSize;

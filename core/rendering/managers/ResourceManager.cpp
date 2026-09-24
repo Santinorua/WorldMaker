@@ -19,6 +19,7 @@ namespace WorldMaker
     std::unordered_map<unsigned int, MeshMaterialWPtr> ResourceManager::s_MeshMaterialCache = {};
     std::unordered_map<std::string, ArrayTexture2DWPtr> ResourceManager::s_arrayTexture2DCache = {};
     std::unordered_map<std::string, Texture2DWPtr> ResourceManager::s_texture2DCache = {};
+    std::unordered_map<std::string, CubemapWPtr> ResourceManager::s_cubemapsCache = {};
     std::unordered_map<std::string, ModelWPtr> ResourceManager::s_modelCache;
     std::vector<TerrainMaterialSPtr> ResourceManager::s_terrainMaterials = {};
     bool ResourceManager::s_inited = false;
@@ -138,6 +139,29 @@ namespace WorldMaker
         {
             s_texture2DCache.erase(relativePath);
             std::cout << "Texture2D of relative path " << relativePath << " destroyed\n";
+        }
+    }
+
+    void ResourceManager::RemoveCubemapIfExpired(const std::vector<std::string>& relativePaths)
+    {
+        std::string relativePath = unifyPaths(relativePaths);
+        auto it = s_cubemapsCache.find(relativePath);
+
+        if (it != s_cubemapsCache.end() && it->second.expired())
+        {
+            s_cubemapsCache.erase(relativePath);
+            std::cout << "Cubemap of unified path " << relativePath << " destroyed\n";
+        }
+    }
+
+    void ResourceManager::RemoveCubemapIfExpired(const std::string& relativePath)
+    {
+        auto it = s_cubemapsCache.find(relativePath);
+
+        if (it != s_cubemapsCache.end() && it->second.expired())
+        {
+            s_cubemapsCache.erase(relativePath);
+            std::cout << "Cubemap of path " << relativePath << " destroyed\n";
         }
     }
 

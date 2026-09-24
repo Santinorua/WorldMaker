@@ -2,6 +2,7 @@
 
 #include "Pointers.h"
 #include "ArrayTexture2D.h"
+#include "Cubemap.h"
 #include "MeshMaterial.h"
 #include "Model.h"
 #include "TerrainMaterial.h"
@@ -30,6 +31,9 @@ namespace WorldMaker
         // static TextureSPtr GetTexture(const std::vector<std::string>& relativePaths);
         static void RemoveArrayTexture2DIfExpired(const std::string& relativePath, ArrayTexture2D* tex);
         static void RemoveTexture2DIfExpired(const std::string& relativePath);
+
+        static void RemoveCubemapIfExpired(const std::vector<std::string>& relativePaths);
+        static void RemoveCubemapIfExpired(const std::string& relativePath);
         // static void RemoveTextureIfExpired(const std::vector<std::string>& relativePaths);
 
         // Material handling ---------------------------------------------------------------------------------
@@ -53,6 +57,7 @@ public:
         static std::vector<TerrainMaterialSPtr> s_terrainMaterials; // SHOULD BE HANDLED BY THE UI AND EDITOR
         static std::unordered_map<std::string, ArrayTexture2DWPtr> s_arrayTexture2DCache;
         static std::unordered_map<std::string, Texture2DWPtr> s_texture2DCache;
+        static std::unordered_map<std::string, CubemapWPtr> s_cubemapsCache;
         static std::unordered_map<unsigned int, TerrainMaterialWPtr> s_terrainMaterialCache;
         static std::unordered_map<unsigned int, MeshMaterialWPtr> s_MeshMaterialCache;
         static std::unordered_map<std::string, ModelWPtr> s_modelCache;

@@ -10,7 +10,7 @@ namespace WorldMaker
 	}
 	void NoiseRenderUnit::ChangeNoise(const int& p_width, const int& p_height, std::vector<double>& p_data)
 	{
-		quad = Vertex::CreateUnitQuadWithAspectRatio(p_width, p_height);
+		quad = MeshVertex::CreateUnitQuadWithAspectRatio(p_width, p_height);
 		colorVector = p_data;
 		std::vector<float> hola;
 		for (double d : p_data)

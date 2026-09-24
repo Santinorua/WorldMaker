@@ -27,8 +27,8 @@ namespace WorldMaker {
                 m_normal.x, m_normal.y, m_normal.z
             };
         }
-        Vertex toGraphicalVertex() const {
-            Vertex vertex;
+        MeshVertex toGraphicalVertex() const {
+            MeshVertex vertex;
             vertex.m_position = m_position;
             vertex.m_color = m_color;
             vertex.m_materialLayer = m_materialLayer;

@@ -19,12 +19,12 @@ namespace WorldMaker
 		int height = 0;
 		std::vector<double> colorVector = {};
 		Texture2DSPtr noiseTex = nullptr;
-		std::vector<Vertex> quad = Vertex::CreateUnitQuadWithAspectRatio(1,1);
+		std::vector<MeshVertex> quad = MeshVertex::CreateUnitQuadWithAspectRatio(1,1);
 		const std::vector<unsigned int> quadIndices=
 		{
 			0,1,2,0,2,3
 		};
-		SSBOUPtr<Vertex> vertices = std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
+		SSBOUPtr<MeshVertex> vertices = std::make_unique<SSBO<MeshVertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
 		SSBOUPtr<unsigned int> indices = std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);
 	};
 }
