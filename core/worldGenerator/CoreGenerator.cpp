@@ -22,9 +22,10 @@ namespace WorldMaker {
         m_featureSeed = PRNG::nextNumber64(nextSeed);
     }
 
-    double WorldGenerator::getHeight(double erosion, double continentalness, double base) {
-        double continentalnessModifier;
+    double WorldGenerator::getHeight(double erosion, double continentalness, double base, Biome biome, Biome secondaryBiome, double secondaryWeight) {
 
+        // Continentalness
+        double continentalnessModifier;
         if (continentalness >= -0.1) {
             continentalnessModifier = 0;
 
@@ -34,6 +35,7 @@ namespace WorldMaker {
             continentalnessModifier = -0.5;
         }
 
+        // Erosion
         double erosionModifier;
         if (erosion >= 0.8) {
             erosionModifier = erosion;
@@ -43,7 +45,18 @@ namespace WorldMaker {
             erosionModifier = Lerp(0.0, 0.2, (erosion * 10.0) / 6.0, false);
         }
 
+        // Biome
+
+
+
         double final = base * erosionModifier + continentalnessModifier;
+
+        double secondaryTransitionThreshold = 0.9;
+        if (biome.m_modifiers.size() > 0 || (secondaryBiome.m_modifiers.size() > 0 && secondaryWeight > secondaryTransitionThreshold)) {
+            double mainBiome = biome.applyModifiers(final);
+            double secondaryBiomeValue = secondaryBiome.applyModifiers(final);
+            final = Lerp(mainBiome, secondaryBiomeValue, (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)), true);
+        }
 
         return final;
     }
@@ -55,13 +68,18 @@ namespace WorldMaker {
         double humidity = m_humidity.getNoise(x, z);
         double base = m_base.getNoise(x, z);
 
-        double height = getHeight(erosion, continentalness, base);
 
         double params[4] = {erosion, continentalness, temperature, humidity};
 
         auto [biome, secondaryData] = BiomeGenerator::getBiomes(params);
         auto [secondaryBiome, secondaryWeight] = secondaryData;
         int biomeId = BiomeGenerator::getBiomeId(biome.name);
+
+
+
+        double height = getHeight(erosion, continentalness, base, biome, secondaryBiome, secondaryWeight);
+
+        double secondaryTransitionThreshold = 0.9;
 
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
@@ -100,7 +118,11 @@ namespace WorldMaker {
             }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
-        
+        double finalWeight = (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold));
+        if (finalWeight < 0) {
+            finalWeight = 0;
+        }
+        v.m_color = {Lerp(biome.biomeColor.x, secondaryBiome.biomeColor.x, finalWeight, true), Lerp(biome.biomeColor.y, secondaryBiome.biomeColor.y, finalWeight, true), Lerp(biome.biomeColor.z, secondaryBiome.biomeColor.z, finalWeight, true), 1.0};
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
 

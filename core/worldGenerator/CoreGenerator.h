@@ -49,7 +49,7 @@ namespace WorldMaker {
         FractalNoise m_base;
         uint64_t m_featureSeed;
     public:
-        double getHeight(double erosion, double continentalness, double base);
+        double getHeight(double erosion, double continentalness, double base, Biome biome, Biome secondaryBiome, double secondaryWeight);
         generatorVertex getVertex(float x, float z);
         WorldGenerator(double yScale, uint64_t seed);
     };

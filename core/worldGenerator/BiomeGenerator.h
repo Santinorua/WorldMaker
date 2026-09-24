@@ -30,6 +30,7 @@ namespace WorldMaker {
     class Modifier {
         std::function<double(const double &value)> m_modifierFunction;
 
+    public:
         double getValue(const double &value) {
             return m_modifierFunction(value);
         }
@@ -39,13 +40,12 @@ namespace WorldMaker {
     class Biome {
         double m_idealConditions[4] =  {-2.0, -2.0, -2.0, -2.0};
         std::vector<ConditionGroup> m_conditionGroups;
-        double m_featureProbability = 0.1;
-        std::vector<Modifier> m_modifiers;
 
     public:
         std::string name;
         Vec4 biomeColor;
         std::vector<int> m_features;
+        std::vector<Modifier> m_modifiers;
 
         void setIdealCondition(BiomeDeterminators determinator, double value) {
             m_idealConditions[(int)determinator] = value;
@@ -75,6 +75,7 @@ namespace WorldMaker {
         void removeConditionGroup(const int index);
         void moveModifierUp(int idx);
         void moveModifierDown(int idx);
+        double applyModifiers(const double &value);
 
     };
 

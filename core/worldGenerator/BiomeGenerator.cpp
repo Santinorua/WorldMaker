@@ -80,6 +80,14 @@ namespace WorldMaker {
         std::swap(m_modifiers[idx], m_modifiers[idx + 1]);
     }
 
+    double Biome::applyModifiers(const double &value) {
+        double final = value;
+        for (Modifier modifier : m_modifiers) {
+            final = modifier.getValue(final);
+        }
+        return final;
+    }
+
     Biome BiomeGenerator::getBiome(double params[4]) {
         assert(m_biomes.size() > 0);
         std::vector<double> distances;
