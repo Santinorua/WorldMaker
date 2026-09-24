@@ -118,7 +118,7 @@ namespace WorldMaker {
             }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
-        double finalWeight = (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold));
+        double finalWeight = 1 - (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold));
         if (finalWeight < 0) {
             finalWeight = 0;
         }
