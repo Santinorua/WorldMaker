@@ -55,7 +55,7 @@ namespace WorldMaker {
         if (biome.m_modifiers.size() > 0 || (secondaryBiome.m_modifiers.size() > 0 && secondaryWeight > secondaryTransitionThreshold)) {
             double mainBiome = biome.applyModifiers(final);
             double secondaryBiomeValue = secondaryBiome.applyModifiers(final);
-            final = Lerp(mainBiome, secondaryBiomeValue, (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)), true);
+            final = Lerp(mainBiome, secondaryBiomeValue, (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)) / 2, true);
         }
 
         return final;
@@ -118,10 +118,17 @@ namespace WorldMaker {
             }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
-        double finalWeight = 1 - (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold));
+        double finalWeight = (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)) / 2;
         if (finalWeight < 0) {
+            // std::cout << secondaryWeight << std::endl;
             finalWeight = 0;
         }
+        // if (finalWeight != 0) {
+        //     std::cout << finalWeight << std::endl;
+        // }
+        // if (finalWeight > 0) {
+        //     std::cout << "primary biome red: " << biome.biomeColor.x << std::endl << "secondary biome red: " << secondaryBiome.biomeColor.x << std::endl << "final red" << Lerp(biome.biomeColor.x, secondaryBiome.biomeColor.x, finalWeight, true) << std::endl;
+        // }
         v.m_color = {Lerp(biome.biomeColor.x, secondaryBiome.biomeColor.x, finalWeight, true), Lerp(biome.biomeColor.y, secondaryBiome.biomeColor.y, finalWeight, true), Lerp(biome.biomeColor.z, secondaryBiome.biomeColor.z, finalWeight, true), 1.0};
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };

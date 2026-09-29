@@ -134,7 +134,7 @@ namespace WorldMaker {
                 }
             }
         }
-        double secondWeight = 1 - (bestDistance - secondBestDistance) / bestDistance;
+        double secondWeight = bestDistance / secondBestDistance;
         return std::make_pair(m_biomes[bestBiome], std::make_pair(m_biomes[secondBestBiome], secondWeight));
     }
 
@@ -185,8 +185,10 @@ namespace WorldMaker {
         forest.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
         forest.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
         forest.setIdealCondition(BiomeDeterminators::Humidity,0.6);
-        forest.biomeColor = Vec4(0.0, 0.57, 0.0, 1.0);
-
+        forest.biomeColor = Vec4(0.0, 0.415, 0.0, 1.0);
+        // forest.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            // return value * 4;
+        // }));
         addBiome(forest);
 
         // Biome mountain = Biome();

@@ -34,6 +34,7 @@ namespace WorldMaker {
         double getValue(const double &value) {
             return m_modifierFunction(value);
         }
+        Modifier(std::function<double(const double &value)> modifierFunction) : m_modifierFunction(modifierFunction) {}
     };
 
     // template<typename T>
@@ -70,6 +71,9 @@ namespace WorldMaker {
                 }
             }
         }
+
+
+
         double idealDistance(double params[4]);
         void addConditionGroup(const ConditionGroup &conditionGroup);
         void removeConditionGroup(const int index);
