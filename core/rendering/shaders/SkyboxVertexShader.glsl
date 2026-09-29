@@ -5,9 +5,10 @@ const int SSBOType_indices = 1;
 
 struct VertexData
 {
-    float position[3];
-    float uv[2];
-    float normal[3];
+    double position[3];
+    double color[4];
+    double uv[2];
+    double normal[3];
 };
 
 layout(binding = SSBOType_vertices, std430) readonly buffer ssbo0

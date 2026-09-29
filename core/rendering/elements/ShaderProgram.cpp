@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "TerrainMaterial.h"
 #include "Pointers.h"
+#include "ResourceManager.h"
 
 namespace WorldMaker
 {
@@ -15,7 +16,7 @@ namespace WorldMaker
 
 
 	ShaderProgram::ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath)
-		: m_vFilePath(globalizePath(vertexPath)), m_fFilePath(globalizePath(fragmentPath)), m_instanceId(s_idInstanceCount++), m_glName(0)
+		: m_vertexShaderPath(globalizePath(vertexPath)), m_fragmentShaderPath(globalizePath(fragmentPath)), m_instanceId(s_idInstanceCount++), m_glName(0)
 	{
 		m_glName = createProgram(vertexPath, fragmentPath);
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
@@ -24,6 +25,7 @@ namespace WorldMaker
 	ShaderProgram::~ShaderProgram()
 	{
 	    GLCall(glDeleteProgram(m_glName));
+	    ResourceManager::RemoveShaderProgramIfExpired(m_vertexShaderPath, m_fragmentShaderPath);
 		std::cout << "Shader Destroyed!\n";
 	}
 

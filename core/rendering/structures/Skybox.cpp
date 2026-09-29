@@ -1,10 +1,11 @@
 #include "Skybox.h"
 #include "Vertex.h"
+#include "ResourceManager.h"
+#include "RenderingAssets.h"
 
 namespace WorldMaker
 {
     bool Skybox::s_inited = false;
-    ShaderProgramSPtr Skybox::s_shaderProgram = nullptr;
     VertexArrayUPtr Skybox::s_vertexArray = nullptr;
     SSBOUPtr<SkyboxVertex> Skybox::s_verticesSSBO = nullptr;
     SSBOUPtr<unsigned int> Skybox::s_indicesSSBO = nullptr;
@@ -37,4 +38,24 @@ namespace WorldMaker
         0, 4, 5,
         5, 1, 0
     };
+
+    void Skybox::Init()
+    {
+        if (s_inited)
+        {
+            std::cerr << "Error: Trying to init Skybox when it was already initialized!\n";
+            return;
+        }
+        s_vertexArray = std::make_unique<VertexArray>();
+        s_verticesSSBO = std::make_unique<SSBO<SkyboxVertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT);
+        s_indicesSSBO = std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);
+        s_inited = true;
+        s_verticesSSBO->pushData(s_vertices);
+        s_verticesSSBO->submitData();
+        s_indicesSSBO->pushData(s_indices);
+        s_indicesSSBO->submitData();
+        s_cubemap = ResourceManager::LoadCubemap({
+			skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath
+			});
+    }
 }

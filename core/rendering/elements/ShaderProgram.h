@@ -20,7 +20,8 @@ namespace WorldMaker
 		terrain = 1,
 		model = 2,
 		baking = 3,
-		water = 4
+		water = 4,
+		skybox = 5
 	};
 
 	class ShaderProgram
@@ -58,10 +59,13 @@ namespace WorldMaker
 		unsigned int m_instanceId;
 		unsigned int static s_idInstanceCount;
 		std::unordered_map<std::string, int> m_UniformLocationCache;
-		std::string m_vFilePath;
-		std::string m_fFilePath;
+		std::string m_vertexShaderPath;
+		std::string m_fragmentShaderPath;
 		static GLint maxTextureSlots;
 	};
 
 	using ShaderProgramSPtr = std::shared_ptr<ShaderProgram>;
+	using ShaderProgramWPtr = std::weak_ptr<ShaderProgram>;
+
+	using ShaderProgramName = std::string; // the union of all shader paths
 }

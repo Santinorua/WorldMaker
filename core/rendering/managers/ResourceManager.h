@@ -28,6 +28,10 @@ namespace WorldMaker
         static ArrayTexture2DSPtr LoadArrayTexture(const std::string& relativePath);
         static TextureSPtr GetTexture2D(const std::string& relativePath);
         static ArrayTexture2DSPtr GetArrayTexture2D(const std::string& relativePath);
+
+        static CubemapSPtr LoadCubemap(const std::vector<std::string>& relativePaths);
+        static CubemapSPtr LoadCubemap(const std::string& relativePath);
+
         // static TextureSPtr GetTexture(const std::vector<std::string>& relativePaths);
         static void RemoveArrayTexture2DIfExpired(const std::string& relativePath, ArrayTexture2D* tex);
         static void RemoveTexture2DIfExpired(const std::string& relativePath);
@@ -49,6 +53,12 @@ namespace WorldMaker
         static ModelSPtr GetModel(const std::string& relativePath);
         static void RemoveModelIfExpired(const std::string& relativePath);
 
+        // Shader Program Handling --------------------------------------------------------------------------
+        static ShaderProgramSPtr LoadShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+        static ShaderProgramSPtr GetShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+        static ShaderProgramSPtr GetShaderProgram(const std::string& shaderProgramName);
+        static void RemoveShaderProgramIfExpired(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+
     private:
 
         static bool s_inited;
@@ -61,5 +71,6 @@ public:
         static std::unordered_map<unsigned int, TerrainMaterialWPtr> s_terrainMaterialCache;
         static std::unordered_map<unsigned int, MeshMaterialWPtr> s_MeshMaterialCache;
         static std::unordered_map<std::string, ModelWPtr> s_modelCache;
+        static std::unordered_map<ShaderProgramName, ShaderProgramWPtr> s_shaderProgramsCache;
     };
 }

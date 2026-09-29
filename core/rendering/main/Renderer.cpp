@@ -6,6 +6,7 @@
 #include "DebugUtils.h"
 #include "NoiseRenderUnit.h"
 #include "OpenGLUtils.h"
+#include "RenderingAssets.h"
 #include "RenderingConstants.h"
 #include "ShaderProgram.h"
 #include "ResourceManager.h"
@@ -14,6 +15,7 @@
 #include "GlobalLight.h"
 #include "GPUResourceManager.h"
 #include "WorldWater.h"
+#include "Skybox.h"
 
 #include <memory>
 
@@ -65,14 +67,15 @@ namespace WorldMaker
 
         s_bakeFBO.Init(2048);
 
-        s_shaderProgramsByType[ShaderProgramType::noise] = std::make_shared<ShaderProgram>("core/rendering/shaders/NoiseVertexShader.glsl", "core/rendering/shaders/NoiseFragmentShader.glsl");
-        s_shaderProgramsByType[ShaderProgramType::terrain] = std::make_shared<ShaderProgram>("core/rendering/shaders/TerrainVertexShader.glsl", "core/rendering/shaders/TerrainFragmentShader.glsl");
-        s_shaderProgramsByType[ShaderProgramType::model] = std::make_shared<ShaderProgram>("core/rendering/shaders/ModelVertexShader.glsl", "core/rendering/shaders/ModelFragmentShader.glsl");
-        s_shaderProgramsByType[ShaderProgramType::baking] = std::make_shared<ShaderProgram>("core/rendering/shaders/BakingVertexShader.glsl", "core/rendering/shaders/BakingFragmentShader.glsl");
-        s_shaderProgramsByType[ShaderProgramType::water] = std::make_shared<ShaderProgram>("core/rendering/shaders/WaterVertexShader.glsl", "core/rendering/shaders/WaterFragmentShader.glsl");
+        s_shaderProgramsByType[ShaderProgramType::noise] = ResourceManager::LoadShaderProgram(noiseVertexShaderPath, noiseFragmentShaderPath);
+        s_shaderProgramsByType[ShaderProgramType::terrain] = ResourceManager::LoadShaderProgram(TerrainVertexShaderPath, terrainFragmentShaderPath);
+        s_shaderProgramsByType[ShaderProgramType::model] = ResourceManager::LoadShaderProgram(modelVertexShaderPath, modelFragmentShaderPath);
+        s_shaderProgramsByType[ShaderProgramType::baking] = ResourceManager::LoadShaderProgram(bakingVertexShaderPath, bakingFragmentShaderPath);
+        s_shaderProgramsByType[ShaderProgramType::water] = ResourceManager::LoadShaderProgram(waterVertexShaderPath, waterFragmentShaderPath);
+        s_shaderProgramsByType[ShaderProgramType::skybox] = ResourceManager::LoadShaderProgram(skyboxVertexShaderPath, skyboxFragmentShaderPath);
 
         WorldWater::Init();
-
+        Skybox::Init();
         s_inited = true;
 	}
 
@@ -93,7 +96,7 @@ namespace WorldMaker
 	void Renderer::DrawNoise(const NoiseRenderUnit& noise)
 	{
 		// Six indices are needed to draw a square
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
 	}
 
 	void Renderer::DrawBakedTerrain(ChunkRenderUnit& chunk)
@@ -108,7 +111,7 @@ namespace WorldMaker
 		chunk.m_vertexArray->bind();
 		chunk.m_vertices[chunk.m_current_lod]->bindBufferBase(SSBOType::vertices);
 		chunk.m_indices[chunk.m_current_lod]->bindBufferBase(SSBOType::indices);
-		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size());
+		GLCall(glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size()));
 		GLCall(glEnable(GL_CULL_FACE));
 		GLCall(glEnable(GL_DEPTH_TEST));
 	}
@@ -124,7 +127,21 @@ namespace WorldMaker
 	    WorldWater::s_vertexArray->bind();
         WorldWater::s_vertices->bindBufferBase(SSBOType::vertices);
         WorldWater::s_indices->bindBufferBase(SSBOType::indices);
-        glDrawArrays(GL_TRIANGLES, 0, WorldWater::s_indices->m_data.size());
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, WorldWater::s_indices->m_data.size()));
+	}
+
+	void Renderer::DrawSkybox()
+	{
+	    GLCall(glDisable(GL_CULL_FACE));
+        ShaderProgramSPtr shaderProgram = s_shaderProgramsByType[ShaderProgramType::skybox];
+        shaderProgram->bind();
+        ShaderProgram::s_boundShader->updateCameraMatrices();
+        Skybox::s_vertexArray->bind();
+        Skybox::s_verticesSSBO->bindBufferBase(SSBOType::vertices);
+        Skybox::s_indicesSSBO->bindBufferBase(SSBOType::indices);
+        GLCall(glActiveTexture(GL_TEXTURE3));
+		GLCall(glBindTexture(GL_TEXTURE_CUBE_MAP, Skybox::s_cubemap->glName()));
+		GLCall(glDrawArraysInstanced(GL_TRIANGLES, 0, Skybox::s_indices.size(), 1));
 	}
 
 	void Renderer::DrawChunkTerrain(ChunkRenderUnit& chunk)
@@ -137,7 +154,7 @@ namespace WorldMaker
 		chunk.m_vertexArray->bind();
 		chunk.m_vertices[chunk.m_current_lod]->bindBufferBase(SSBOType::vertices);
 		chunk.m_indices[chunk.m_current_lod]->bindBufferBase(SSBOType::indices);
-		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size());
+		GLCall(glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size()));
 	}
 	void Renderer::DrawChunkModels(ChunkRenderUnit& chunk)
 	{

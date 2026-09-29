@@ -113,6 +113,7 @@ int main()
 
 		WorldWater::UpdateWaterTransform(render_distance);
 		Renderer::DrawWater();
+		Renderer::DrawSkybox();
 		for (auto& ck : chunks) {
 		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
 			Renderer::DrawChunkTerrain(*ck.second);

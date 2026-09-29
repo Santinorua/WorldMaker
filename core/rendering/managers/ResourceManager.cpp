@@ -21,6 +21,7 @@ namespace WorldMaker
     std::unordered_map<std::string, Texture2DWPtr> ResourceManager::s_texture2DCache = {};
     std::unordered_map<std::string, CubemapWPtr> ResourceManager::s_cubemapsCache = {};
     std::unordered_map<std::string, ModelWPtr> ResourceManager::s_modelCache;
+    std::unordered_map<ShaderProgramName, ShaderProgramWPtr> ResourceManager::s_shaderProgramsCache = {};
     std::vector<TerrainMaterialSPtr> ResourceManager::s_terrainMaterials = {};
     bool ResourceManager::s_inited = false;
     bool ResourceManager::s_ended = false;
@@ -96,6 +97,34 @@ namespace WorldMaker
 
         s_arrayTexture2DCache[relativePath] = newTexture;
         return newTexture;
+    }
+
+    CubemapSPtr ResourceManager::LoadCubemap(const std::string& relativePath)
+    {
+        auto it = s_cubemapsCache.find(relativePath);
+        if (it != s_cubemapsCache.end())
+        {
+            if (!it->second.expired()) return it->second.lock();
+            else s_cubemapsCache.erase(it);
+        }
+
+        CubemapSPtr newCubemap = std::make_shared<Cubemap>(relativePath);
+        s_cubemapsCache[relativePath] = newCubemap;
+        return newCubemap;
+    }
+    CubemapSPtr ResourceManager::LoadCubemap(const std::vector<std::string>& relativePaths)
+    {
+        std::string unifiedPath = unifyPaths(relativePaths);
+        auto it = s_cubemapsCache.find(unifiedPath);
+        if (it != s_cubemapsCache.end())
+        {
+            if (!it->second.expired()) return it->second.lock();
+            else s_cubemapsCache.erase(it);
+        }
+
+        CubemapSPtr newCubemap = std::make_shared<Cubemap>(relativePaths);
+        s_cubemapsCache[unifiedPath] = newCubemap;
+        return newCubemap;
     }
 
     // Returns nullptr if the texture is not found
@@ -259,6 +288,53 @@ namespace WorldMaker
         {
             s_modelCache.erase(relativePath);
             std::cout << "Model of relative " << relativePath << " destroyed\n";
+        }
+    }
+
+    // Shader Program Handling --------------------------------------------------------------------------
+
+    ShaderProgramSPtr ResourceManager::LoadShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+    {
+        std::string unifiedPath = unifyPaths({vertexShaderPath, fragmentShaderPath});
+        auto it = s_shaderProgramsCache.find(unifiedPath);
+        if (it != s_shaderProgramsCache.end())
+        {
+            if (!it->second.expired()) return it->second.lock();
+        }
+        ShaderProgramSPtr newShaderProgram = std::make_shared<ShaderProgram>(vertexShaderPath, fragmentShaderPath);
+        s_shaderProgramsCache[unifiedPath] = newShaderProgram;
+        return newShaderProgram;
+    }
+    ShaderProgramSPtr ResourceManager::GetShaderProgram(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+    {
+        std::string unifiedPath = unifyPaths({vertexShaderPath, fragmentShaderPath});
+        auto it = s_shaderProgramsCache.find(unifiedPath);
+        if (it != s_shaderProgramsCache.end())
+        {
+            if (!it->second.expired()) return it->second.lock();
+        }
+        return nullptr;
+    }
+    ShaderProgramSPtr ResourceManager::GetShaderProgram(const std::string& shaderProgramName)
+    {
+        auto it = s_shaderProgramsCache.find(shaderProgramName);
+        if (it != s_shaderProgramsCache.end())
+        {
+            if (!it->second.expired()) return it->second.lock();
+        }
+        return nullptr;
+    }
+    void ResourceManager::RemoveShaderProgramIfExpired(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+    {
+        std::string unifiedPath = unifyPaths({vertexShaderPath, fragmentShaderPath});
+
+        // This one below
+        auto it = s_shaderProgramsCache.find(unifiedPath);
+
+        if (it != s_shaderProgramsCache.end() && it->second.expired())
+        {
+            s_shaderProgramsCache.erase(unifiedPath);
+            std::cout << "Shader Program destroyed. Made of\n vertex shader: " << vertexShaderPath << "\n fragment shader: " << fragmentShaderPath << "\n";
         }
     }
 }
