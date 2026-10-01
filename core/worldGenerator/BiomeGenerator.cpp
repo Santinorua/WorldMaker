@@ -191,15 +191,18 @@ namespace WorldMaker {
         // }));
         addBiome(forest);
 
-        // Biome mountain = Biome();
-        // mountain.name = "Mountain";
-        // mountain.setIdealCondition(BiomeDeterminators::Continentalness, 0.8);
-        // mountain.setIdealCondition(BiomeDeterminators::Erosion, 1);
-        // mountain.setIdealCondition(BiomeDeterminators::Temperature, -2);
-        // mountain.setIdealCondition(BiomeDeterminators::Humidity,-2);
-        // mountain.biomeColor = Vec4(0.42, 0.91, 0.42, 1.0);
-        //
-        // addBiome(mountain);
+        Biome mountain = Biome();
+        mountain.name = "Mountain";
+        mountain.setIdealCondition(BiomeDeterminators::Continentalness, 0.8);
+        mountain.setIdealCondition(BiomeDeterminators::Erosion, 1);
+        mountain.setIdealCondition(BiomeDeterminators::Temperature, -2);
+        mountain.setIdealCondition(BiomeDeterminators::Humidity,-2);
+        mountain.biomeColor = Vec4(0.0, 0.0, 0.0, 1.0);
+        mountain.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            return value + .1;
+        }));
+
+        addBiome(mountain);
 
 
     }

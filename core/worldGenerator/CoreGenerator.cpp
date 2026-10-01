@@ -51,12 +51,13 @@ namespace WorldMaker {
 
         double final = base * erosionModifier + continentalnessModifier;
 
-        double secondaryTransitionThreshold = 0.9;
-        if (biome.m_modifiers.size() > 0 || (secondaryBiome.m_modifiers.size() > 0 && secondaryWeight > secondaryTransitionThreshold)) {
+        double secondaryTransitionThreshold = 0.8;
+        // if (biome.m_modifiers.size() > 0 || (secondaryBiome.m_modifiers.size() > 0 && secondaryWeight > secondaryTransitionThreshold)) {
             double mainBiome = biome.applyModifiers(final);
             double secondaryBiomeValue = secondaryBiome.applyModifiers(final);
-            final = Lerp(mainBiome, secondaryBiomeValue, (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)) / 2, true);
-        }
+            final = Lerp(mainBiome, secondaryBiomeValue, 0.5 * std::clamp((secondaryWeight - secondaryTransitionThreshold) / (1.0 - secondaryTransitionThreshold), 0.0, 1.0) , true);
+            // (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)) / 2.0
+        // }
 
         return final;
     }
@@ -118,11 +119,7 @@ namespace WorldMaker {
             }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
-        double finalWeight = (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)) / 2;
-        if (finalWeight < 0) {
-            // std::cout << secondaryWeight << std::endl;
-            finalWeight = 0;
-        }
+        double finalWeight = 0.5 * std::clamp((secondaryWeight - secondaryTransitionThreshold) / (1.0 - secondaryTransitionThreshold), 0.0, 1.0);
         // if (finalWeight != 0) {
         //     std::cout << finalWeight << std::endl;
         // }
