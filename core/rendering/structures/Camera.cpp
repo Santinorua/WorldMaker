@@ -33,6 +33,16 @@ namespace WorldMaker
 	    s_aspectRatio = newAspectRatio;
 	}
 
+	void Camera::SetFogColor(const glm::vec3& newColor)
+	{
+	    s_fogColor = newColor;
+	}
+
+	void Camera::SetFogDistance(float newDistance)
+	{
+	    s_fogDistance = newDistance;
+	}
+
 	glm::vec3 Camera::Front()
 	{
         float pitch = glm::radians(s_rot.x);
