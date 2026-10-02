@@ -11,7 +11,6 @@ namespace WorldMaker
     SSBOUPtr<unsigned int> WorldWater::s_indices = nullptr;
     SSBOUPtr<MeshVertex> WorldWater::s_vertices = nullptr;
     VertexArrayUPtr WorldWater::s_vertexArray = nullptr;
-    ShaderProgramType const WorldWater::s_shaderProgramType = ShaderProgramType::water;
     void WorldWater::Init()
     {
         s_indices = std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);

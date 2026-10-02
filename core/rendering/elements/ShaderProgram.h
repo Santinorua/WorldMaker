@@ -20,8 +20,7 @@ namespace WorldMaker
 		terrain = 1,
 		model = 2,
 		baking = 3,
-		water = 4,
-		skybox = 5
+		skybox = 4
 	};
 
 	class ShaderProgram
@@ -46,7 +45,7 @@ namespace WorldMaker
 		void setUniformTextureSlots(const std::string& name);
 		void loadTexture2DArray(unsigned int texture2DArray);
 		void loadMeshMaterial(MeshMaterial* mat);
-		void updateCameraMatrices();
+		void updateCameraData();
 		unsigned int maxTexturesCapacity() { return  maxTextureSlots; }
 		unsigned int instanceId() const { return m_instanceId; }
 		unsigned int rendererID() const { return m_glName; }

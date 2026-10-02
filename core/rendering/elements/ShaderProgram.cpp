@@ -188,11 +188,15 @@ namespace WorldMaker
         setUniform1f("u_shininess", mat->m_shininess);
 	}
 
-	void ShaderProgram::updateCameraMatrices()
+	void ShaderProgram::updateCameraData()
 	{
 		bind();
 		setUniformMat4f("u_view", Camera::ViewMatrix());
 		setUniformMat4f("u_projection", Camera::ProjectionMatrix());
+		std::cout << "Camera pos: " << Camera::Position() << "\n";
+		setUniform4f("u_cameraPos", Camera::Position().x, Camera::Position().y, Camera::Position().z, 1.0f);
+		setUniform1f("u_fogDistance", Camera::FogDistance());
+		setUniform4f("u_fogColor", Camera::FogColor().x, Camera::FogColor().y, Camera::FogColor().z, 1.0f);
 	}
 
 	int ShaderProgram::getUniformLocation(const std::string& name)

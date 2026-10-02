@@ -33,6 +33,9 @@ uniform float u_lightOffset;
 
 uniform sampler2DArray u_texture2DArray;
 
+uniform vec4 u_cameraPos;
+uniform float u_fogDistance;
+uniform vec4 u_fogColor;
 void main()
 {
     Material materialA = materials[frag_triMaterialIndices[0]];
@@ -56,5 +59,10 @@ void main()
     float intensity = min(((similarity + 1.0) * 0.5) * shininess, 1);
     vec4 intensityVec = vec4(intensity, intensity, intensity, 1.0);
 
-    final_color = (frag_color * diffuse * 0.8 + specular * 0.2) * lightColor * intensityVec;
+    float dist = distance(frag_pos.xz, u_cameraPos.xz);
+    float fogFactor = clamp(dist / u_fogDistance, 0.0, 1.0);
+
+    vec4 litColor = ((frag_color * diffuse * 0.8 + specular * 0.2) * lightColor * intensityVec);
+
+    final_color = mix(litColor, u_fogColor, fogFactor);
 }

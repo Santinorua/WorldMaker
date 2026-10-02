@@ -20,7 +20,11 @@ namespace WorldMaker
 		static glm::vec3 s_rot;
 		static float s_rotationSpeed;
 		static Frustum s_frustum;
+		static glm::vec3 s_fogColor;
+		static float s_fogDistance;
 	public:
+	    static inline glm::vec3 FogColor() { return s_fogColor; }
+	    static inline float FogDistance() { return s_fogDistance; }
 		static inline glm::vec3 Position() { return s_pos;}
 		static inline glm::vec3 Rotation() { return s_rot;}
 		static inline float NearPlane() { return s_nearPlane; }

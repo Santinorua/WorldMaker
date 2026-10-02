@@ -14,7 +14,6 @@ namespace WorldMaker
         static void UpdateWaterTransform(int renderDistance);
         static SSBOUPtr<unsigned int> s_indices;
         static SSBOUPtr<MeshVertex> s_vertices;
-        static const ShaderProgramType s_shaderProgramType;
 		static VertexArrayUPtr s_vertexArray;
         static void Init();
     };

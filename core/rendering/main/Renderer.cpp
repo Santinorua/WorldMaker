@@ -71,7 +71,6 @@ namespace WorldMaker
         s_shaderProgramsByType[ShaderProgramType::terrain] = ResourceManager::LoadShaderProgram(TerrainVertexShaderPath, terrainFragmentShaderPath);
         s_shaderProgramsByType[ShaderProgramType::model] = ResourceManager::LoadShaderProgram(modelVertexShaderPath, modelFragmentShaderPath);
         s_shaderProgramsByType[ShaderProgramType::baking] = ResourceManager::LoadShaderProgram(bakingVertexShaderPath, bakingFragmentShaderPath);
-        s_shaderProgramsByType[ShaderProgramType::water] = ResourceManager::LoadShaderProgram(waterVertexShaderPath, waterFragmentShaderPath);
         s_shaderProgramsByType[ShaderProgramType::skybox] = ResourceManager::LoadShaderProgram(skyboxVertexShaderPath, skyboxFragmentShaderPath);
 
         WorldWater::Init();
@@ -121,7 +120,7 @@ namespace WorldMaker
 	    GLCall(glDisable(GL_CULL_FACE));
 		ShaderProgramSPtr shaderProgram = s_shaderProgramsByType[ShaderProgramType::terrain];
 		shaderProgram->bind();
-		ShaderProgram::s_boundShader->updateCameraMatrices();
+		ShaderProgram::s_boundShader->updateCameraData();
 		GlobalLight::LoadLightSettings();
         GPUResourceManager::PrepareToDrawTerrain();
 	    WorldWater::s_vertexArray->bind();
@@ -135,7 +134,7 @@ namespace WorldMaker
 	    GLCall(glDisable(GL_CULL_FACE));
         ShaderProgramSPtr shaderProgram = s_shaderProgramsByType[ShaderProgramType::skybox];
         shaderProgram->bind();
-        ShaderProgram::s_boundShader->updateCameraMatrices();
+        ShaderProgram::s_boundShader->updateCameraData();
         Skybox::s_vertexArray->bind();
         Skybox::s_verticesSSBO->bindBufferBase(SSBOType::vertices);
         Skybox::s_indicesSSBO->bindBufferBase(SSBOType::indices);
@@ -148,7 +147,7 @@ namespace WorldMaker
 	{
 	    GLCall(glEnable(GL_CULL_FACE));
 	    Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
-		ShaderProgram::s_boundShader->updateCameraMatrices();
+		ShaderProgram::s_boundShader->updateCameraData();
         GlobalLight::LoadLightSettings();
         GPUResourceManager::PrepareToDrawTerrain();
 		chunk.m_vertexArray->bind();
@@ -160,7 +159,7 @@ namespace WorldMaker
 	{
 	    GLCall(glDisable(GL_CULL_FACE));
         Renderer::s_shaderProgramsByType[ShaderProgramType::model]->bind();
-		ShaderProgram::s_boundShader->updateCameraMatrices();
+		ShaderProgram::s_boundShader->updateCameraData();
         GlobalLight::LoadLightSettings();
 	    for (auto& [modelId, pair] : chunk.m_models.m_modelInstancesSSBO)
     	{
