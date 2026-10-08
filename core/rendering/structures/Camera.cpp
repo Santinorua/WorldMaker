@@ -18,6 +18,7 @@ namespace WorldMaker
 	Frustum Camera::s_frustum;
 	glm::vec3 Camera::s_fogColor = glm::vec3(0.529f, 0.513f, 0.509f);
 	float Camera::s_fogDistance = 300;
+	float Camera::s_fogFadeDistance = 200;
 
 	glm::mat4 Camera::ProjectionMatrix()
 	{

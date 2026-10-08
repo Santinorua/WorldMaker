@@ -34,6 +34,7 @@ uniform float u_lightOffset;
 uniform sampler2DArray u_texture2DArray;
 
 uniform vec4 u_cameraPos;
+uniform float u_fogFadeDistance;
 uniform float u_fogDistance;
 uniform vec4 u_fogColor;
 void main()
@@ -60,7 +61,9 @@ void main()
     vec4 intensityVec = vec4(intensity, intensity, intensity, 1.0);
 
     float dist = distance(frag_pos.xz, u_cameraPos.xz);
-    float fogFactor = clamp(dist / u_fogDistance, 0.0, 1.0);
+    dist -= u_fogDistance;
+    dist = max(dist, 0);
+    float fogFactor = clamp(dist / u_fogFadeDistance, 0.0, 1.0);
 
     vec4 litColor = ((frag_color * diffuse * 0.8 + specular * 0.2) * lightColor * intensityVec);
 
