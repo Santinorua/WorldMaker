@@ -58,4 +58,10 @@ namespace WorldMaker
 			skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath,skyboxDefaultPath
 			});
     }
+    void Skybox::ChangeSkybox(const std::string& newSkybox)
+    {
+        s_cubemap = ResourceManager::LoadCubemap({
+			newSkybox,newSkybox,newSkybox,newSkybox,newSkybox,newSkybox
+			});
+    }
 }

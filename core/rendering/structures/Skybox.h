@@ -20,5 +20,6 @@ namespace WorldMaker
 		static std::vector<unsigned int> s_indices;
 
 		static void Init();
+		static void ChangeSkybox(const std::string& newSkybox);
 	};
 }
