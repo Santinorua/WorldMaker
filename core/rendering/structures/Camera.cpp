@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "ChunkRenderUnit.h"
 #include "Input.h"
 #include "CoolTime.h"
 
@@ -11,7 +12,7 @@ namespace WorldMaker
 	float Camera::s_farPlane = 3000.0f;
 	float Camera::s_fov = 45.0f;
 	float Camera::s_aspectRatio = 800.0f/600.0f;
-	glm::vec3 Camera::s_pos = glm::vec3(-40, 55, -50);
+	glm::vec3 Camera::s_pos = glm::vec3(6797 * ChunkRenderUnit::s_chunkScale, 100, 1914 * ChunkRenderUnit::s_chunkScale);
 	glm::vec3 Camera::s_rot = glm::vec3(-14.3, 38.5, 0);
 	float Camera::s_speed = 50.0f;
 	float Camera::s_rotationSpeed = 0.1f;

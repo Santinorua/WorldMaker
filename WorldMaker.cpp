@@ -57,7 +57,7 @@ int main()
 	int gridWidth = ChunkRenderUnit::s_chunkRes;
     int gridDepth = ChunkRenderUnit::s_chunkRes;
 
-	int render_distance = 4;
+	int render_distance = 12;
 
 	WorldGenerator generator(150, 42);
 
