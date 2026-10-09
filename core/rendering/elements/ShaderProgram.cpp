@@ -193,7 +193,6 @@ namespace WorldMaker
 		bind();
 		setUniformMat4f("u_view", Camera::ViewMatrix());
 		setUniformMat4f("u_projection", Camera::ProjectionMatrix());
-		std::cout << "Camera pos: " << Camera::Position() << "\n";
 		setUniform4f("u_cameraPos", Camera::Position().x, Camera::Position().y, Camera::Position().z, 1.0f);
 		setUniform1f("u_fogDistance", Camera::FogDistance());
 		setUniform1f("u_fogFadeDistance", Camera::FogFadeDistance());

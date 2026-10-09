@@ -61,9 +61,6 @@ namespace WorldMaker
 
 		setLOD(lod);
 
-		std::cout << "Original tallest for " << this << ": " << tallestPoint << '\n';
-		std::cout << "Original lowest for " << this << ": " << lowestPoint << '\n';
-
 		m_models = chunkModels;
 		m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
 		m_tallestPoint = std::max(tallestPoint, chunkModels.tallestPoint);
