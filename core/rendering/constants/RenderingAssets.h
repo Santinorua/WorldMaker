@@ -11,7 +11,7 @@ namespace WorldMaker
     inline std::string diffuseTexDefaultSandPath = "core/rendering/assets/textures/defaultSand.jpg";
     inline std::string diffuseTexDefaultWaterPath = "core/rendering/assets/textures/water.png";
 
-    inline std::string skyboxDefaultPath = "core/rendering/assets/textures/skybox.png";
+    inline std::string skyboxDefaultPath = "core/rendering/assets/textures/skyboxBlue.png";
 
     inline std::string noiseVertexShaderPath = "core/rendering/shaders/NoiseVertexShader.glsl";
     inline std::string noiseFragmentShaderPath = "core/rendering/shaders/NoiseFragmentShader.glsl";
