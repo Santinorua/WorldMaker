@@ -51,13 +51,17 @@ namespace WorldMaker {
 
         double final = base * erosionModifier + continentalnessModifier;
 
-        double secondaryTransitionThreshold = 0.8;
-        // if (biome.m_modifiers.size() > 0 || (secondaryBiome.m_modifiers.size() > 0 && secondaryWeight > secondaryTransitionThreshold)) {
+        double biomeTransitionThreshold = 0.8;
+        if (secondaryWeight > biomeTransitionThreshold && (biome.m_modifiers.size() > 0 || secondaryBiome.m_modifiers.size() > 0)) {
             double mainBiome = biome.applyModifiers(final);
             double secondaryBiomeValue = secondaryBiome.applyModifiers(final);
-            final = Lerp(mainBiome, secondaryBiomeValue, 0.5 * std::clamp((secondaryWeight - secondaryTransitionThreshold) / (1.0 - secondaryTransitionThreshold), 0.0, 1.0) , true);
-            // (secondaryWeight - secondaryTransitionThreshold) * (1/(1-secondaryTransitionThreshold)) / 2.0
-        // }
+            final = Lerp(mainBiome  , secondaryBiomeValue, 0.5 * std::clamp((secondaryWeight - biomeTransitionThreshold) / (1.0 - biomeTransitionThreshold), 0.0, 1.0) , true);
+            if (biome.name == "Mountain" || secondaryBiome.name == "Mountain") {
+                std::cout << "main: " << mainBiome << " secondary: " << secondaryBiomeValue << " weight: " << secondaryWeight << " final: " << final << std::endl;
+            }
+        } else {
+            final = biome.applyModifiers(final);
+        }
 
         return final;
     }
@@ -80,7 +84,7 @@ namespace WorldMaker {
 
         double height = getHeight(erosion, continentalness, base, biome, secondaryBiome, secondaryWeight);
 
-        double secondaryTransitionThreshold = 0.9;
+        double biomeTransitionThreshold = 0.8;
 
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
@@ -119,7 +123,7 @@ namespace WorldMaker {
             }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
-        double finalWeight = 0.5 * std::clamp((secondaryWeight - secondaryTransitionThreshold) / (1.0 - secondaryTransitionThreshold), 0.0, 1.0);
+        double finalWeight = 0.5 * std::clamp((secondaryWeight - biomeTransitionThreshold) / (1.0 - biomeTransitionThreshold), 0.0, 1.0);
         // if (finalWeight != 0) {
         //     std::cout << finalWeight << std::endl;
         // }
