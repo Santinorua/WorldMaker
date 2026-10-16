@@ -183,7 +183,7 @@ namespace WorldMaker {
         plains.setIdealCondition(BiomeDeterminators::Continentalness, -0.4);
         plains.setIdealCondition(BiomeDeterminators::Erosion, 0);
         plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
-        plains.setIdealCondition(BiomeDeterminators::Humidity,0.2);
+        plains.setIdealCondition(BiomeDeterminators::Humidity,0.0);
         plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
 
         addBiome(plains);
@@ -210,20 +210,39 @@ namespace WorldMaker {
         // }));
         addBiome(forest);
 
-        Biome mountain = Biome();
-        mountain.name = "Mountain";
-        mountain.setIdealCondition(BiomeDeterminators::Continentalness, 0.8);
-        mountain.setIdealCondition(BiomeDeterminators::Erosion, 1);
-        mountain.setIdealCondition(BiomeDeterminators::Temperature, -2);
-        mountain.setIdealCondition(BiomeDeterminators::Humidity,-2);
-        mountain.biomeColor = Vec4(0.0, 0.0, 0.0, 1.0);
-        mountain.m_modifiers.push_back(Modifier([](const double &value) -> double {
+        Biome hill = Biome();
+        hill.name = "Hills";
+        hill.setIdealCondition(BiomeDeterminators::Continentalness, 1.0);
+        hill.setIdealCondition(BiomeDeterminators::Erosion, 0.7);
+        hill.setIdealCondition(BiomeDeterminators::Temperature, -2);
+        hill.setIdealCondition(BiomeDeterminators::Humidity,-2);
+        hill.biomeColor = Vec4(0.0, 0.6, 0.0, 1.0);
+        hill.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            double temp = value;
+            if (temp < 0) {
+                temp *= -0.3;
+            }
             return value + .1;
         }));
 
+        addBiome(hill);
+
+        Biome mountain = Biome();
+        mountain.name = "Mountain";
+        mountain.setIdealCondition(BiomeDeterminators::Continentalness, 1.0);
+        mountain.setIdealCondition(BiomeDeterminators::Erosion, 1.0);
+        mountain.setIdealCondition(BiomeDeterminators::Temperature, -2);
+        mountain.setIdealCondition(BiomeDeterminators::Humidity,-2);
+        mountain.biomeColor = Vec4(0.3, 0.3, 0.3, 1.0);
+        mountain.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            double temp = value;
+            if (temp < 0) {
+                temp *= -0.3;
+            }
+            return value + .5;
+        }));
+
         addBiome(mountain);
-
-
     }
 
 
