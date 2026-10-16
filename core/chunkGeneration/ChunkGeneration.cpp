@@ -174,7 +174,7 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 				std::vector<MeshVertex> vertices;
 				ChunkModels models;
 				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, &models, vertices, tallest, lowest);
-				chunk.second->uploadLOD(vertices, 3, tallest, lowest);
+				chunk.second->uploadLOD(vertices, 3, tallest, lowest, &models);
 			}
 			chunk.second->setLOD(3);
 			continue;
@@ -185,7 +185,7 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 				std::vector<MeshVertex> vertices;
 				ChunkModels models;
 				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, &models, vertices, tallest, lowest);
-				chunk.second->uploadLOD(vertices, 2, tallest, lowest);
+				chunk.second->uploadLOD(vertices, 2, tallest, lowest, &models);
 			}
 			chunk.second->setLOD(2);
 			continue;
@@ -195,7 +195,7 @@ void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_
 			std::vector<MeshVertex> vertices;
 			ChunkModels models;
 			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, &models, vertices, tallest, lowest);
-			chunk.second->uploadLOD(vertices, 0, tallest, lowest);
+			chunk.second->uploadLOD(vertices, 0, tallest, lowest, &models);
 		}
 		chunk.second->setLOD(0);
 	}
