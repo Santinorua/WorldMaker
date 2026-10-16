@@ -63,6 +63,7 @@ namespace WorldMaker {
         void addFeature(int featureId) {
             m_features.push_back(featureId);
         }
+
         void removeFeature(int featureId) {
             for (int i = 0; i < m_features.size(); i++) {
                 if (m_features[i] == featureId) {
@@ -84,11 +85,17 @@ namespace WorldMaker {
     };
 
 
+    struct BiomeWeight {
+        int biomeId;
+        double weight;
+    };
+
     class BiomeGenerator {
     public:
         static std::vector<Biome> m_biomes;
         static Biome getBiome(double params[4]);
-        static std::pair<Biome, std::pair<Biome, double>> getBiomes(double params[4]);
+        // Normalized weights for all nearby biomes; the dominant biome is first.
+        static std::vector<BiomeWeight> getBiomeWeights(double params[4]);
         static void addBiome(const Biome &biome);
         static void removeBiome(int index);
         static int getBiomeId(const std::string &name);

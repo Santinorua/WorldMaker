@@ -22,7 +22,7 @@ namespace WorldMaker {
         m_featureSeed = PRNG::nextNumber64(nextSeed);
     }
 
-    double WorldGenerator::getHeight(double erosion, double continentalness, double base, Biome biome, Biome secondaryBiome, double secondaryWeight) {
+    double WorldGenerator::getHeight(double erosion, double continentalness, double base, const std::vector<BiomeWeight> &biomeWeights) {
 
         // Continentalness
         double continentalnessModifier;
@@ -45,22 +45,13 @@ namespace WorldMaker {
             erosionModifier = Lerp(0.0, 0.2, (erosion * 10.0) / 6.0, false);
         }
 
-        // Biome
-
-
-
-        double final = base * erosionModifier + continentalnessModifier;
-
-        double biomeTransitionThreshold = 0.8;
-        if (secondaryWeight > biomeTransitionThreshold && (biome.m_modifiers.size() > 0 || secondaryBiome.m_modifiers.size() > 0)) {
-            double mainBiome = biome.applyModifiers(final);
-            double secondaryBiomeValue = secondaryBiome.applyModifiers(final);
-            final = Lerp(mainBiome  , secondaryBiomeValue, 0.5 * std::clamp((secondaryWeight - biomeTransitionThreshold) / (1.0 - biomeTransitionThreshold), 0.0, 1.0) , true);
-            if (biome.name == "Mountain" || secondaryBiome.name == "Mountain") {
-                std::cout << "main: " << mainBiome << " secondary: " << secondaryBiomeValue << " weight: " << secondaryWeight << " final: " << final << std::endl;
-            }
-        } else {
-            final = biome.applyModifiers(final);
+        // Apply each biome's modifier chain to the same base height, then blend
+        // the results using the same normalized weights as the vertex color.
+        double baseHeight = base * erosionModifier + continentalnessModifier;
+        double final = 0.0;
+        for (const BiomeWeight &biomeWeight : biomeWeights) {
+            final += BiomeGenerator::m_biomes[biomeWeight.biomeId].applyModifiers(baseHeight)
+                     * biomeWeight.weight;
         }
 
         return final;
@@ -76,15 +67,13 @@ namespace WorldMaker {
 
         double params[4] = {erosion, continentalness, temperature, humidity};
 
-        auto [biome, secondaryData] = BiomeGenerator::getBiomes(params);
-        auto [secondaryBiome, secondaryWeight] = secondaryData;
-        int biomeId = BiomeGenerator::getBiomeId(biome.name);
+        auto biomeWeights = BiomeGenerator::getBiomeWeights(params);
+        int biomeId = biomeWeights.front().biomeId;
+        const Biome &biome = BiomeGenerator::m_biomes[biomeId];
 
 
 
-        double height = getHeight(erosion, continentalness, base, biome, secondaryBiome, secondaryWeight);
-
-        double biomeTransitionThreshold = 0.8;
+        double height = getHeight(erosion, continentalness, base, biomeWeights);
 
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
@@ -123,14 +112,13 @@ namespace WorldMaker {
             }
             v.m_color = {0.0, 0.0, 1.0, 1.0};
         }
-        double finalWeight = 0.5 * std::clamp((secondaryWeight - biomeTransitionThreshold) / (1.0 - biomeTransitionThreshold), 0.0, 1.0);
-        // if (finalWeight != 0) {
-        //     std::cout << finalWeight << std::endl;
-        // }
-        // if (finalWeight > 0) {
-        //     std::cout << "primary biome red: " << biome.biomeColor.x << std::endl << "secondary biome red: " << secondaryBiome.biomeColor.x << std::endl << "final red" << Lerp(biome.biomeColor.x, secondaryBiome.biomeColor.x, finalWeight, true) << std::endl;
-        // }
-        v.m_color = {Lerp(biome.biomeColor.x, secondaryBiome.biomeColor.x, finalWeight, true), Lerp(biome.biomeColor.y, secondaryBiome.biomeColor.y, finalWeight, true), Lerp(biome.biomeColor.z, secondaryBiome.biomeColor.z, finalWeight, true), 1.0};
+        v.m_color = {0.0, 0.0, 0.0, 1.0};
+        for (const BiomeWeight &biomeWeight : biomeWeights) {
+            const Vec4 &color = BiomeGenerator::m_biomes[biomeWeight.biomeId].biomeColor;
+            v.m_color.x += color.x * biomeWeight.weight;
+            v.m_color.y += color.y * biomeWeight.weight;
+            v.m_color.z += color.z * biomeWeight.weight;
+        }
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
 

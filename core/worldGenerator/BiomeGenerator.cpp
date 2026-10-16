@@ -1,5 +1,10 @@
 #include "BiomeGenerator.h"
+#include "Interpolations.h"
 #include "Vec4.h"
+
+#include <algorithm>
+#include <cassert>
+#include <limits>
 
 namespace WorldMaker {
 
@@ -109,33 +114,47 @@ namespace WorldMaker {
         return m_biomes[bestBiome];
     }
 
-    std::pair<Biome, std::pair<Biome, double>> BiomeGenerator::getBiomes(double params[4]) {
+    std::vector<BiomeWeight> BiomeGenerator::getBiomeWeights(double params[4]) {
         assert(m_biomes.size() > 0);
         std::vector<double> distances;
         distances.reserve(m_biomes.size());
         double bestDistance = std::numeric_limits<double>::max();
-        double secondBestDistance = std::numeric_limits<double>::max();
         int bestBiome = 0;
-        int secondBestBiome = -1;
         for (int i = 0; i < m_biomes.size(); i++) {
-            bool conditionsMet = true;
-            // Comprobar condiciones
-            if (conditionsMet) {
-                double distance = m_biomes[i].idealDistance(params);
-                distances.push_back(distance);
-                if (distance < bestDistance) {
-                    secondBestDistance = bestDistance;
-                    secondBestBiome = bestBiome;
-                    bestDistance = distance;
-                    bestBiome = i;
-                } else if (distance < secondBestDistance) {
-                    secondBestDistance = distance;
-                    secondBestBiome = i;
-                }
+            double distance = m_biomes[i].idealDistance(params);
+            distances.push_back(distance);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestBiome = i;
             }
         }
-        double secondWeight = bestDistance / secondBestDistance;
-        return std::make_pair(m_biomes[bestBiome], std::make_pair(m_biomes[secondBestBiome], secondWeight));
+
+        constexpr double biomeTransitionThreshold = 0.8;
+        std::vector<BiomeWeight> weights;
+        weights.reserve(m_biomes.size());
+        weights.push_back({bestBiome, 1.0});
+        double totalWeight = 1.0;
+        for (int i = 0; i < m_biomes.size(); i++) {
+            if (i == bestBiome) continue;
+
+            // Coincident ideal conditions share the weight without dividing by zero.
+            double relativeDistance = distances[i] == 0.0 ? 1.0 : bestDistance / distances[i];
+            double transition = std::clamp((relativeDistance - biomeTransitionThreshold)
+                                          / (1.0 - biomeTransitionThreshold), 0.0, 1.0);
+            double blend = SmoothStep(0.5 * transition);
+            if (blend == 0.0) continue;
+
+            // Preserve the existing two-biome curve after normalization:
+            // weight / (1 + weight) == blend. Include every nearby biome so a
+            // change in second place cannot suddenly add or remove a modifier.
+            double weight = blend / (1.0 - blend);
+            weights.push_back({i, weight});
+            totalWeight += weight;
+        }
+        for (BiomeWeight &biomeWeight : weights) {
+            biomeWeight.weight /= totalWeight;
+        }
+        return weights;
     }
 
     void BiomeGenerator::addBiome(const Biome &biome) {
