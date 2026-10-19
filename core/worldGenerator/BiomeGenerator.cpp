@@ -185,13 +185,16 @@ namespace WorldMaker {
         plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
         plains.setIdealCondition(BiomeDeterminators::Humidity,0.0);
         plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
+        plains.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            return value * 0.3;
+        }));
 
         addBiome(plains);
 
         Biome desert = Biome();
         desert.name = "Desert";
-        desert.setIdealCondition(BiomeDeterminators::Continentalness, 0.25);
-        desert.setIdealCondition(BiomeDeterminators::Erosion, 0.5);
+        desert.setIdealCondition(BiomeDeterminators::Continentalness, 0.4);
+        desert.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
         desert.setIdealCondition(BiomeDeterminators::Temperature, 1);
         desert.setIdealCondition(BiomeDeterminators::Humidity,-1);
         desert.biomeColor = Vec4(1.0, 1.0, 0.0, 1.0);
@@ -220,9 +223,9 @@ namespace WorldMaker {
         hill.m_modifiers.push_back(Modifier([](const double &value) -> double {
             double temp = value;
             if (temp < 0) {
-                temp *= -0.3;
+                temp *= -0.1;
             }
-            return value + .1;
+            return temp + .01;
         }));
 
         addBiome(hill);
@@ -239,10 +242,27 @@ namespace WorldMaker {
             if (temp < 0) {
                 temp *= -0.3;
             }
-            return value + .5;
+            return temp + 0.6;
         }));
 
         addBiome(mountain);
+
+        Biome ocean = Biome();
+        ocean.name = "Ocean";
+        ocean.setIdealCondition(BiomeDeterminators::Continentalness, -0.7);
+        ocean.setIdealCondition(BiomeDeterminators::Erosion, 0.2);
+        ocean.setIdealCondition(BiomeDeterminators::Temperature, -2);
+        ocean.setIdealCondition(BiomeDeterminators::Humidity,0.0);
+        ocean.biomeColor = Vec4(0.0, 0.0, 1.0, 1.0);
+        ocean.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            double temp = value;
+            if (temp > 0) {
+                temp *= -0.1;
+            }
+
+            return temp * 0.2 - 0.6;
+        }));
+        addBiome(ocean);
     }
 
 
