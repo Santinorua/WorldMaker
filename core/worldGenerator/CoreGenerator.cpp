@@ -96,10 +96,10 @@ namespace WorldMaker {
         double params[4] = {erosion, continentalness, temperature, humidity};
 
         auto biomeWeights = BiomeGenerator::getBiomeWeights(params);
-        int biomeId = biomeWeights.front().biomeId;
 
         double height = getHeight(erosion, continentalness, humidity, rivers, base, biomeWeights);
 
+        int biomeId = biomeWeights.front().biomeId;
         const Biome &biome = BiomeGenerator::m_biomes[biomeId];
 
 
