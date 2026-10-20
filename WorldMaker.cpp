@@ -107,6 +107,7 @@ int main()
 		ui::FeaturesWindow();
 
 		Camera::UpdateCameraTransform();
+		Camera::SetFogRenderDistance(static_cast<float>(render_distance * ChunkRenderUnit::s_chunkScale));
 
 		WorldWater::UpdateWaterTransform(render_distance);
 		Renderer::DrawWater();

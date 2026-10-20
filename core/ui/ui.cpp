@@ -108,12 +108,15 @@ static bool show_export = false;
 static bool export_attempted = false;
 static bool export_succeeded = false;
 static size_t exported_chunk_count = 0;
+static std::string exported_path;
 
 static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
 	if (!show_export) return;
 	using Coordinate = std::pair<int, int>;
 	static std::set<Coordinate> selected;
 	static bool initialized = false;
+	static char export_folder[4096] = ".";
+	static char export_name[256] = "world";
 	std::set<Coordinate> loaded;
 	for (const auto &[position, chunk] : chunks)
 		if (chunk) loaded.emplace(position.x, position.y);
@@ -124,7 +127,7 @@ static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
 	// Keep coordinates, never chunk pointers: chunks can be regenerated or unloaded.
 	std::erase_if(selected, [&](const Coordinate &coordinate) { return !loaded.contains(coordinate); });
 
-	ImGui::SetNextWindowSize(ImVec2(460, 520), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(520, 620), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Export World", &show_export)) {
 		ImGui::Text("Selected: %zu / %zu loaded chunks", selected.size(), loaded.size());
 		ImGui::TextWrapped("Choose the chunks to include. Newly loaded chunks are not selected automatically.");
@@ -162,22 +165,47 @@ static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
 			ImGui::EndTable();
 		}
 		if (loaded.empty()) ImGui::TextUnformatted("No chunks loaded.");
-		ImGui::TextWrapped("Exports selected terrain and models to world.glb. Replaces the previous export.");
+		ImGui::Separator();
+		ImGui::InputText("Destination folder", export_folder, sizeof(export_folder));
+		ImGui::InputText("Model name", export_name, sizeof(export_name));
+		ImGui::TextWrapped("The .glb extension is added automatically. An existing file at the destination will be replaced.");
 		std::error_code error;
-		auto destination = std::filesystem::current_path(error);
-		if (!error) ImGui::TextWrapped("Destination: %s", (destination / "world.glb").string().c_str());
-		ImGui::BeginDisabled(selected.empty());
+		std::filesystem::path destination;
+		std::string validation_error;
+		std::string filename = export_name;
+		if (filename.empty() || filename == "." || filename == ".." ||
+			filename.find_first_of("<>:\"/\\|?*") != std::string::npos ||
+			std::any_of(filename.begin(), filename.end(), [](unsigned char c) { return c < 32; }) ||
+			filename.back() == '.' || filename.back() == ' ') {
+			validation_error = "Enter a valid model filename without folders.";
+		} else if (export_folder[0] == '\0') {
+			validation_error = "Enter a destination folder.";
+		} else {
+			auto folder = std::filesystem::absolute(std::filesystem::path(export_folder), error);
+			if (error || !std::filesystem::is_directory(folder, error) || error) {
+				validation_error = "The destination folder must exist.";
+			} else {
+				std::string extension = std::filesystem::path(filename).extension().string();
+				std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return std::tolower(c); });
+				if (extension != ".glb") filename += ".glb";
+				destination = (folder / filename).lexically_normal();
+				ImGui::TextWrapped("Destination: %s", destination.string().c_str());
+			}
+		}
+		if (!validation_error.empty()) ImGui::TextWrapped("%s", validation_error.c_str());
+		ImGui::BeginDisabled(selected.empty() || !validation_error.empty());
 		if (ImGui::Button("Export Selected (.glb)")) {
 			ChunkGeneration::ChunkArray subset;
 			for (const auto &entry : chunks)
 				if (entry.second && selected.contains({entry.first.x, entry.first.y})) subset.push_back(entry);
-			export_succeeded = WorldExporter::ExportWorld(subset);
+			exported_path = destination.string();
+			export_succeeded = WorldExporter::ExportWorld(subset, exported_path);
 			export_attempted = true;
 			exported_chunk_count = subset.size();
 		}
 		ImGui::EndDisabled();
 		if (export_attempted) {
-			if (export_succeeded) ImGui::Text("Exported %zu chunks to world.glb", exported_chunk_count);
+			if (export_succeeded) ImGui::TextWrapped("Exported %zu chunks to %s", exported_chunk_count, exported_path.c_str());
 			else ImGui::TextUnformatted("Export failed. Check the console for details.");
 		}
 	}
@@ -237,7 +265,8 @@ void DockSpace(bool &quit, const ChunkGeneration::ChunkArray &chunks) {
 		}
 
 		if (export_attempted) {
-			ImGui::TextUnformatted(export_succeeded ? "World exported: world.glb" : "World export failed. Check the console for details.");
+			if (export_succeeded) ImGui::Text("World exported: %s", exported_path.c_str());
+			else ImGui::TextUnformatted("World export failed. Check the console for details.");
 		}
 
 		ImGui::EndMenuBar();

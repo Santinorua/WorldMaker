@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 namespace WorldMaker
 {
-    bool WorldExporter::ExportWorld(const ChunkGeneration::ChunkArray& chunks)
+    bool WorldExporter::ExportWorld(const ChunkGeneration::ChunkArray& chunks, const std::string& outPath)
     {
         tinygltf::Model gltfModel;
         gltfModel.asset.version = "2.0";
@@ -36,7 +36,7 @@ namespace WorldMaker
         gltfModel.buffers.push_back(bufferBuilder.buffer);
 
         tinygltf::TinyGLTF writer;
-        bool ok = writer.WriteGltfSceneToFile(&gltfModel, "world.glb", true, true, true, true);
+        bool ok = writer.WriteGltfSceneToFile(&gltfModel, outPath, true, true, true, true);
         if (!ok) std::cerr << "Failed when exporting world\n";
         else std::cout << "World exported successfully!\n";
         return ok;

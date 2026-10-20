@@ -44,6 +44,13 @@ namespace WorldMaker
 	    s_fogDistance = newDistance;
 	}
 
+	void Camera::SetFogRenderDistance(float renderDistance)
+	{
+	    // Fade out completely just before the render boundary (95% of its radius).
+	    s_fogDistance = renderDistance * 0.70f;
+	    s_fogFadeDistance = renderDistance * 0.25f;
+	}
+
 	glm::vec3 Camera::Front()
 	{
         float pitch = glm::radians(s_rot.x);

@@ -37,6 +37,7 @@ namespace WorldMaker
 		static void SetAspectRatio(float newAspectRatio);
 		static void SetFogColor(const glm::vec3& newColor);
 		static void SetFogDistance(float newDistance);
+		static void SetFogRenderDistance(float renderDistance);
 
 		static bool CanSeeSphere(glm::vec3 center, float radius);
 		static bool CanSeeBox(glm::vec3 min, glm::vec3 max);
