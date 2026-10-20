@@ -52,12 +52,12 @@ int main()
 	BiomeGenerator::addDefaultBiomes();
 	FeatureManager::addDefaultFeatures();
 
-	Preferences preferences = {.camera_speed = &Camera::s_speed};
+	Preferences preferences = {.camera_speed = &Camera::s_speed, .render_distance = 8};
 
 	int gridWidth = ChunkRenderUnit::s_chunkRes;
     int gridDepth = ChunkRenderUnit::s_chunkRes;
 
-	int render_distance = 4;
+	const unsigned int& render_distance = preferences.render_distance;
 
 	WorldGenerator generator(150, 42);
 

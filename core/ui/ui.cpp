@@ -247,7 +247,7 @@ void DockSpace(bool &quit, const ChunkGeneration::ChunkArray &chunks) {
 	ExportWindow(chunks);
 }
 
-void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks) {
+void DebugWindow(const unsigned int &render_distance, const ChunkGeneration::ChunkArray &chunks) {
 	if (!open_windows.debug) return;
 
 	ImGui::Begin("Debug", &open_windows.debug);
@@ -258,9 +258,6 @@ void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks
 
 	ImGui::Text("FPS: %.1f",
 			ImGui::GetIO().Framerate);
-
-	IMGUI_INPUT(render_distance, ImGuiDataType_S32);
-	render_distance = std::max(1, render_distance);
 
 	auto chunk_pos = ChunkGeneration::GetChunkPos(Camera::Position());
 	ImGui::Text("Chunk Pos: (%d, %d)", chunk_pos.x, chunk_pos.y);
@@ -276,7 +273,7 @@ void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks
 	ImGui::End();
 }
 
-bool GenerationWindow(int &chunk_size, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator, ChunkGeneration::ChunkStreamer& streamer) {
+bool GenerationWindow(int &chunk_size, uint64_t &seed, const int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator, ChunkGeneration::ChunkStreamer& streamer) {
 	bool redraw = false;
 
 	if (!open_windows.generation) return false;
@@ -744,6 +741,10 @@ bool PreferencesWindow(Preferences &preferences) {
 	ImGui::Text("Camera Speed: ");
 	ImGui::SameLine();
 	IMGUI_INPUT(*preferences.camera_speed, ImGuiDataType_Float);
+
+	ImGui::Text("Render Distance: ");
+	ImGui::SameLine();
+	IMGUI_INPUT(preferences.render_distance, ImGuiDataType_U32);
 
 	ImGui::PopItemWidth();
 
