@@ -122,6 +122,9 @@ namespace WorldMaker {
         int bestBiome = 0;
         for (int i = 0; i < m_biomes.size(); i++) {
             double distance = m_biomes[i].idealDistance(params);
+            if (m_biomes[i].name == "Rivers") {
+                distance = 50.0; // Rivers should not be selected as the best biome based on distance
+            }
             distances.push_back(distance);
             if (distance < bestDistance) {
                 bestDistance = distance;
@@ -272,14 +275,14 @@ namespace WorldMaker {
         river.setIdealCondition(BiomeDeterminators::Temperature, -2);
         river.setIdealCondition(BiomeDeterminators::Humidity,-2);
         river.biomeColor = Vec4(1.0, 0.0, 1.0, 1.0);
-        river.m_modifiers.push_back(Modifier([](const double &value) -> double {
-            double temp = value;
-            if (temp > 0) {
-                temp *= -1.0;
-            }
-
-            return temp - 0.4;
-        }));
+        // river.m_modifiers.push_back(Modifier([](const double &value) -> double {
+        //     double temp = value;
+        //     if (temp > 0) {
+        //         temp *= -1.0;
+        //     }
+        //
+        //     return temp - 0.4;
+        // }));
         addBiome(river);
 
     }

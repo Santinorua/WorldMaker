@@ -55,7 +55,7 @@ namespace WorldMaker {
             for (BiomeWeight &biomeWeight : biomeWeights) {
                 biomeWeight.weight *= 1-riverWeight;
             }
-            biomeWeights[BiomeGenerator::getBiomeId("Rivers")].weight = riverWeight;
+            biomeWeights[BiomeGenerator::getBiomeId("Rivers")].weight += riverWeight;
         }
 
         double baseHeight = base * erosionModifier + continentalnessModifier;
@@ -90,40 +90,11 @@ namespace WorldMaker {
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
 
-        if (continentalness >= -0.1) {
-            v.m_color = biome.biomeColor;
-            for (int featureId : biome.m_features) {
-                // Feature *currentFeature = &FeatureManager::m_features[i];
-                if (FeatureManager::m_features[featureId].terrestrialStatus != 0) {
-                    continue;
-                }
-                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
-            }
-            // v.m_color =
-        } else if (continentalness >= -0.6) {
-            for (int featureId : biome.m_features) {
-                // Feature *currentFeature = &FeatureManager::m_features[i];
-                if (FeatureManager::m_features[featureId].terrestrialStatus != 1) {
-                    continue;
-                }
-
-                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
-            }
-            v.m_color = {Lerp(0.0, biome.biomeColor.x, ((continentalness+0.6) * 2), true), Lerp(0.0, biome.biomeColor.y, ((continentalness+0.6) * 2), true), Lerp(1.0, biome.biomeColor.z, ((continentalness+0.6) * 2), true), 1.0};
-        } else {
-            for (int featureId : biome.m_features) {
-                // Feature *currentFeature = &FeatureManager::m_features[i];
-                if (FeatureManager::m_features[featureId].terrestrialStatus != 2) {
-                    continue;
-                }
-                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-
-                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
-            }
-            v.m_color = {0.0, 0.0, 1.0, 1.0};
+        for (int featureId : biome.m_features) {
+            FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
+            v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
         }
+
         v.m_color = {0.0, 0.0, 0.0, 1.0};
         for (const BiomeWeight &biomeWeight : biomeWeights) {
             const Vec4 &color = BiomeGenerator::m_biomes[biomeWeight.biomeId].biomeColor;
