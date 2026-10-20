@@ -5,6 +5,8 @@
 #include "Interpolations.h"
 #include "BiomeGenerator.h"
 
+#include <algorithm>
+
 namespace WorldMaker {
 
     WorldGenerator::WorldGenerator(double yScale, uint64_t seed) {
@@ -50,12 +52,26 @@ namespace WorldMaker {
 
         // Apply each biome's modifier chain to the same base height, then blend
         // the results using the same normalized weights as the vertex color.
-        if (humidity > -0.3 && rivers >= -0.04 && rivers <= 0.04) {
-            double riverWeight = 1.0 - (std::abs(rivers) * 25);
+        const int riverBiomeId = BiomeGenerator::getBiomeId("Rivers");
+        if (riverBiomeId >= 0 && humidity > -0.4 && rivers >= -0.04 && rivers <= 0.04) {
+            double riverWeight = Lerp(0.0, 1.0, 1.0 - (std::abs(rivers) * 25), true);
             for (BiomeWeight &biomeWeight : biomeWeights) {
                 biomeWeight.weight *= 1-riverWeight;
             }
-            biomeWeights[BiomeGenerator::getBiomeId("Rivers")].weight += riverWeight;
+            // Weights contain only nearby biomes, ordered by dominance, not by ID.
+            auto river = std::find_if(biomeWeights.begin(), biomeWeights.end(),
+                                     [riverBiomeId](const BiomeWeight &weight) {
+                                         return weight.biomeId == riverBiomeId;
+                                     });
+            if (river != biomeWeights.end()) {
+                river->weight += riverWeight;
+            } else {
+                biomeWeights.push_back({riverBiomeId, riverWeight});
+            }
+            std::stable_sort(biomeWeights.begin(), biomeWeights.end(),
+                 [](const BiomeWeight &a, const BiomeWeight &b) {
+                     return a.weight > b.weight;
+                 });
         }
 
         double baseHeight = base * erosionModifier + continentalnessModifier;
@@ -81,11 +97,11 @@ namespace WorldMaker {
 
         auto biomeWeights = BiomeGenerator::getBiomeWeights(params);
         int biomeId = biomeWeights.front().biomeId;
-        const Biome &biome = BiomeGenerator::m_biomes[biomeId];
-
-
 
         double height = getHeight(erosion, continentalness, humidity, rivers, base, biomeWeights);
+
+        const Biome &biome = BiomeGenerator::m_biomes[biomeId];
+
 
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};

@@ -198,9 +198,12 @@ namespace WorldMaker {
         desert.name = "Desert";
         desert.setIdealCondition(BiomeDeterminators::Continentalness, 0.4);
         desert.setIdealCondition(BiomeDeterminators::Erosion, 0.1);
-        desert.setIdealCondition(BiomeDeterminators::Temperature, 1);
+        desert.setIdealCondition(BiomeDeterminators::Temperature, 0.8);
         desert.setIdealCondition(BiomeDeterminators::Humidity,-1);
         desert.biomeColor = Vec4(1.0, 1.0, 0.0, 1.0);
+        desert.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            return value * 0.6;
+        }));
 
         addBiome(desert);
 
@@ -274,15 +277,15 @@ namespace WorldMaker {
         river.setIdealCondition(BiomeDeterminators::Erosion, -2);
         river.setIdealCondition(BiomeDeterminators::Temperature, -2);
         river.setIdealCondition(BiomeDeterminators::Humidity,-2);
-        river.biomeColor = Vec4(1.0, 0.0, 1.0, 1.0);
-        // river.m_modifiers.push_back(Modifier([](const double &value) -> double {
-        //     double temp = value;
-        //     if (temp > 0) {
-        //         temp *= -1.0;
-        //     }
-        //
-        //     return temp - 0.4;
-        // }));
+        river.biomeColor = Vec4(0.0, 0.0, 1.0, 1.0);
+        river.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            double temp = value;
+            if (temp > 0) {
+                temp *= -0.2;
+            }
+
+            return temp - 0.2;
+        }));
         addBiome(river);
 
     }
