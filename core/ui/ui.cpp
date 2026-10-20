@@ -9,6 +9,7 @@
 #include "ChunkRenderUnit.h"
 #include "BiomeGenerator.h"
 #include "WorldExporter.h"
+#include "FolderPicker.h"
 
 #include "Input.h"
 
@@ -117,6 +118,7 @@ static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
 	static bool initialized = false;
 	static char export_folder[4096] = ".";
 	static char export_name[256] = "world";
+	static std::string folder_picker_error;
 	std::set<Coordinate> loaded;
 	for (const auto &[position, chunk] : chunks)
 		if (chunk) loaded.emplace(position.x, position.y);
@@ -166,7 +168,21 @@ static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
 		}
 		if (loaded.empty()) ImGui::TextUnformatted("No chunks loaded.");
 		ImGui::Separator();
-		ImGui::InputText("Destination folder", export_folder, sizeof(export_folder));
+		ImGui::TextUnformatted("Destination folder");
+		const float browse_width = ImGui::CalcTextSize("Browse...").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		ImGui::SetNextItemWidth(std::max(1.0f, ImGui::GetContentRegionAvail().x - browse_width - ImGui::GetStyle().ItemSpacing.x));
+		ImGui::InputText("##ExportFolder", export_folder, sizeof(export_folder));
+		ImGui::SameLine();
+		if (ImGui::Button("Browse...")) {
+			folder_picker_error.clear();
+			std::string folder = export_folder;
+			if (PickExportFolder(Renderer::GetWindow(), folder, folder_picker_error)) {
+				if (folder.size() < sizeof(export_folder))
+					std::snprintf(export_folder, sizeof(export_folder), "%s", folder.c_str());
+				else folder_picker_error = "The selected folder path is too long.";
+			}
+		}
+		if (!folder_picker_error.empty()) ImGui::TextWrapped("%s", folder_picker_error.c_str());
 		ImGui::InputText("Model name", export_name, sizeof(export_name));
 		ImGui::TextWrapped("The .glb extension is added automatically. An existing file at the destination will be replaced.");
 		std::error_code error;
@@ -181,15 +197,17 @@ static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
 		} else if (export_folder[0] == '\0') {
 			validation_error = "Enter a destination folder.";
 		} else {
-			auto folder = std::filesystem::absolute(std::filesystem::path(export_folder), error);
+			auto folder = std::filesystem::absolute(std::filesystem::u8path(export_folder), error);
 			if (error || !std::filesystem::is_directory(folder, error) || error) {
 				validation_error = "The destination folder must exist.";
 			} else {
 				std::string extension = std::filesystem::path(filename).extension().string();
 				std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c) { return std::tolower(c); });
 				if (extension != ".glb") filename += ".glb";
-				destination = (folder / filename).lexically_normal();
-				ImGui::TextWrapped("Destination: %s", destination.string().c_str());
+				destination = (folder / std::filesystem::u8path(filename)).lexically_normal();
+				const auto utf8 = destination.u8string();
+				const std::string display_path(utf8.begin(), utf8.end());
+				ImGui::TextWrapped("Destination: %s", display_path.c_str());
 			}
 		}
 		if (!validation_error.empty()) ImGui::TextWrapped("%s", validation_error.c_str());
@@ -198,7 +216,8 @@ static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
 			ChunkGeneration::ChunkArray subset;
 			for (const auto &entry : chunks)
 				if (entry.second && selected.contains({entry.first.x, entry.first.y})) subset.push_back(entry);
-			exported_path = destination.string();
+			const auto utf8 = destination.u8string();
+			exported_path.assign(utf8.begin(), utf8.end());
 			export_succeeded = WorldExporter::ExportWorld(subset, exported_path);
 			export_attempted = true;
 			exported_chunk_count = subset.size();

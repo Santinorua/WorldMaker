@@ -316,6 +316,9 @@ target_include_directories(ChunkGeneration PUBLIC ${CMAKE_SOURCE_DIR}/core/chunk
 file (GLOB UI_SRC "${CMAKE_SOURCE_DIR}/core/ui/*.cpp")
 add_library(ui STATIC ${UI_SRC})
 target_link_libraries(ui PUBLIC Rendering PerlinNoise Math WorldGenerator Vendor ChunkGeneration WorldExporter)
+if(WIN32)
+    target_link_libraries(ui PRIVATE ole32 shell32 uuid)
+endif()
 target_include_directories(ui PUBLIC ${CMAKE_SOURCE_DIR}/core/ui)
 
 # -----------------------------------------------------------------------------------------------------
