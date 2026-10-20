@@ -92,7 +92,6 @@ namespace WorldMaker {
         double rivers = m_rivers.getNoise(x, z);
         double base = m_base.getNoise(x, z);
 
-        double height = getHeight(erosion, continentalness, base);
 
         double params[4] = {erosion, continentalness, temperature, humidity};
 
@@ -107,9 +106,12 @@ namespace WorldMaker {
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
 
-        for (int featureId : biome.m_features) {
-            FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-            v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
+        if (height * m_yScale > -15.0) {
+            for (int featureId : biome.m_features) {
+                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
+
+                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
+            }
         }
 
         v.m_color = {0.0, 0.0, 0.0, 1.0};

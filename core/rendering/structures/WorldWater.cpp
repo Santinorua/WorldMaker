@@ -6,7 +6,7 @@
 
 namespace WorldMaker
 {
-    float WorldWater::s_yPos = -40.0f;
+    float WorldWater::s_yPos = -15.0f;
     glm::ivec2 WorldWater::s_lastPlayerChunkPos = {0, 0};
     SSBOUPtr<unsigned int> WorldWater::s_indices = nullptr;
     SSBOUPtr<MeshVertex> WorldWater::s_vertices = nullptr;
