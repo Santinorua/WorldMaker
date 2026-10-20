@@ -248,7 +248,7 @@ namespace WorldMaker {
         addBiome(mountain);
 
         Biome ocean = Biome();
-        ocean.name = "Ocean";
+        ocean.name = "Oceans";
         ocean.setIdealCondition(BiomeDeterminators::Continentalness, -0.7);
         ocean.setIdealCondition(BiomeDeterminators::Erosion, 0.2);
         ocean.setIdealCondition(BiomeDeterminators::Temperature, -2);
@@ -263,6 +263,25 @@ namespace WorldMaker {
             return temp * 0.2 - 0.6;
         }));
         addBiome(ocean);
+
+
+        Biome river = Biome();
+        river.name = "Rivers";
+        river.setIdealCondition(BiomeDeterminators::Continentalness, -2);
+        river.setIdealCondition(BiomeDeterminators::Erosion, -2);
+        river.setIdealCondition(BiomeDeterminators::Temperature, -2);
+        river.setIdealCondition(BiomeDeterminators::Humidity,-2);
+        river.biomeColor = Vec4(1.0, 0.0, 1.0, 1.0);
+        river.m_modifiers.push_back(Modifier([](const double &value) -> double {
+            double temp = value;
+            if (temp > 0) {
+                temp *= -1.0;
+            }
+
+            return temp - 0.4;
+        }));
+        addBiome(river);
+
     }
 
 

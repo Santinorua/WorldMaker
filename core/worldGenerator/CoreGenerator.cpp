@@ -19,10 +19,13 @@ namespace WorldMaker {
         m_humidity = FractalNoise(20.0, 1.0, nextSeed, 4, 2.5, 0.25);
         nextSeed = PRNG::nextNumber64(nextSeed);
         m_base = FractalNoise(60.0, 1.5, nextSeed, 4, 2.0, 0.5);
+        nextSeed = PRNG::nextNumber64(nextSeed);
+        m_rivers = FractalNoise(30.0, 1.0, nextSeed, 3, 2.0, 0.2);
+        nextSeed = PRNG::nextNumber64(nextSeed);
         m_featureSeed = PRNG::nextNumber64(nextSeed);
     }
 
-    double WorldGenerator::getHeight(double erosion, double continentalness, double base, const std::vector<BiomeWeight> &biomeWeights) {
+    double WorldGenerator::getHeight(double erosion, double continentalness, double humidity, double rivers, double base, std::vector<BiomeWeight> &biomeWeights) {
 
         // Continentalness
         double continentalnessModifier;
@@ -30,9 +33,9 @@ namespace WorldMaker {
             continentalnessModifier = 0;
 
         } else if (continentalness >= -0.6) {
-            continentalnessModifier = Lerp(-0.5, 0.0, ((continentalness+0.6) * 2), true);
+            continentalnessModifier = Lerp(-0.3, 0.0, ((continentalness+0.6) * 2), true);
         } else {
-            continentalnessModifier = -0.5;
+            continentalnessModifier = -0.3;
         }
 
         // Erosion
@@ -47,6 +50,14 @@ namespace WorldMaker {
 
         // Apply each biome's modifier chain to the same base height, then blend
         // the results using the same normalized weights as the vertex color.
+        if (humidity > -0.3 && rivers >= -0.04 && rivers <= 0.04) {
+            double riverWeight = 1.0 - (std::abs(rivers) * 25);
+            for (BiomeWeight &biomeWeight : biomeWeights) {
+                biomeWeight.weight *= 1-riverWeight;
+            }
+            biomeWeights[BiomeGenerator::getBiomeId("Rivers")].weight = riverWeight;
+        }
+
         double baseHeight = base * erosionModifier + continentalnessModifier;
         double final = 0.0;
         for (const BiomeWeight &biomeWeight : biomeWeights) {
@@ -62,6 +73,7 @@ namespace WorldMaker {
         double erosion = (m_erosion.getNoise(x, z) + 0.5);
         double temperature = m_temperature.getNoise(x, z);
         double humidity = m_humidity.getNoise(x, z);
+        double rivers = m_rivers.getNoise(x, z);
         double base = m_base.getNoise(x, z);
 
 
@@ -73,7 +85,7 @@ namespace WorldMaker {
 
 
 
-        double height = getHeight(erosion, continentalness, base, biomeWeights);
+        double height = getHeight(erosion, continentalness, humidity, rivers, base, biomeWeights);
 
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
@@ -119,6 +131,10 @@ namespace WorldMaker {
             v.m_color.y += color.y * biomeWeight.weight;
             v.m_color.z += color.z * biomeWeight.weight;
         }
+        // if (humidity > -0.3 && rivers >= -0.04 && rivers <= 0.04) {
+        //     v.m_color = {1.0, 0.0, 1.0, 1.0};
+        // }
+
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };
         v.m_position = { static_cast<float>(x), static_cast<float>(height * m_yScale), static_cast<float>(z) };
 
