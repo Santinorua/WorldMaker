@@ -108,9 +108,16 @@ namespace WorldMaker {
 
         if (height * m_yScale > -15.0) {
             for (int featureId : biome.m_features) {
-                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-
-                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
+                if (featureId < 0 || featureId >= FeatureManager::m_features.size()) continue;
+                const Feature &feature = FeatureManager::m_features[featureId];
+                if (biomeId >= feature.radius.size() || biomeId >= feature.probability.size()
+                    || feature.radius[biomeId] < 1 || feature.probability[biomeId] <= 0
+                    || feature.modelPath.empty()) continue;
+                FeatureNoise featureNoise(m_featureSeed, feature.radius[biomeId], feature.probability[biomeId]);
+                if (featureNoise.getNoise(x, z)) {
+                    v.m_featureId = featureId + 1;
+                    break;
+                }
             }
         }
 

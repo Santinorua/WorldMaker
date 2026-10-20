@@ -108,6 +108,7 @@ int main()
 
 		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator);
 		ui::BiomesWindow();
+		ui::FeaturesWindow();
 
 		Camera::UpdateCameraTransform();
 

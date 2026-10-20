@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <functional>
+#include <algorithm>
+#include <cmath>
 #include "Texture2D.h"
 #include "Features.h"
 #include "Vec4.h"
@@ -31,10 +33,28 @@ namespace WorldMaker {
         std::function<double(const double &value)> m_modifierFunction;
 
     public:
-        double getValue(const double &value) {
-            return m_modifierFunction(value);
+        enum class Type { Affine, NegativeScale, PositiveScale, Clamp, Absolute, Custom };
+        Type type = Type::Affine;
+        double factor = 1.0;
+        double offset = 0.0;
+        double minimum = -1.0;
+        double maximum = 1.0;
+
+        Modifier(Type type = Type::Affine, double factor = 1.0, double offset = 0.0)
+            : type(type), factor(factor), offset(offset) {}
+        double getValue(const double &value) const {
+            switch (type) {
+                case Type::Affine: return value * factor + offset;
+                case Type::NegativeScale: return (value < 0 ? value * factor : value) + offset;
+                case Type::PositiveScale: return (value > 0 ? value * factor : value) + offset;
+                case Type::Clamp: return std::clamp(value, std::min(minimum, maximum), std::max(minimum, maximum));
+                case Type::Absolute: return std::abs(value) * factor + offset;
+                case Type::Custom: return m_modifierFunction ? m_modifierFunction(value) : value;
+            }
+            return value;
         }
-        Modifier(std::function<double(const double &value)> modifierFunction) : m_modifierFunction(modifierFunction) {}
+        Modifier(std::function<double(const double &value)> modifierFunction)
+            : m_modifierFunction(modifierFunction), type(Type::Custom) {}
     };
 
     // template<typename T>

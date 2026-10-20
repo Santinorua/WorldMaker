@@ -9,9 +9,17 @@ namespace WorldMaker {
 
     void FeatureManager::addFeature(const Feature &feature) {
         m_features.push_back(feature);
+        m_features.back().radius.resize(BiomeGenerator::m_biomes.size(), 20);
+        m_features.back().probability.resize(BiomeGenerator::m_biomes.size(), 0.05);
     }
 
     void FeatureManager::removeFeature(const int index) {
+        if (index < 0 || index >= m_features.size()) return;
+        for (Biome &biome : BiomeGenerator::m_biomes) {
+            auto &ids = biome.m_features;
+            ids.erase(std::remove(ids.begin(), ids.end(), index), ids.end());
+            for (int &id : ids) if (id > index) --id;
+        }
         m_features.erase(m_features.begin() + index);
     }
 
@@ -37,7 +45,7 @@ namespace WorldMaker {
         tree.probability.push_back(0);
         tree.probability.push_back(0.85);
 
-        m_features.push_back(tree);
+        addFeature(tree);
         BiomeGenerator::m_biomes[BiomeGenerator::getBiomeId("Plains")].addFeature(getFeatureId(tree));
         BiomeGenerator::m_biomes[BiomeGenerator::getBiomeId("Forest")].addFeature(getFeatureId(tree));
     }

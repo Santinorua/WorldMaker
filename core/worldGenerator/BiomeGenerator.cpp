@@ -81,7 +81,7 @@ namespace WorldMaker {
     }
 
     void Biome::moveModifierDown(int idx) {
-        if (idx < 0 || idx >= m_modifiers.size() - 1) return;
+        if (idx < 0 || idx + 1 >= m_modifiers.size()) return;
         std::swap(m_modifiers[idx], m_modifiers[idx + 1]);
     }
 
@@ -162,9 +162,18 @@ namespace WorldMaker {
 
     void BiomeGenerator::addBiome(const Biome &biome) {
         m_biomes.push_back(biome);
+        for (Feature &feature : FeatureManager::m_features) {
+            feature.radius.resize(m_biomes.size(), 20);
+            feature.probability.resize(m_biomes.size(), 0.05);
+        }
     }
 
     void BiomeGenerator::removeBiome(int index) {
+        if (index < 0 || index >= m_biomes.size() || m_biomes.size() <= 1) return;
+        for (Feature &feature : FeatureManager::m_features) {
+            if (index < feature.radius.size()) feature.radius.erase(feature.radius.begin() + index);
+            if (index < feature.probability.size()) feature.probability.erase(feature.probability.begin() + index);
+        }
         m_biomes.erase(m_biomes.begin() + index);
     }
 
@@ -188,9 +197,7 @@ namespace WorldMaker {
         plains.setIdealCondition(BiomeDeterminators::Temperature, 0.5);
         plains.setIdealCondition(BiomeDeterminators::Humidity,0.0);
         plains.biomeColor = Vec4(0.0, 1.0, 0.0, 1.0);
-        plains.m_modifiers.push_back(Modifier([](const double &value) -> double {
-            return value * 0.3;
-        }));
+        plains.m_modifiers.push_back(Modifier(Modifier::Type::Affine, 0.3));
 
         addBiome(plains);
 
@@ -201,9 +208,7 @@ namespace WorldMaker {
         desert.setIdealCondition(BiomeDeterminators::Temperature, 0.8);
         desert.setIdealCondition(BiomeDeterminators::Humidity,-1);
         desert.biomeColor = Vec4(1.0, 1.0, 0.0, 1.0);
-        desert.m_modifiers.push_back(Modifier([](const double &value) -> double {
-            return value * 0.6;
-        }));
+        desert.m_modifiers.push_back(Modifier(Modifier::Type::Affine, 0.6));
 
         addBiome(desert);
 
@@ -226,13 +231,7 @@ namespace WorldMaker {
         hill.setIdealCondition(BiomeDeterminators::Temperature, -2);
         hill.setIdealCondition(BiomeDeterminators::Humidity,-2);
         hill.biomeColor = Vec4(0.0, 0.6, 0.0, 1.0);
-        hill.m_modifiers.push_back(Modifier([](const double &value) -> double {
-            double temp = value;
-            if (temp < 0) {
-                temp *= -0.1;
-            }
-            return temp + .01;
-        }));
+        hill.m_modifiers.push_back(Modifier(Modifier::Type::NegativeScale, -0.1, 0.01));
 
         addBiome(hill);
 
@@ -243,13 +242,7 @@ namespace WorldMaker {
         mountain.setIdealCondition(BiomeDeterminators::Temperature, -2);
         mountain.setIdealCondition(BiomeDeterminators::Humidity,-2);
         mountain.biomeColor = Vec4(0.3, 0.3, 0.3, 1.0);
-        mountain.m_modifiers.push_back(Modifier([](const double &value) -> double {
-            double temp = value;
-            if (temp < 0) {
-                temp *= -0.3;
-            }
-            return temp + 0.6;
-        }));
+        mountain.m_modifiers.push_back(Modifier(Modifier::Type::NegativeScale, -0.3, 0.6));
 
         addBiome(mountain);
 
@@ -260,14 +253,8 @@ namespace WorldMaker {
         ocean.setIdealCondition(BiomeDeterminators::Temperature, -2);
         ocean.setIdealCondition(BiomeDeterminators::Humidity,0.0);
         ocean.biomeColor = Vec4(0.0, 0.0, 1.0, 1.0);
-        ocean.m_modifiers.push_back(Modifier([](const double &value) -> double {
-            double temp = value;
-            if (temp > 0) {
-                temp *= -0.1;
-            }
-
-            return temp * 0.2 - 0.6;
-        }));
+        ocean.m_modifiers.push_back(Modifier(Modifier::Type::PositiveScale, -0.1));
+        ocean.m_modifiers.push_back(Modifier(Modifier::Type::Affine, 0.2, -0.6));
         addBiome(ocean);
 
 
@@ -278,14 +265,7 @@ namespace WorldMaker {
         river.setIdealCondition(BiomeDeterminators::Temperature, -2);
         river.setIdealCondition(BiomeDeterminators::Humidity,-2);
         river.biomeColor = Vec4(0.0, 0.0, 1.0, 1.0);
-        river.m_modifiers.push_back(Modifier([](const double &value) -> double {
-            double temp = value;
-            if (temp > 0) {
-                temp *= -0.2;
-            }
-
-            return temp - 0.2;
-        }));
+        river.m_modifiers.push_back(Modifier(Modifier::Type::PositiveScale, -0.2, -0.2));
         addBiome(river);
 
     }
