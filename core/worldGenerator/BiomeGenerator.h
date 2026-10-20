@@ -61,6 +61,7 @@ namespace WorldMaker {
     class Biome {
         double m_idealConditions[4] =  {-2.0, -2.0, -2.0, -2.0};
         std::vector<ConditionGroup> m_conditionGroups;
+        double m_featureProbability = 0.1;
 
     public:
         std::string name;
@@ -95,12 +96,12 @@ namespace WorldMaker {
 
 
 
-        double idealDistance(double params[4]);
+        double idealDistance(double params[4]) const;
         void addConditionGroup(const ConditionGroup &conditionGroup);
         void removeConditionGroup(const int index);
         void moveModifierUp(int idx);
         void moveModifierDown(int idx);
-        double applyModifiers(const double &value);
+        double applyModifiers(const double &value) const;
 
     };
 
@@ -114,11 +115,14 @@ namespace WorldMaker {
     public:
         static std::vector<Biome> m_biomes;
         static Biome getBiome(double params[4]);
+        static Biome getBiome(double params[4], const std::vector<Biome>& biomes);
         // Normalized weights for all nearby biomes; the dominant biome is first.
         static std::vector<BiomeWeight> getBiomeWeights(double params[4]);
+        static std::vector<BiomeWeight> getBiomeWeights(double params[4], const std::vector<Biome>& biomes);
         static void addBiome(const Biome &biome);
         static void removeBiome(int index);
         static int getBiomeId(const std::string &name);
+        static int getBiomeId(const std::string &name, const std::vector<Biome>& biomes);
         static void addDefaultBiomes();
     };
 }

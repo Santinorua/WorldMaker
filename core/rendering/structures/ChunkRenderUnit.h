@@ -22,7 +22,8 @@ namespace WorldMaker
 	    double tallestPoint = 0;
 		double lowestPoint = 0;
 	    std::unordered_map<unsigned int, std::pair<ModelSPtr, MatricesSSBO>> m_modelInstancesSSBO = {};
-		void addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot = glm::identity<glm::quat>(), glm::vec3 scale = {1,1,1});
+		void addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot = glm::identity<glm::quat>(), glm::vec3 scale = {1,1,1}, bool submit = true);
+		void submitData();
 	};
 	struct ChunkRenderUnit
 	{
@@ -32,10 +33,11 @@ namespace WorldMaker
 		double m_tallestPoint = 0;
 		double m_lowestPoint = 0;
 		int m_current_lod = 0;
-		ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod);
+		int m_modelsLOD = MAX_LOD;
+		ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod, const std::vector<unsigned int>* indices = nullptr);
 		glm::vec3 center();
 
-		void uploadLOD(std::vector<MeshVertex>& vertices, int lod, double tallest_point, double lowest_point, ChunkModels *models = nullptr);
+		void uploadLOD(std::vector<MeshVertex>& vertices, int lod, double tallest_point, double lowest_point, ChunkModels *models = nullptr, const std::vector<unsigned int>* indices = nullptr);
 
 		void setLOD(int lod);
 		bool hasLOD(int lod);

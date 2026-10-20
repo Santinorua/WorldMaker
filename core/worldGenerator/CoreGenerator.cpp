@@ -28,9 +28,15 @@ namespace WorldMaker {
     }
 
     double WorldGenerator::getHeight(double erosion, double continentalness, double humidity, double rivers, double base, std::vector<BiomeWeight> &biomeWeights) {
+        return getHeight(erosion, continentalness, humidity, rivers, base, biomeWeights, BiomeGenerator::m_biomes);
+    }
+
+    double WorldGenerator::getHeight(double erosion, double continentalness, double humidity, double rivers, double base,
+                                     std::vector<BiomeWeight>& biomeWeights, const std::vector<Biome>& biomes) {
 
         // Continentalness
         double continentalnessModifier;
+
         if (continentalness >= -0.1) {
             continentalnessModifier = 0;
 
@@ -52,7 +58,7 @@ namespace WorldMaker {
 
         // Apply each biome's modifier chain to the same base height, then blend
         // the results using the same normalized weights as the vertex color.
-        const int riverBiomeId = BiomeGenerator::getBiomeId("Rivers");
+        const int riverBiomeId = BiomeGenerator::getBiomeId("Rivers", biomes);
         if (riverBiomeId >= 0 && humidity > -0.4 && rivers >= -0.04 && rivers <= 0.04) {
             double riverWeight = Lerp(0.0, 1.0, 1.0 - (std::abs(rivers) * 25), true);
             for (BiomeWeight &biomeWeight : biomeWeights) {
@@ -77,7 +83,7 @@ namespace WorldMaker {
         double baseHeight = base * erosionModifier + continentalnessModifier;
         double final = 0.0;
         for (const BiomeWeight &biomeWeight : biomeWeights) {
-            final += BiomeGenerator::m_biomes[biomeWeight.biomeId].applyModifiers(baseHeight)
+            final += biomes[biomeWeight.biomeId].applyModifiers(baseHeight)
                      * biomeWeight.weight;
         }
 
@@ -85,6 +91,10 @@ namespace WorldMaker {
     }
 
     generatorVertex WorldGenerator::getVertex(float x, float z) {
+        return getVertex(x, z, BiomeGenerator::m_biomes, FeatureManager::m_features);
+    }
+
+    generatorVertex WorldGenerator::getVertex(float x, float z, const std::vector<Biome>& biomes, const std::vector<Feature>& features) {
         double continentalness = m_continentalness.getNoise(x, z);
         double erosion = (m_erosion.getNoise(x, z) + 0.5);
         double temperature = m_temperature.getNoise(x, z);
@@ -95,12 +105,12 @@ namespace WorldMaker {
 
         double params[4] = {erosion, continentalness, temperature, humidity};
 
-        auto biomeWeights = BiomeGenerator::getBiomeWeights(params);
+        auto biomeWeights = BiomeGenerator::getBiomeWeights(params, biomes);
 
-        double height = getHeight(erosion, continentalness, humidity, rivers, base, biomeWeights);
+        double height = getHeight(erosion, continentalness, humidity, rivers, base, biomeWeights, biomes);
 
         int biomeId = biomeWeights.front().biomeId;
-        const Biome &biome = BiomeGenerator::m_biomes[biomeId];
+        const Biome &biome = biomes[biomeId];
 
 
         generatorVertex v;
@@ -108,8 +118,8 @@ namespace WorldMaker {
 
         if (height * m_yScale > -15.0) {
             for (int featureId : biome.m_features) {
-                if (featureId < 0 || featureId >= FeatureManager::m_features.size()) continue;
-                const Feature &feature = FeatureManager::m_features[featureId];
+                if (featureId < 0 || featureId >= features.size()) continue;
+                const Feature &feature = features[featureId];
                 if (biomeId >= feature.radius.size() || biomeId >= feature.probability.size()
                     || feature.radius[biomeId] < 1 || feature.probability[biomeId] <= 0
                     || feature.modelPath.empty()) continue;
@@ -123,7 +133,7 @@ namespace WorldMaker {
 
         v.m_color = {0.0, 0.0, 0.0, 1.0};
         for (const BiomeWeight &biomeWeight : biomeWeights) {
-            const Vec4 &color = BiomeGenerator::m_biomes[biomeWeight.biomeId].biomeColor;
+            const Vec4 &color = biomes[biomeWeight.biomeId].biomeColor;
             v.m_color.x += color.x * biomeWeight.weight;
             v.m_color.y += color.y * biomeWeight.weight;
             v.m_color.z += color.z * biomeWeight.weight;

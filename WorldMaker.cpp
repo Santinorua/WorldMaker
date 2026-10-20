@@ -62,8 +62,9 @@ int main()
 	WorldGenerator generator(150, 42);
 
 	ChunkGeneration::ChunkArray chunks;
+	ChunkGeneration::ChunkStreamer chunkStreamer;
 
-	ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
+	chunkStreamer.update(chunks, generator, render_distance, Camera::Position());
 
 	bool doRender2D = false;
 
@@ -88,7 +89,7 @@ int main()
 	bool quit = false;
 	while (!Renderer::WindowShouldClose() && !quit)
 	{
-		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position());
+		chunkStreamer.update(chunks, generator, render_distance, Camera::Position());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		CoolTime::Update();
@@ -101,7 +102,7 @@ int main()
 		ui::PreferencesWindow(preferences);
 		ui::DebugWindow(render_distance, chunks);
 
-		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator);
+		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator, chunkStreamer);
 		ui::BiomesWindow();
 		ui::FeaturesWindow();
 
@@ -125,6 +126,7 @@ int main()
 		glfwPollEvents();
 	}
 
+	chunkStreamer.shutdown();
 	for (auto& ck : chunks) {
 		delete ck.second;
 	}

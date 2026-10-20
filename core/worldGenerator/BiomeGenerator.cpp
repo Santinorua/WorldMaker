@@ -51,7 +51,7 @@ namespace WorldMaker {
 
     // Biome
 
-    double Biome::idealDistance(double params[4]) {
+    double Biome::idealDistance(double params[4]) const {
         double distance = 0.0;
         double distanceVec[4];
         for (int i = 0; i < 4; i++) {
@@ -85,8 +85,9 @@ namespace WorldMaker {
         std::swap(m_modifiers[idx], m_modifiers[idx + 1]);
     }
 
-    double Biome::applyModifiers(const double &value) {
+    double Biome::applyModifiers(const double &value) const {
         double final = value;
+        // Keep callable state local to this sample, as in the procedural generator.
         for (Modifier modifier : m_modifiers) {
             final = modifier.getValue(final);
         }
@@ -94,16 +95,20 @@ namespace WorldMaker {
     }
 
     Biome BiomeGenerator::getBiome(double params[4]) {
-        assert(m_biomes.size() > 0);
+        return getBiome(params, m_biomes);
+    }
+
+    Biome BiomeGenerator::getBiome(double params[4], const std::vector<Biome>& biomes) {
+        assert(biomes.size() > 0);
         std::vector<double> distances;
-        distances.reserve(m_biomes.size());
+        distances.reserve(biomes.size());
         double bestDistance = std::numeric_limits<double>::max();
         int bestBiome = 0;
-        for (int i = 0; i < m_biomes.size(); i++) {
+        for (int i = 0; i < biomes.size(); i++) {
             bool conditionsMet = true;
             // Comprobar condiciones
             if (conditionsMet) {
-                double distance = m_biomes[i].idealDistance(params);
+                double distance = biomes[i].idealDistance(params);
                 distances.push_back(distance);
                 if (distance < bestDistance) {
                     bestDistance = distance;
@@ -111,18 +116,22 @@ namespace WorldMaker {
                 }
             }
         }
-        return m_biomes[bestBiome];
+        return biomes[bestBiome];
     }
 
     std::vector<BiomeWeight> BiomeGenerator::getBiomeWeights(double params[4]) {
-        assert(m_biomes.size() > 0);
+        return getBiomeWeights(params, m_biomes);
+    }
+
+    std::vector<BiomeWeight> BiomeGenerator::getBiomeWeights(double params[4], const std::vector<Biome>& biomes) {
+        assert(biomes.size() > 0);
         std::vector<double> distances;
-        distances.reserve(m_biomes.size());
+        distances.reserve(biomes.size());
         double bestDistance = std::numeric_limits<double>::max();
         int bestBiome = 0;
-        for (int i = 0; i < m_biomes.size(); i++) {
-            double distance = m_biomes[i].idealDistance(params);
-            if (m_biomes[i].name == "Rivers") {
+        for (int i = 0; i < biomes.size(); i++) {
+            double distance = biomes[i].idealDistance(params);
+            if (biomes[i].name == "Rivers") {
                 distance = 50.0; // Rivers should not be selected as the best biome based on distance
             }
             distances.push_back(distance);
@@ -134,10 +143,10 @@ namespace WorldMaker {
 
         constexpr double biomeTransitionThreshold = 0.8;
         std::vector<BiomeWeight> weights;
-        weights.reserve(m_biomes.size());
+        weights.reserve(biomes.size());
         weights.push_back({bestBiome, 1.0});
         double totalWeight = 1.0;
-        for (int i = 0; i < m_biomes.size(); i++) {
+        for (int i = 0; i < biomes.size(); i++) {
             if (i == bestBiome) continue;
 
             // Coincident ideal conditions share the weight without dividing by zero.
@@ -178,8 +187,12 @@ namespace WorldMaker {
     }
 
     int BiomeGenerator::getBiomeId(const std::string &name) {
-        for (int i = 0; i < m_biomes.size(); i++) {
-            if (m_biomes[i].name == name) {
+        return getBiomeId(name, m_biomes);
+    }
+
+    int BiomeGenerator::getBiomeId(const std::string &name, const std::vector<Biome>& biomes) {
+        for (int i = 0; i < biomes.size(); i++) {
+            if (biomes[i].name == name) {
                 return i;
             }
         }

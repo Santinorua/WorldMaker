@@ -1,7 +1,5 @@
 cmake_minimum_required (VERSION 3.8...4.1.0)
 
-set(CMAKE_CXX_COMPILER "g++")
-
 project(WorldMaker VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -16,6 +14,7 @@ add_compile_options(-ggdb -Og)
 
 include(FetchContent)
 include(FindOpenGL)
+find_package(Threads REQUIRED)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################
@@ -42,7 +41,9 @@ target_link_libraries(Vendor INTERFACE ImGui tinygltf)
 
 # GLEW
 
-FetchContent_Populate(glew URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip)
+if(NOT glew_SOURCE_DIR)
+    FetchContent_Populate(glew URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip)
+endif()
 add_library(glew_s STATIC ${glew_SOURCE_DIR}/src/glew.c ${glew_SOURCE_DIR}/src/glewinfo.c)
 target_include_directories(glew_s PUBLIC ${glew_SOURCE_DIR}/include)
 target_compile_definitions(glew_s PRIVATE GLEW_BUILD PUBLIC GLEW_STATIC)
@@ -68,10 +69,12 @@ set(BUILD_SHARED_LIBS ON)
 
 # GLM
 
-FetchContent_Populate(
+if(NOT glm_SOURCE_DIR)
+    FetchContent_Populate(
         glm
         URL https://github.com/g-truc/glm/archive/refs/tags/1.0.1.zip
-)
+    )
+endif()
 add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE ${glm_SOURCE_DIR})
 add_library(glm::glm ALIAS glm)
@@ -114,6 +117,8 @@ set(ASSIMP_WARNINGS_AS_ERRORS OFF) # Add this to prevent Assimp from treating wa
 
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+# Override the normal variable set above as well (newer CMake preserves it).
+set(BUILD_SHARED_LIBS OFF)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
@@ -129,6 +134,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
 endif()
 
 FetchContent_MakeAvailable(assimp)
+if(MINGW AND NOT BUILD_SHARED_LIBS)
+    # Assimp forces static MinGW runtimes through its link interface. Let the
+    # selected compiler and Threads::Threads choose compatible runtimes instead.
+    get_target_property(assimp_link_interface assimp INTERFACE_LINK_LIBRARIES)
+    list(REMOVE_ITEM assimp_link_interface
+            -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lwinpthread)
+    set_property(TARGET assimp PROPERTY INTERFACE_LINK_LIBRARIES "${assimp_link_interface}")
+endif()
 set(BUILD_SHARED_LIBS ON)
 # -----------------------------------------------------------------------------------------------------
 
@@ -293,7 +306,7 @@ target_link_libraries(WorldGenerator PUBLIC Math PerlinNoise Rendering)
 
 file (GLOB CHUNKGEN_SRC "${CMAKE_SOURCE_DIR}/core/chunkGeneration/*.cpp")
 add_library(ChunkGeneration STATIC ${CHUNKGEN_SRC})
-target_link_libraries(ChunkGeneration PUBLIC Rendering PerlinNoise Math WorldGenerator)
+target_link_libraries(ChunkGeneration PUBLIC Rendering PerlinNoise Math WorldGenerator Threads::Threads)
 target_include_directories(ChunkGeneration PUBLIC ${CMAKE_SOURCE_DIR}/core/chunkGeneration)
 
 # -----------------------------------------------------------------------------------------------------
@@ -324,10 +337,43 @@ add_executable(WorldMaker WorldMaker.cpp)
 
 target_link_libraries(WorldMaker PUBLIC Core)
 
-if(WIN32 AND TARGET assimp)
-    add_custom_command(TARGET WorldMaker POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:assimp>
-            $<TARGET_FILE_DIR:WorldMaker>
-            COMMENT "Copying Assimp runtime next to WorldMaker.exe")
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(ChunkGenerationTests tests/ChunkGenerationTests.cpp)
+    target_link_libraries(ChunkGenerationTests PRIVATE ChunkGeneration)
+    add_test(NAME ChunkGenerationConcurrency COMMAND ChunkGenerationTests)
+    set_tests_properties(ChunkGenerationConcurrency PROPERTIES TIMEOUT 60)
+    # Run explicitly on a machine with an OpenGL 4.4 context; headless CI uses
+    # the concurrency test above and never invokes the graphics driver.
+    add_executable(ChunkStreamingGLTests tests/ChunkStreamingGLTests.cpp)
+    target_link_libraries(ChunkStreamingGLTests PRIVATE ChunkGeneration)
 endif()
+
+set(runtime_targets WorldMaker)
+if(BUILD_TESTING)
+    list(APPEND runtime_targets ChunkGenerationTests ChunkStreamingGLTests)
+endif()
+
+set(runtime_dlls)
+get_target_property(assimp_library_type assimp TYPE)
+if(WIN32 AND assimp_library_type STREQUAL "SHARED_LIBRARY")
+    list(APPEND runtime_dlls $<TARGET_FILE:assimp>)
+endif()
+if(MINGW)
+    get_filename_component(mingw_bin_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+    foreach(runtime_name libstdc++-6.dll libgcc_s_seh-1.dll libwinpthread-1.dll)
+        if(EXISTS "${mingw_bin_dir}/${runtime_name}")
+            list(APPEND runtime_dlls "${mingw_bin_dir}/${runtime_name}")
+        endif()
+    endforeach()
+endif()
+
+foreach(runtime_target IN LISTS runtime_targets)
+    foreach(runtime_dll IN LISTS runtime_dlls)
+        add_custom_command(TARGET ${runtime_target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${runtime_dll}"
+            $<TARGET_FILE_DIR:${runtime_target}>
+            COMMENT "Copying runtime next to ${runtime_target}" VERBATIM)
+    endforeach()
+endforeach()

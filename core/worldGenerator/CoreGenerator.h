@@ -51,7 +51,10 @@ namespace WorldMaker {
         uint64_t m_featureSeed;
     public:
         double getHeight(double erosion, double continentalness, double humidity, double rivers, double base, std::vector<BiomeWeight> &biomeWeights);
+        double getHeight(double erosion, double continentalness, double humidity, double rivers, double base,
+                         std::vector<BiomeWeight>& biomeWeights, const std::vector<Biome>& biomes);
         generatorVertex getVertex(float x, float z);
+        generatorVertex getVertex(float x, float z, const std::vector<Biome>& biomes, const std::vector<Feature>& features);
         WorldGenerator(double yScale, uint64_t seed);
     };
 

@@ -1,206 +1,304 @@
 #include "ChunkGeneration.h"
-#include "ChunkRenderUnit.h"
-#include "CoreGenerator.h"
-#include <glm/gtc/quaternion.hpp>
-#include <glm/geometric.hpp>
 
-#define LOD_LEVELS 5
-#define CLAMP0(x) ((x) * ((x) > 0))
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <condition_variable>
+#include <deque>
+#include <exception>
+#include <limits>
+#include <map>
+#include <mutex>
+#include <set>
+#include <stdexcept>
+#include <thread>
+#include <tuple>
 
-#define GENERATION_COORD(v) (((float)(v) / ChunkRenderUnit::s_chunkRes) * ChunkRenderUnit::s_chunkScale)
+namespace WorldMaker::ChunkGeneration {
 
-#define CHECK_LOD_DIST(ck_dist, render_distance, thresh) (((float)(ck_dist).x / (render_distance) > (thresh)) || ((float)(ck_dist).y / (render_distance) > (thresh)))
+GenerationSettings::GenerationSettings(const WorldGenerator& source)
+    : generator(source), biomes(BiomeGenerator::m_biomes), features(FeatureManager::m_features),
+      resolution(ChunkRenderUnit::s_chunkRes), scale(ChunkRenderUnit::s_chunkScale) {}
 
+bool GenerateChunkData(const GenerationSettings& settings, ChunkRequest request,
+                       ChunkData& data, const std::atomic_bool& cancelled) {
+    if (cancelled.load()) return false;
+    if (request.lod < 0 || request.lod > ChunkRenderUnit::MAX_LOD ||
+        settings.resolution < 16 || settings.resolution % 16 != 0 || settings.scale <= 0 || settings.biomes.empty())
+        throw std::invalid_argument("Invalid chunk generation settings");
+    data = {};
+    data.request = request;
+    data.tallest = std::numeric_limits<double>::lowest();
+    data.lowest = std::numeric_limits<double>::max();
+    // Noise objects are private to this job, even though sampling is read-only.
+    auto generator = settings.generator;
+    const int cells = settings.resolution >> request.lod;
+    const int side = cells + 1;
+    const int step = 1 << request.lod;
+    const auto sample = [&](int x, int z) {
+        const float worldX = (float(request.position.x * cells + x) * step / settings.resolution) * settings.scale;
+        const float worldZ = (float(request.position.y * cells + z) * step / settings.resolution) * settings.scale;
+        return generator.getVertex(worldX, worldZ, settings.biomes, settings.features);
+    };
 
-namespace WorldMaker {
+    data.vertices.reserve(side * side);
+    for (int z = 0; z < side; ++z) {
+        if (cancelled.load()) return false;
+        for (int x = 0; x < side; ++x) {
+            auto vertex = sample(x, z);
+            data.tallest = std::max(data.tallest, vertex.m_position.y);
+            data.lowest = std::min(data.lowest, vertex.m_position.y);
+            if (vertex.m_featureId != 0) {
+                const auto& feature = settings.features[vertex.m_featureId - 1];
+                data.models.push_back({feature.modelPath,
+                    {vertex.m_position.x, vertex.m_position.y + feature.y_offset, vertex.m_position.z},
+                    feature.rotation, feature.scale});
+            }
+            data.vertices.push_back(vertex.toGraphicalVertex());
+        }
+    }
 
-	namespace ChunkGeneration {
-
-
-void GenerateVertices(WorldGenerator& generator, int x_chunk, int z_chunk, int lod, ChunkModels *chunkModels, std::vector<MeshVertex> &chunkVertices, double &tallest_point, double &lowest_point)
-{
-	chunkVertices.clear();
-
-	int side = (ChunkRenderUnit::s_chunkRes >> lod) + 1; // Resolution change
-	int gridWidth = side; // other names because they were used
-	int gridDepth = side;
-
-	chunkVertices.reserve(side * side);
-
-	// TODO: Add scale for chunks
-
-	for (int z = z_chunk * side - z_chunk; z < side * (z_chunk + 1) - z_chunk; z++)
-	{
-		int localX = 0;
-		for (int x = x_chunk * side - x_chunk; x < side * (x_chunk + 1) - x_chunk; x++)
-		{
-
-			generatorVertex v;
-			v = generator.getVertex(GENERATION_COORD(x<<lod), GENERATION_COORD(z<<lod));
-
-			tallest_point = glm::max(v.m_position.y, tallest_point);
-			lowest_point = glm::min(v.m_position.y, lowest_point);
-
-			if (v.m_featureId != 0 && chunkModels != nullptr)
-			{
-				chunkModels->addInstance(FeatureManager::m_features[v.m_featureId - 1].modelPath, {v.m_position.x, v.m_position.y + FeatureManager::m_features[v.m_featureId - 1].y_offset, v.m_position.z},
-						FeatureManager::m_features[v.m_featureId - 1].rotation, FeatureManager::m_features[v.m_featureId - 1].scale);
-			}
-			chunkVertices.push_back(v.toGraphicalVertex());
-			localX++;
-		}
-	}
-
-	int localZ = 0;
-	for (int z = z_chunk * side - z_chunk; z < side * (z_chunk + 1) - z_chunk; z++) {
-		// int localZ = (z + z_chunk) % side;
-		int localX = 0;
-		for (int  x = x_chunk * side - x_chunk; x < side * (x_chunk + 1) - x_chunk; x++) {
-			// int localX = (x + x_chunk) % side;
-			float hL = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position.y : generator.getVertex(GENERATION_COORD((x-1)<<lod), GENERATION_COORD(z<<lod)).m_position.y;
-			float hR = localX != side - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position.y : generator.getVertex(GENERATION_COORD((x+1)<<lod), GENERATION_COORD(z<<lod)).m_position.y;
-			float hU = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position.y : generator.getVertex(GENERATION_COORD(x<<lod), GENERATION_COORD((z-1)<<lod)).m_position.y;
-			float hD = localZ != side - 1 ? chunkVertices[(localZ+1)*gridWidth + localX].m_position.y : generator.getVertex(GENERATION_COORD(x<<lod), GENERATION_COORD((z+1)<<lod)).m_position.y;
-
-			glm::vec3 normal;
-			normal.x = static_cast<float>(hL - hR);
-			normal.y = static_cast<float>(2.0 * 1);
-			normal.z = static_cast<float>(hD - hU);
-
-			// glm::vec3 R = localX != side - 1 ? chunkVertices[localZ*gridWidth + localX+1].m_position : generator.getVertex(x+1, z).m_position;
-			// glm::vec3 L = localX != 0 ? chunkVertices[localZ*gridWidth + localX-1].m_position : generator.getVertex(x-1, z).m_position;
-			// glm::vec3 U = localZ != 0 ? chunkVertices[(localZ-1)*gridWidth + localX].m_position : generator.getVertex(x, z-1).m_position;
-			// glm::vec3 D = localZ != side - 1 ? chunkVertices[(localZ+1)*gridWidth + localX].m_position : generator.getVertex(x, z+1).m_position;
-			//
-			//
-			// glm::vec3 tangentX = R - L;
-			// glm::vec3 tangentY = D - U;
-			//
-			// glm::vec3 normal = ;
-
-			normal = glm::normalize(normal);
-
-			chunkVertices[localZ * gridWidth + localX].m_normal = normal;
-			localX++;
-		}
-		localZ++;
-	}
+    data.indices.reserve(cells * cells * 6);
+    for (int z = 0; z < side; ++z) {
+        if (cancelled.load()) return false;
+        for (int x = 0; x < side; ++x) {
+            const auto height = [&](int sx, int sz) {
+                if (sx < 0 || sz < 0 || sx >= side || sz >= side) return sample(sx, sz).m_position.y;
+                return data.vertices[sz * side + sx].m_position.y;
+            };
+            data.vertices[z * side + x].m_normal = glm::normalize(glm::vec3(
+                height(x - 1, z) - height(x + 1, z), 2.0f, height(x, z + 1) - height(x, z - 1)));
+            if (x < cells && z < cells) {
+                const unsigned int bottomLeft = z * side + x;
+                const unsigned int topLeft = (z + 1) * side + x;
+                data.indices.insert(data.indices.end(),
+                    {bottomLeft, topLeft + 1, bottomLeft + 1, bottomLeft, topLeft, topLeft + 1});
+            }
+        }
+    }
+    return !cancelled.load();
 }
 
-ChunkRenderUnit* GenerateChunk(WorldGenerator& generator, int x_chunk, int z_chunk, int lod)
-{
-	std::vector<MeshVertex> chunkVertices;
+namespace {
+using Key = std::tuple<int, int, int>;
+Key key(ChunkRequest request) { return {request.position.x, request.position.y, request.lod}; }
 
-	ChunkModels chunkModels;
-	double tallestPoint = 0;
-	double lowestPoint = 0;
-	int side = (ChunkRenderUnit::s_chunkRes >> lod) + (lod != 0); // Resolution change
-	int gridWidth = side; // other names because they were used
-	int gridDepth = side;
-
-
-	chunkVertices.reserve(side * side);
-
-	// TODO: Add scale for chunks
-
-	GenerateVertices(generator, x_chunk, z_chunk, lod, &chunkModels, chunkVertices, tallestPoint, lowestPoint);
-
-	return new ChunkRenderUnit(chunkVertices, tallestPoint, lowestPoint, chunkModels, lod);
+int desiredLOD(glm::ivec2 position, glm::ivec2 camera, int distance) {
+    auto delta = glm::abs(position - camera);
+    const float ratio = float(std::max(delta.x, delta.y)) / distance;
+    if (ratio > 0.80f) return 4;
+    if (ratio > 0.60f) return 3;
+    if (ratio > 0.45f) return 2;
+    return 0;
+}
 }
 
-glm::ivec2 GetChunkPos(glm::vec3 pos) {
-	int x = (pos.x - 1) / ChunkRenderUnit::s_chunkScale;
-	int y = (pos.z - 1) / ChunkRenderUnit::s_chunkScale;
-	if (pos.x < 0) x--;
-	if (pos.z < 0) y--;
+struct ChunkWorkerPool::Impl {
+    struct Job {
+        ChunkRequest request;
+        std::shared_ptr<const GenerationSettings> settings;
+        std::atomic_bool cancelled = false;
+        bool started = false; // Protected by mutex.
+    };
+    struct Result {
+        std::shared_ptr<Job> job;
+        ChunkData data;
+        std::exception_ptr error;
+    };
+    std::mutex mutex;
+    std::condition_variable changed;
+    bool stopping = false;
+    std::map<Key, std::shared_ptr<Job>> pending;
+    std::deque<std::shared_ptr<Job>> queued;
+    std::deque<Result> ready;
+    std::vector<std::thread> workers;
 
-	return {x, y};
+    void run() {
+        for (;;) {
+            std::shared_ptr<Job> job;
+            {
+                std::unique_lock lock(mutex);
+                // Bound completed mesh memory if rendering/uploading falls behind.
+                changed.wait(lock, [&] { return stopping || (!queued.empty() && ready.size() < 8); });
+                if (stopping) return;
+                job = queued.front();
+                queued.pop_front();
+                job->started = true;
+            }
+            Result result;
+            result.job = job;
+            bool complete = false;
+            try {
+                complete = GenerateChunkData(*job->settings, job->request, result.data, job->cancelled);
+            } catch (...) {
+                result.error = std::current_exception();
+                complete = true;
+            }
+            {
+                std::lock_guard lock(mutex);
+                if (complete && !job->cancelled && !stopping) ready.push_back(std::move(result));
+            }
+        }
+    }
+};
+
+ChunkWorkerPool::ChunkWorkerPool(unsigned int workerCount) : m_impl(std::make_unique<Impl>()) {
+    if (workerCount == 0) {
+        const auto cores = std::thread::hardware_concurrency();
+        workerCount = std::clamp(cores > 1 ? cores - 1 : 1u, 1u, 4u);
+    }
+    try {
+        for (unsigned int i = 0; i < workerCount; ++i) m_impl->workers.emplace_back([this] { m_impl->run(); });
+    } catch (...) {
+        shutdown();
+        throw;
+    }
 }
 
-glm::ivec2 GetGenerationRange(int pos, int render_distance) {
-	return {CLAMP0(pos - render_distance), pos + render_distance};
+ChunkWorkerPool::~ChunkWorkerPool() { shutdown(); }
+
+void ChunkWorkerPool::reset() {
+    std::lock_guard lock(m_impl->mutex);
+    for (auto& [key, job] : m_impl->pending) job->cancelled = true;
+    m_impl->pending.clear();
+    m_impl->queued.clear();
+    m_impl->ready.clear();
+    m_impl->changed.notify_all();
 }
 
-void RegenerateChunks(ChunkArray& chunks, WorldGenerator& generator, int render_distance, glm::vec3 camera_pos, bool force)
-{
-	static glm::ivec2 last_pos = {INT_MAX, INT_MAX};
-	glm::ivec2 pos = GetChunkPos(camera_pos);
-
-	if (pos == last_pos && !force) {
-		return;
-	}
-	last_pos = pos;
-
-	glm::ivec2 x_generation_range = GetGenerationRange(pos.x, render_distance);
-	glm::ivec2 y_generation_range = GetGenerationRange(pos.y, render_distance);
-
-	for (int x = x_generation_range.x; x < x_generation_range.y; x++) {
-		for (int y = y_generation_range.x; y < y_generation_range.y; y++) {
-			auto found = std::find_if(chunks.begin(), chunks.end(), [x, y](std::pair<glm::ivec2, ChunkRenderUnit*>& ck) {return ck.first == glm::ivec2{x, y};} );
-			if (found != chunks.end()) continue;
-			chunks.push_back({{x, y}, GenerateChunk(generator, x, y, ChunkRenderUnit::MAX_LOD)});
-		}
-	}
-
-	for (int i = 0; i < chunks.size(); i++) {
-		auto& chunk = chunks[i];
-
-		auto ck_pos = chunk.first;
-		auto ck_dist = pos - ck_pos;
-
-// || glm::abs(ck_dist.x) > render_distance - 1 || glm::abs(ck_dist.y) > render_distance - 1
-		if (ck_dist.x > render_distance || ck_dist.y > render_distance || ck_dist.x < -render_distance + 1 || ck_dist.y < -render_distance + 1) {
-			//printf("Deleting (%d, %d)\n", ck_pos.x, ck_pos.y);
-			delete chunk.second;
-			chunks.erase(std::next(chunks.begin(), i));
-			i--;
-			continue;
-		}
-
-		ck_dist = glm::abs(ck_dist);
-		double tallest, lowest;
-		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.80)) {
-			if (!chunk.second->hasLOD(4)) {
-				std::vector<MeshVertex> vertices;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 4, nullptr, vertices, tallest, lowest);
-				chunk.second->uploadLOD(vertices, 4, tallest, lowest);
-			}
-			chunk.second->setLOD(4);
-			continue;
-		}
-
-		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.60)) {
-			if (!chunk.second->hasLOD(3)) {
-				std::vector<MeshVertex> vertices;
-				ChunkModels models;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 3, &models, vertices, tallest, lowest);
-				chunk.second->uploadLOD(vertices, 3, tallest, lowest, &models);
-			}
-			chunk.second->setLOD(3);
-			continue;
-		}
-
-		if (CHECK_LOD_DIST(ck_dist, render_distance, 0.45)) {
-			if (!chunk.second->hasLOD(2)) {
-				std::vector<MeshVertex> vertices;
-				ChunkModels models;
-				GenerateVertices(generator, ck_pos.x, ck_pos.y, 2, &models, vertices, tallest, lowest);
-				chunk.second->uploadLOD(vertices, 2, tallest, lowest, &models);
-			}
-			chunk.second->setLOD(2);
-			continue;
-		}
-
-		if (!chunk.second->hasLOD(0)) {
-			std::vector<MeshVertex> vertices;
-			ChunkModels models;
-			GenerateVertices(generator, ck_pos.x, ck_pos.y, 0, &models, vertices, tallest, lowest);
-			chunk.second->uploadLOD(vertices, 0, tallest, lowest, &models);
-		}
-		chunk.second->setLOD(0);
-	}
+void ChunkWorkerPool::shutdown() {
+    {
+        std::lock_guard lock(m_impl->mutex);
+        m_impl->stopping = true;
+        for (auto& [key, job] : m_impl->pending) job->cancelled = true;
+    }
+    m_impl->changed.notify_all();
+    for (auto& worker : m_impl->workers) if (worker.joinable()) worker.join();
+    reset();
 }
 
+void ChunkWorkerPool::request(const std::vector<ChunkRequest>& requests,
+                              std::shared_ptr<const GenerationSettings> settings) {
+    std::lock_guard lock(m_impl->mutex);
+    if (m_impl->stopping) return;
+    std::set<Key> wanted;
+    for (const auto& request : requests) wanted.insert(key(request));
+    for (auto it = m_impl->pending.begin(); it != m_impl->pending.end();) {
+        if (!wanted.contains(it->first)) {
+            it->second->cancelled = true;
+            it = m_impl->pending.erase(it);
+        } else ++it;
+    }
+    std::erase_if(m_impl->ready, [](const auto& result) { return result.job->cancelled.load(); });
+    m_impl->queued.clear();
+    std::set<Key> enqueued;
+    for (const auto& request : requests) {
+        auto& job = m_impl->pending[key(request)];
+        if (!job) {
+            job = std::make_shared<Impl::Job>();
+            job->request = request;
+            job->settings = settings;
+        }
+        if (!job->started && enqueued.insert(key(request)).second) m_impl->queued.push_back(job);
+    }
+    m_impl->changed.notify_all();
+}
+
+bool ChunkWorkerPool::tryPop(ChunkData& data) {
+    std::lock_guard lock(m_impl->mutex);
+    if (m_impl->ready.empty()) return false;
+    auto result = std::move(m_impl->ready.front());
+    m_impl->ready.pop_front();
+    m_impl->pending.erase(key(result.job->request));
+    m_impl->changed.notify_all();
+    if (result.error) std::rethrow_exception(result.error);
+    data = std::move(result.data);
+    return true;
+}
+
+glm::ivec2 GetChunkPos(glm::vec3 position) {
+    return {int(std::floor(position.x / ChunkRenderUnit::s_chunkScale)),
+            int(std::floor(position.z / ChunkRenderUnit::s_chunkScale))};
+}
+
+glm::ivec2 GetGenerationRange(int position, int renderDistance) {
+    return {std::max(0, position - renderDistance), position + renderDistance};
+}
+
+void ChunkStreamer::update(ChunkArray& chunks, const WorldGenerator& generator, int renderDistance,
+                           glm::vec3 cameraPosition, bool force) {
+    renderDistance = std::max(1, renderDistance);
+    const auto position = GetChunkPos(cameraPosition);
+    const bool newWorld = !m_settings || force || m_lastResolution != ChunkRenderUnit::s_chunkRes ||
+        m_lastScale != ChunkRenderUnit::s_chunkScale || m_lastSeed != generator.m_seed;
+    if (newWorld) {
+        m_settings = std::make_shared<GenerationSettings>(generator);
+        m_workers.reset();
+        for (auto& chunk : chunks) delete chunk.second;
+        chunks.clear();
+    }
+    if (newWorld || position != m_lastPosition || renderDistance != m_lastDistance) {
+        m_lastPosition = position;
+        m_lastDistance = renderDistance;
+        m_lastResolution = ChunkRenderUnit::s_chunkRes;
+        m_lastScale = ChunkRenderUnit::s_chunkScale;
+        m_lastSeed = generator.m_seed;
+        const auto xRange = GetGenerationRange(position.x, renderDistance);
+        const auto zRange = GetGenerationRange(position.y, renderDistance);
+        std::erase_if(chunks, [&](const auto& chunk) {
+            const auto p = chunk.first;
+            if (p.x >= xRange.x && p.x < xRange.y && p.y >= zRange.x && p.y < zRange.y) return false;
+            delete chunk.second;
+            return true;
+        });
+        std::map<std::pair<int, int>, ChunkRenderUnit*> loaded;
+        for (auto& chunk : chunks) loaded[{chunk.first.x, chunk.first.y}] = chunk.second;
+        std::vector<ChunkRequest> requests;
+        for (int x = xRange.x; x < xRange.y; ++x) {
+            for (int z = zRange.x; z < zRange.y; ++z) {
+                const int lod = desiredLOD({x, z}, position, renderDistance);
+                auto found = loaded.find({x, z});
+                if (found != loaded.end() && found->second->hasLOD(lod)) found->second->setLOD(lod);
+                else requests.push_back({{x, z}, lod});
+            }
+        }
+        std::stable_sort(requests.begin(), requests.end(), [&](const auto& a, const auto& b) {
+            auto da = a.position - position;
+            auto db = b.position - position;
+            return double(da.x) * da.x + double(da.y) * da.y < double(db.x) * db.x + double(db.y) * db.y;
+        });
+        m_workers.request(requests, m_settings);
+    }
+
+    // GL and the resource cache belong to the main thread. Limit uploads per frame
+    // and stop after a small time budget; an individual driver call cannot be preempted.
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(2);
+    for (int uploads = 0; uploads < 2; ++uploads) {
+        ChunkData data;
+        if (!m_workers.tryPop(data)) break;
+        auto found = std::find_if(chunks.begin(), chunks.end(), [&](const auto& chunk) {
+            return chunk.first == data.request.position;
+        });
+        ChunkModels models;
+        const bool replaceModels = found == chunks.end() || data.request.lod < found->second->m_modelsLOD;
+        if (replaceModels) {
+            for (const auto& instance : data.models) {
+                if (!m_modelCache.contains(instance.path))
+                    m_modelCache.emplace(instance.path, ResourceManager::LoadModel(instance.path));
+                models.addInstance(instance.path, instance.position, instance.rotation, instance.scale, false);
+            }
+            models.submitData();
+        }
+        if (found == chunks.end()) {
+            chunks.push_back({data.request.position, new ChunkRenderUnit(data.vertices, data.tallest,
+                data.lowest, std::move(models), data.request.lod, &data.indices)});
+        } else {
+            found->second->uploadLOD(data.vertices, data.request.lod, data.tallest, data.lowest,
+                replaceModels ? &models : nullptr, &data.indices);
+            found->second->setLOD(data.request.lod);
+        }
+        if (std::chrono::steady_clock::now() >= deadline) break;
+    }
 }
 
 }

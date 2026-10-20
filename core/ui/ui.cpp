@@ -260,6 +260,7 @@ void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks
 			ImGui::GetIO().Framerate);
 
 	IMGUI_INPUT(render_distance, ImGuiDataType_S32);
+	render_distance = std::max(1, render_distance);
 
 	auto chunk_pos = ChunkGeneration::GetChunkPos(Camera::Position());
 	ImGui::Text("Chunk Pos: (%d, %d)", chunk_pos.x, chunk_pos.y);
@@ -275,7 +276,7 @@ void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks
 	ImGui::End();
 }
 
-bool GenerationWindow(int &chunk_size, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator) {
+bool GenerationWindow(int &chunk_size, uint64_t &seed, int& render_distance, ChunkGeneration::ChunkArray &chunks, WorldGenerator &generator, ChunkGeneration::ChunkStreamer& streamer) {
 	bool redraw = false;
 
 	if (!open_windows.generation) return false;
@@ -302,15 +303,13 @@ bool GenerationWindow(int &chunk_size, uint64_t &seed, int& render_distance, Chu
 
 	if (ImGui::Button("Generate mesh")) {
 		redraw = true;
+		// Every LOD needs at least one cell and must cover the same chunk extent.
+		chunk_size = std::max(16, chunk_size / 16 * 16);
 		ChunkRenderUnit::s_chunkRes = chunk_size;
 
 		generator = WorldGenerator(150, seed);
 
-		for (auto &chunk : chunks) {
-			delete chunk.second;
-		}
-		chunks.clear();
-		ChunkGeneration::RegenerateChunks(chunks, generator, render_distance, Camera::Position(), true);
+		streamer.update(chunks, generator, render_distance, Camera::Position(), true);
 	}
 	ImGui::End();
 	return redraw;

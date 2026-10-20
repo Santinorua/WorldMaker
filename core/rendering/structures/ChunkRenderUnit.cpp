@@ -1,5 +1,6 @@
 #include "ChunkRenderUnit.h"
 #include "Vertex.h"
+#include <algorithm>
 #include <iostream>
 
 
@@ -26,47 +27,38 @@ namespace WorldMaker
 	void ChunkRenderUnit::setLOD(int lod)
 	{
 		m_current_lod = lod;
-		m_vertices[m_current_lod]->submitData();
-		m_indices[m_current_lod]->submitData();
 		// TODO: Delete buffers when unused
 	}
 
-	void ChunkRenderUnit::uploadLOD(std::vector<MeshVertex>& vertices, int lod, double tallest_point, double lowest_point, ChunkModels *chunkModels)
+	void ChunkRenderUnit::uploadLOD(std::vector<MeshVertex>& vertices, int lod, double tallest_point, double lowest_point, ChunkModels *chunkModels, const std::vector<unsigned int>* generatedIndices)
 	{
-		std::vector<unsigned int> indices = GetIndicesForChunk(lod);
-		m_vertices.insert({lod, std::make_unique<SSBO<MeshVertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT)});
-		m_indices.insert({lod, std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT)});
+		if (hasLOD(lod)) return;
+		const auto fallbackIndices = generatedIndices ? std::vector<unsigned int>{} : GetIndicesForChunk(lod);
+		const auto& indices = generatedIndices ? *generatedIndices : fallbackIndices;
+		m_vertices.insert({lod, std::make_unique<SSBO<MeshVertex>>(vertices.size(), GL_DYNAMIC_STORAGE_BIT)});
+		m_indices.insert({lod, std::make_unique<SSBO<unsigned int>>(indices.size(), GL_DYNAMIC_STORAGE_BIT)});
 
 		m_vertices[lod]->pushData(vertices);
 
 		m_indices[lod]->pushData(indices);
+		m_vertices[lod]->submitData();
+		m_indices[lod]->submitData();
 
 		if (chunkModels != nullptr) {
 			m_models = *chunkModels;
+			m_modelsLOD = lod;
 		}
 
-		m_tallestPoint = tallest_point;
-		m_lowestPoint = lowest_point;
+		m_tallestPoint = std::max({m_tallestPoint, tallest_point, m_models.tallestPoint});
+		m_lowestPoint = std::min({m_lowestPoint, lowest_point, m_models.lowestPoint});
 	}
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod)
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod, const std::vector<unsigned int>* indices)
 	{
-		std::vector<unsigned int> indices = GetIndicesForChunk(lod);
-		m_vertices.insert({lod, std::make_unique<SSBO<MeshVertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT)});
-		m_indices.insert({lod, std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT)});
-
-		m_indices[lod]->pushData(indices);
-
-		m_vertices[lod]->pushData(vertices);
-
+		m_tallestPoint = tallestPoint;
+		m_lowestPoint = lowestPoint;
+		uploadLOD(vertices, lod, tallestPoint, lowestPoint, &chunkModels, indices);
 		setLOD(lod);
-
-		std::cout << "Original tallest for " << this << ": " << tallestPoint << '\n';
-		std::cout << "Original lowest for " << this << ": " << lowestPoint << '\n';
-
-		m_models = chunkModels;
-		m_lowestPoint = std::min(lowestPoint, chunkModels.lowestPoint);
-		m_tallestPoint = std::max(tallestPoint, chunkModels.tallestPoint);
 	}
 
 	std::vector<unsigned int> ChunkRenderUnit::GetIndicesForChunk(int lod)
@@ -94,7 +86,7 @@ namespace WorldMaker
         return indices;
 	}
 
-	void ChunkModels::addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot, glm::vec3 scale)
+	void ChunkModels::addInstance(const std::string& modelPath, glm::vec3 pos, glm::quat rot, glm::vec3 scale, bool submit)
 	{
         ModelSPtr model = ResourceManager::LoadModel(modelPath);
         auto& ssbo = m_modelInstancesSSBO[model->instanceId()].second;
@@ -107,9 +99,14 @@ namespace WorldMaker
             glm::mat4_cast(rot) *
             glm::scale(glm::mat4(1), scale);
         ssbo->pushData(modelMat);
-        ssbo->submitData();
+        if (submit) ssbo->submitData();
         m_modelInstancesSSBO[model->instanceId()].first = model;
         tallestPoint = std::max(tallestPoint, pos.y + model->tallestPoint() * scale.y);
-        lowestPoint = std::max(lowestPoint, pos.y + model->lowestPoint() * scale.y);
+        lowestPoint = std::min(lowestPoint, pos.y + model->lowestPoint() * scale.y);
+	}
+
+	void ChunkModels::submitData()
+	{
+		for (auto& [id, model] : m_modelInstancesSSBO) model.second->submitData();
 	}
 }
