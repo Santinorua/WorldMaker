@@ -5,6 +5,8 @@
 #include "Interpolations.h"
 #include "BiomeGenerator.h"
 
+#include <algorithm>
+
 namespace WorldMaker {
 
     WorldGenerator::WorldGenerator(double yScale, uint64_t seed) {
@@ -19,21 +21,26 @@ namespace WorldMaker {
         m_humidity = FractalNoise(20.0, 1.0, nextSeed, 4, 2.5, 0.25);
         nextSeed = PRNG::nextNumber64(nextSeed);
         m_base = FractalNoise(60.0, 1.5, nextSeed, 4, 2.0, 0.5);
+        nextSeed = PRNG::nextNumber64(nextSeed);
+        m_rivers = FractalNoise(30.0, 1.0, nextSeed, 3, 2.0, 0.2);
+        nextSeed = PRNG::nextNumber64(nextSeed);
         m_featureSeed = PRNG::nextNumber64(nextSeed);
     }
 
-    double WorldGenerator::getHeight(double erosion, double continentalness, double base) {
-        double continentalnessModifier;
+    double WorldGenerator::getHeight(double erosion, double continentalness, double humidity, double rivers, double base, std::vector<BiomeWeight> &biomeWeights) {
 
+        // Continentalness
+        double continentalnessModifier;
         if (continentalness >= -0.1) {
             continentalnessModifier = 0;
 
         } else if (continentalness >= -0.6) {
-            continentalnessModifier = Lerp(-0.5, 0.0, ((continentalness+0.6) * 2), true);
+            continentalnessModifier = Lerp(-0.3, 0.0, ((continentalness+0.6) * 2), true);
         } else {
-            continentalnessModifier = -0.5;
+            continentalnessModifier = -0.3;
         }
 
+        // Erosion
         double erosionModifier;
         if (erosion >= 0.8) {
             erosionModifier = erosion;
@@ -43,7 +50,36 @@ namespace WorldMaker {
             erosionModifier = Lerp(0.0, 0.2, (erosion * 10.0) / 6.0, false);
         }
 
-        double final = base * erosionModifier + continentalnessModifier;
+        // Apply each biome's modifier chain to the same base height, then blend
+        // the results using the same normalized weights as the vertex color.
+        const int riverBiomeId = BiomeGenerator::getBiomeId("Rivers");
+        if (riverBiomeId >= 0 && humidity > -0.4 && rivers >= -0.04 && rivers <= 0.04) {
+            double riverWeight = Lerp(0.0, 1.0, 1.0 - (std::abs(rivers) * 25), true);
+            for (BiomeWeight &biomeWeight : biomeWeights) {
+                biomeWeight.weight *= 1-riverWeight;
+            }
+            // Weights contain only nearby biomes, ordered by dominance, not by ID.
+            auto river = std::find_if(biomeWeights.begin(), biomeWeights.end(),
+                                     [riverBiomeId](const BiomeWeight &weight) {
+                                         return weight.biomeId == riverBiomeId;
+                                     });
+            if (river != biomeWeights.end()) {
+                river->weight += riverWeight;
+            } else {
+                biomeWeights.push_back({riverBiomeId, riverWeight});
+            }
+            std::stable_sort(biomeWeights.begin(), biomeWeights.end(),
+                 [](const BiomeWeight &a, const BiomeWeight &b) {
+                     return a.weight > b.weight;
+                 });
+        }
+
+        double baseHeight = base * erosionModifier + continentalnessModifier;
+        double final = 0.0;
+        for (const BiomeWeight &biomeWeight : biomeWeights) {
+            final += BiomeGenerator::m_biomes[biomeWeight.biomeId].applyModifiers(baseHeight)
+                     * biomeWeight.weight;
+        }
 
         return final;
     }
@@ -53,49 +89,35 @@ namespace WorldMaker {
         double erosion = (m_erosion.getNoise(x, z) + 0.5);
         double temperature = m_temperature.getNoise(x, z);
         double humidity = m_humidity.getNoise(x, z);
+        double rivers = m_rivers.getNoise(x, z);
         double base = m_base.getNoise(x, z);
 
         double height = getHeight(erosion, continentalness, base);
 
         double params[4] = {erosion, continentalness, temperature, humidity};
-        Biome biome = BiomeGenerator::getBiome(params);
-        int biomeId = BiomeGenerator::getBiomeId(biome.name);
+
+        auto biomeWeights = BiomeGenerator::getBiomeWeights(params);
+
+        double height = getHeight(erosion, continentalness, humidity, rivers, base, biomeWeights);
+
+        int biomeId = biomeWeights.front().biomeId;
+        const Biome &biome = BiomeGenerator::m_biomes[biomeId];
+
 
         generatorVertex v;
         v.m_color = {1.0,1.0,1.0,1.0};
 
-        if (continentalness >= -0.1) {
-            v.m_color = biome.biomeColor;
-            for (int featureId : biome.m_features) {
-                // Feature *currentFeature = &FeatureManager::m_features[i];
-                if (FeatureManager::m_features[featureId].terrestrialStatus != 0) {
-                    continue;
-                }
-                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
-            }
-        } else if (continentalness >= -0.6) {
-            for (int featureId : biome.m_features) {
-                // Feature *currentFeature = &FeatureManager::m_features[i];
-                if (FeatureManager::m_features[featureId].terrestrialStatus != 1) {
-                    continue;
-                }
+        for (int featureId : biome.m_features) {
+            FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
+            v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
+        }
 
-                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
-            }
-            v.m_color = {Lerp(0.0, biome.biomeColor.x, ((continentalness+0.6) * 2), true), Lerp(0.0, biome.biomeColor.y, ((continentalness+0.6) * 2), true), Lerp(1.0, biome.biomeColor.z, ((continentalness+0.6) * 2), true), 1.0};
-        } else {
-            for (int featureId : biome.m_features) {
-                // Feature *currentFeature = &FeatureManager::m_features[i];
-                if (FeatureManager::m_features[featureId].terrestrialStatus != 2) {
-                    continue;
-                }
-
-                FeatureNoise featureNoise = FeatureNoise(m_featureSeed, FeatureManager::m_features[featureId].radius[biomeId], FeatureManager::m_features[featureId].probability[biomeId]);
-                v.m_featureId = featureNoise.getNoise(x, z) * (FeatureManager::getFeatureId(FeatureManager::m_features[featureId]) + 1);
-            }
-            v.m_color = {0.0, 0.0, 1.0, 1.0};
+        v.m_color = {0.0, 0.0, 0.0, 1.0};
+        for (const BiomeWeight &biomeWeight : biomeWeights) {
+            const Vec4 &color = BiomeGenerator::m_biomes[biomeWeight.biomeId].biomeColor;
+            v.m_color.x += color.x * biomeWeight.weight;
+            v.m_color.y += color.y * biomeWeight.weight;
+            v.m_color.z += color.z * biomeWeight.weight;
         }
 
         v.m_uv = { static_cast<float>(x) / 10.0f, static_cast<float>(z) / 10.0f };

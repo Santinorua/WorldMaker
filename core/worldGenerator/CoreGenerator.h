@@ -21,7 +21,7 @@ namespace WorldMaker {
             return
             {
                 m_position.x, m_position.y, m_position.z,
-                m_color.x, m_color.y, m_color.z, m_color.y,
+                m_color.x, m_color.y, m_color.z, m_color.w,
                 m_materialLayer,
                 m_uv.x, m_uv.y,
                 m_normal.x, m_normal.y, m_normal.z
@@ -46,10 +46,11 @@ namespace WorldMaker {
         FractalNoise m_continentalness;
         FractalNoise m_temperature;
         FractalNoise m_humidity;
+        FractalNoise m_rivers;
         FractalNoise m_base;
         uint64_t m_featureSeed;
     public:
-        double getHeight(double erosion, double continentalness, double base);
+        double getHeight(double erosion, double continentalness, double humidity, double rivers, double base, std::vector<BiomeWeight> &biomeWeights);
         generatorVertex getVertex(float x, float z);
         WorldGenerator(double yScale, uint64_t seed);
     };

@@ -5,6 +5,8 @@
 namespace WorldMaker
 {
     double Lerp(double a, double b, double t, bool useSmoothStep) {
+        // if (t < 0) return a;
+        // if (t > 1) return b;
         if (useSmoothStep) {
             t = SmoothStep(t);
         }

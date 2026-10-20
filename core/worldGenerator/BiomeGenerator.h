@@ -30,22 +30,23 @@ namespace WorldMaker {
     class Modifier {
         std::function<double(const double &value)> m_modifierFunction;
 
+    public:
         double getValue(const double &value) {
             return m_modifierFunction(value);
         }
+        Modifier(std::function<double(const double &value)> modifierFunction) : m_modifierFunction(modifierFunction) {}
     };
 
     // template<typename T>
     class Biome {
         double m_idealConditions[4] =  {-2.0, -2.0, -2.0, -2.0};
         std::vector<ConditionGroup> m_conditionGroups;
-        double m_featureProbability = 0.1;
-        std::vector<Modifier> m_modifiers;
 
     public:
         std::string name;
         Vec4 biomeColor;
         std::vector<int> m_features;
+        std::vector<Modifier> m_modifiers;
 
         void setIdealCondition(BiomeDeterminators determinator, double value) {
             m_idealConditions[(int)determinator] = value;
@@ -62,6 +63,7 @@ namespace WorldMaker {
         void addFeature(int featureId) {
             m_features.push_back(featureId);
         }
+
         void removeFeature(int featureId) {
             for (int i = 0; i < m_features.size(); i++) {
                 if (m_features[i] == featureId) {
@@ -70,19 +72,30 @@ namespace WorldMaker {
                 }
             }
         }
+
+
+
         double idealDistance(double params[4]);
         void addConditionGroup(const ConditionGroup &conditionGroup);
         void removeConditionGroup(const int index);
         void moveModifierUp(int idx);
         void moveModifierDown(int idx);
+        double applyModifiers(const double &value);
 
     };
 
+
+    struct BiomeWeight {
+        int biomeId;
+        double weight;
+    };
 
     class BiomeGenerator {
     public:
         static std::vector<Biome> m_biomes;
         static Biome getBiome(double params[4]);
+        // Normalized weights for all nearby biomes; the dominant biome is first.
+        static std::vector<BiomeWeight> getBiomeWeights(double params[4]);
         static void addBiome(const Biome &biome);
         static void removeBiome(int index);
         static int getBiomeId(const std::string &name);
