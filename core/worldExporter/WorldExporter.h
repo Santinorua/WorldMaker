@@ -17,7 +17,7 @@ namespace WorldMaker
     public:
         using ModelMeshCache = std::unordered_map<unsigned int, std::vector<int>>;
 
-        static void ExportWorld(ChunkGeneration::ChunkArray chunks);
+        static bool ExportWorld(const ChunkGeneration::ChunkArray& chunks);
         static void ExportChunkToGLB(ChunkRenderUnit* chunk);
         static void ExportModelToGLB(ModelSPtr model, const std::string& outPath);
 

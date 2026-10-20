@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "ChunkRenderUnit.h"
 #include "BiomeGenerator.h"
+#include "WorldExporter.h"
 
 #include "Input.h"
 
@@ -16,6 +17,7 @@
 #include <cmath>
 #include <cctype>
 #include <filesystem>
+#include <set>
 #include "FileFunctions.h"
 
 namespace WorldMaker {
@@ -102,7 +104,88 @@ void end() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void DockSpace(bool &quit) {
+static bool show_export = false;
+static bool export_attempted = false;
+static bool export_succeeded = false;
+static size_t exported_chunk_count = 0;
+
+static void ExportWindow(const ChunkGeneration::ChunkArray &chunks) {
+	if (!show_export) return;
+	using Coordinate = std::pair<int, int>;
+	static std::set<Coordinate> selected;
+	static bool initialized = false;
+	std::set<Coordinate> loaded;
+	for (const auto &[position, chunk] : chunks)
+		if (chunk) loaded.emplace(position.x, position.y);
+	if (!initialized && !loaded.empty()) {
+		selected = loaded;
+		initialized = true;
+	}
+	// Keep coordinates, never chunk pointers: chunks can be regenerated or unloaded.
+	std::erase_if(selected, [&](const Coordinate &coordinate) { return !loaded.contains(coordinate); });
+
+	ImGui::SetNextWindowSize(ImVec2(460, 520), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Export World", &show_export)) {
+		ImGui::Text("Selected: %zu / %zu loaded chunks", selected.size(), loaded.size());
+		ImGui::TextWrapped("Choose the chunks to include. Newly loaded chunks are not selected automatically.");
+		if (ImGui::Button("Select All")) selected = loaded;
+		ImGui::SameLine();
+		if (ImGui::Button("Select None")) selected.clear();
+		ImGui::SameLine();
+		if (ImGui::Button("Invert Selection")) {
+			for (const auto &coordinate : loaded) {
+				if (!selected.erase(coordinate)) selected.insert(coordinate);
+			}
+		}
+		if (ImGui::BeginTable("Chunks", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY, ImVec2(0, 240))) {
+			ImGui::TableSetupColumn("Export");
+			ImGui::TableSetupColumn("Chunk X");
+			ImGui::TableSetupColumn("Chunk Z");
+			ImGui::TableSetupScrollFreeze(0, 1);
+			ImGui::TableHeadersRow();
+			for (const auto &coordinate : loaded) {
+				ImGui::PushID(coordinate.first);
+				ImGui::PushID(coordinate.second);
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				bool included = selected.contains(coordinate);
+				if (ImGui::Checkbox("##ExportChunk", &included)) {
+					if (included) selected.insert(coordinate); else selected.erase(coordinate);
+				}
+				ImGui::TableSetColumnIndex(1);
+				ImGui::Text("%d", coordinate.first);
+				ImGui::TableSetColumnIndex(2);
+				ImGui::Text("%d", coordinate.second);
+				ImGui::PopID();
+				ImGui::PopID();
+			}
+			ImGui::EndTable();
+		}
+		if (loaded.empty()) ImGui::TextUnformatted("No chunks loaded.");
+		ImGui::TextWrapped("Exports selected terrain and models to world.glb. Replaces the previous export.");
+		std::error_code error;
+		auto destination = std::filesystem::current_path(error);
+		if (!error) ImGui::TextWrapped("Destination: %s", (destination / "world.glb").string().c_str());
+		ImGui::BeginDisabled(selected.empty());
+		if (ImGui::Button("Export Selected (.glb)")) {
+			ChunkGeneration::ChunkArray subset;
+			for (const auto &entry : chunks)
+				if (entry.second && selected.contains({entry.first.x, entry.first.y})) subset.push_back(entry);
+			export_succeeded = WorldExporter::ExportWorld(subset);
+			export_attempted = true;
+			exported_chunk_count = subset.size();
+		}
+		ImGui::EndDisabled();
+		if (export_attempted) {
+			if (export_succeeded) ImGui::Text("Exported %zu chunks to world.glb", exported_chunk_count);
+			else ImGui::TextUnformatted("Export failed. Check the console for details.");
+		}
+	}
+	ImGui::End();
+}
+
+void DockSpace(bool &quit, const ChunkGeneration::ChunkArray &chunks) {
+	if (!ImGui::GetIO().WantCaptureKeyboard && ImGui::IsKeyPressed(ImGuiKey_Space, false)) show_export = true;
 	int w, h;
 	glfwGetWindowSize(Renderer::GetWindow(), &w, &h);
 
@@ -146,10 +229,22 @@ void DockSpace(bool &quit) {
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Export")) {
+			ImGui::Text("Loaded chunks: %zu", chunks.size());
+			ImGui::Separator();
+			if (ImGui::MenuItem("Choose chunks and export...", "Space")) show_export = true;
+			ImGui::EndMenu();
+		}
+
+		if (export_attempted) {
+			ImGui::TextUnformatted(export_succeeded ? "World exported: world.glb" : "World export failed. Check the console for details.");
+		}
+
 		ImGui::EndMenuBar();
 	}
 
 	ImGui::End();
+	ExportWindow(chunks);
 }
 
 void DebugWindow(int &render_distance, const ChunkGeneration::ChunkArray &chunks) {
