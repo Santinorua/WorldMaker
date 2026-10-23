@@ -27,7 +27,7 @@ namespace WorldMaker
 
         s_vertices->flush();
 
-        int radius = (ChunkRenderUnit::s_chunkRes * renderDistance);
+        int radius = (ChunkRenderUnit::s_chunkRes * renderDistance + ChunkRenderUnit::s_chunkRes);
         float test = 10.0f;
         MeshVertex vertexA;
         vertexA.m_position = Camera::Position()+glm::vec3(-radius, 0, -radius);
