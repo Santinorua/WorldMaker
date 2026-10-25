@@ -109,4 +109,25 @@ namespace WorldMaker
 	{
 		for (auto& [id, model] : m_modelInstancesSSBO) model.second->submitData();
 	}
+
+	std::vector<MeshVertex> &ChunkRenderUnit::getMaxLodVertices() const noexcept {
+		return m_vertices.begin()->second->m_data;
+	}
+
+	std::pair<glm::vec3, glm::vec3> ChunkRenderUnit::getBoundingBox() const noexcept {
+		auto &vertices = getMaxLodVertices();
+
+		const MeshVertex &back = vertices.back();
+		/// TODO: Does it need to be a double?
+		float max_x = back.m_position.x;
+		float max_z = back.m_position.z;
+		float max_y = back.m_position.y;
+
+		const MeshVertex &front = vertices.front();
+		float min_x = front.m_position.x;
+		float min_z = front.m_position.z;
+		float min_y = front.m_position.y;
+
+		return std::make_pair(glm::vec3{ min_x, min_y, min_z }, glm::vec3{ max_x, max_y, max_z });
+	}
 }

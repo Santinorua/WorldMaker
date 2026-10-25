@@ -338,7 +338,7 @@ target_include_directories(editing PUBLIC ${CMAKE_SOURCE_DIR}/core/editing)
 # Core
 
 add_library(Core INTERFACE)
-target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator WorldExporter ChunkGeneration ui)
+target_link_libraries(Core INTERFACE Rendering Vendor Math Input Events Time PRNG Utilities PerlinNoise WorldGenerator WorldExporter ChunkGeneration ui editing)
 
 # -----------------------------------------------------------------------------------------------------
 #######################################################################################################

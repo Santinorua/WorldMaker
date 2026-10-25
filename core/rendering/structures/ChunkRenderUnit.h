@@ -42,6 +42,9 @@ namespace WorldMaker
 		void setLOD(int lod);
 		bool hasLOD(int lod);
 
+		std::pair<glm::vec3, glm::vec3> getBoundingBox() const noexcept;
+		std::vector<MeshVertex> &getMaxLodVertices() const noexcept;
+
 		inline glm::vec3 minPoint() { return glm::vec3(center().x-(s_chunkRes * s_chunkScale)/2.0, m_lowestPoint, center().z - (s_chunkRes * s_chunkScale)/2.0);}
 		inline glm::vec3 maxPoint() { return glm::vec3(center().x+(s_chunkRes * s_chunkScale)/2.0, m_tallestPoint, center().z + (s_chunkRes * s_chunkScale)/2.0);}
 
@@ -49,8 +52,8 @@ namespace WorldMaker
 
 		const ShaderProgramType shaderProgramType = ShaderProgramType::terrain;
 		VertexArrayUPtr m_vertexArray = std::make_unique<VertexArray>();
-		std::unordered_map<int, SSBOUPtr<MeshVertex>> m_vertices; //= { std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT) };
-		std::unordered_map<int, SSBOUPtr<unsigned int>> m_indices; //= std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);
+		std::map<int, SSBOUPtr<MeshVertex>> m_vertices; //= { std::make_unique<SSBO<Vertex>>(baseVertexCount, GL_DYNAMIC_STORAGE_BIT) };
+		std::map<int, SSBOUPtr<unsigned int>> m_indices; //= std::make_unique<SSBO<unsigned int>>(baseIndexCount, GL_DYNAMIC_STORAGE_BIT);
 		ChunkModels m_models = {};
 	};
 	using ChunkRenderUnitUPtr = std::unique_ptr<ChunkRenderUnit>;

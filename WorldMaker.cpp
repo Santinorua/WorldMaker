@@ -40,6 +40,8 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "ui.h"
 
+#include "brushes.h"
+
 using namespace WorldMaker;
 
 
@@ -95,17 +97,6 @@ int main()
 		CoolTime::Update();
         Input::Update();
 
-		ui::begin();
-
-		ui::DockSpace(quit, chunks);
-
-		ui::PreferencesWindow(preferences);
-		ui::DebugWindow(render_distance, chunks);
-
-		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator, chunkStreamer);
-		ui::BiomesWindow();
-		ui::FeaturesWindow();
-
 		Camera::UpdateCameraTransform();
 		Camera::SetFogRenderDistance(static_cast<float>(render_distance * ChunkRenderUnit::s_chunkScale));
 
@@ -117,9 +108,37 @@ int main()
 			Renderer::DrawChunkTerrain(*ck.second);
 			Renderer::DrawChunkModels(*ck.second);
 		}
+
 		if (doRender2D) {
 			Renderer::DrawNoise(noise1);
 		}
+
+		if (Input::GetMouseButtonDown(Mouse_Left)) {
+			double mouse_x, mouse_y;
+			glfwGetCursorPos(Renderer::GetWindow(), &mouse_x, &mouse_y);
+
+			glm::vec2 mouse_pos = {mouse_x, mouse_y};
+
+			glm::uvec2 screen_size = glm::uvec2{Renderer::GetWindowWidth(), Renderer::GetWindowHeight()};
+
+			for (auto& ck : chunks) {
+				glm::vec3 center = ScreenRaycast(*ck.second, mouse_pos, screen_size);
+				if (center.x != 0) {
+					printf("Ray hit at (%f, %f, %f)\n", center.x, center.y, center.z);
+				}
+			}
+		}
+
+		ui::begin();
+
+		ui::DockSpace(quit, chunks);
+
+		ui::PreferencesWindow(preferences);
+		ui::DebugWindow(render_distance, chunks);
+
+		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator, chunkStreamer);
+		ui::BiomesWindow();
+		ui::FeaturesWindow();
 
 		ui::end();
 		glfwSwapBuffers(Renderer::GetWindow());
