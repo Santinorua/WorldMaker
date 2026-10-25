@@ -322,6 +322,15 @@ endif()
 target_include_directories(ui PUBLIC ${CMAKE_SOURCE_DIR}/core/ui)
 
 # -----------------------------------------------------------------------------------------------------
+
+# Editing
+
+file (GLOB EDITING_SRC "${CMAKE_SOURCE_DIR}/core/editing/*.cpp")
+add_library(editing STATIC ${EDITING_SRC})
+target_link_libraries(editing PUBLIC Rendering Math Vendor ChunkGeneration)
+target_include_directories(editing PUBLIC ${CMAKE_SOURCE_DIR}/core/editing)
+
+# -----------------------------------------------------------------------------------------------------
 #######################################################################################################
 #######################################################################################################
 # -----------------------------------------------------------------------------------------------------
