@@ -134,7 +134,11 @@ int main()
 
 			glm::vec3 center = ScreenRaycast(*selected_chunk, mouse_pos, screen_size);
 			if (center.x != 0) {
-				printf("Ray hit at (%f, %f, %f)\n", center.x, center.y, center.z);
+				printf("HIT (%f, %f, %f)\n", center.x, center.y, center.z);
+				auto &ssbo = selected_chunk->getMaxLodSSBO();
+				DrawBrush(Brush(), ssbo.m_data, center);
+				ssbo.submitData();
+//				printf("Ray hit at (%f, %f, %f)\n", center.x, center.y, center.z);
 			}
 		}
 

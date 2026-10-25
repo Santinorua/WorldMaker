@@ -3,6 +3,19 @@
 
 namespace WorldMaker {
 
+float Brush::smoothFalloff(float distance) const noexcept
+{
+	float t = 1.0f - distance / radius;
+
+	return t * t * (3.0f - 2.0f * t);
+}
+
+float Brush::weight(float distance) const noexcept
+{
+	float falloff = smoothFalloff(distance);
+	return falloff * strength;
+}
+
 glm::vec3 RaycastChunk(const ChunkRenderUnit& chunk, const Ray& ray)
 {
 	auto bounding_box = chunk.getBoundingBox();
@@ -60,13 +73,41 @@ glm::vec3 ScreenRaycast(const ChunkRenderUnit& chunk, glm::vec2 mouse_pos, glm::
 	return RaycastChunk(chunk, ray);
 }
 
-void draw_brush_cb(const Brush& brush, std::vector<MeshVertex>& vertices, glm::vec3 center)
+void DrawBrush(const Brush& brush, std::vector<MeshVertex>& vertices, glm::vec3 center)
 {
-	// TODO:
-}
+	const auto &front_pos = vertices.front().m_position;
+	auto local_center = center - glm::vec3 {front_pos.x, front_pos.y, front_pos.z};
+	const auto &back_pos = vertices.back().m_position;
+	int min_x = glm::max(0.0f, local_center.x - brush.radius);
+	int max_x = glm::min(static_cast<float>(ChunkRenderUnit::s_chunkRes) - 1, local_center.x + brush.radius);
 
-const Brush DrawBrush = {
-	.draw_callback = draw_brush_cb,
-};
+	int min_z = glm::max(0.0f, local_center.z - brush.radius);
+	int max_z = glm::min(static_cast<float>(ChunkRenderUnit::s_chunkRes), local_center.z + brush.radius);
+
+	float radius_sq = brush.radius * brush.radius;
+
+	printf("Min x, Max x: %d, %d", min_x, max_x);
+	printf("Min z, Max z: %d, %d", min_z, max_z);
+	for (int z = min_z; z <= max_z; z++) {
+		for (int x = min_x; x <= max_x; x++) {
+			int idx = z * ChunkRenderUnit::s_chunkRes + x;
+			auto& position = vertices[idx].m_position;
+
+			printf("Draw with center @ (%f, %f, %f)\n", center.x, center.y, center.z);
+			printf("Vertex with pos @ (%f, %f, %f)\n", position.x, position.y, position.z);
+			center.y = position.y;
+			glm::vec3 delta = position - center;
+			float dist_sq = glm::dot(delta, delta);
+
+			if (dist_sq > radius_sq)
+				continue;
+
+			float distance = std::sqrt(dist_sq);
+
+			float weight = brush.weight(distance);
+			position.y += weight;
+		}
+	}
+}
 
 }

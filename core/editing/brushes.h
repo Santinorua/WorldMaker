@@ -10,19 +10,15 @@ struct Brush;
 using DrawCallback = void (*)(const Brush&, std::vector<MeshVertex>&, glm::vec3 center);
 
 struct Brush {
-	float radius = 0.5;
+	float radius = 24;
 	float strength = 0.3;
 	float hardness = 0.5;
 
-	DrawCallback draw_callback = empty_callback;
-
-	static float SmoothFalloff() noexcept;
-
-private:
-	static void empty_callback(const Brush&, std::vector<MeshVertex>&, glm::vec3) {}
+	float smoothFalloff(float distance) const noexcept;
+	float weight(float distance) const noexcept;
 };
 
-extern const Brush DrawBrush;
+void DrawBrush(const Brush& brush, std::vector<MeshVertex>& vertices, glm::vec3 center);
 
 struct Ray {
 	glm::vec3 from;

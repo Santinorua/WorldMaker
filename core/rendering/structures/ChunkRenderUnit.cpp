@@ -115,6 +115,10 @@ namespace WorldMaker
 		return m_vertices.begin()->second->m_data;
 	}
 
+	SSBO<MeshVertex> &ChunkRenderUnit::getMaxLodSSBO() const noexcept {
+		return *m_vertices.begin()->second;
+	}
+
 	std::pair<glm::vec3, glm::vec3> ChunkRenderUnit::getBoundingBox() const noexcept {
 		auto &vertices = getMaxLodVertices();
 

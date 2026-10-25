@@ -46,6 +46,7 @@ namespace WorldMaker
 
 		std::pair<glm::vec3, glm::vec3> getBoundingBox() const noexcept;
 		std::vector<MeshVertex> &getMaxLodVertices() const noexcept;
+		SSBO<MeshVertex> &getMaxLodSSBO() const noexcept;
 
 		inline glm::vec3 minPoint() { return glm::vec3(center().x-(s_chunkRes * s_chunkScale)/2.0, m_lowestPoint, center().z - (s_chunkRes * s_chunkScale)/2.0);}
 		inline glm::vec3 maxPoint() { return glm::vec3(center().x+(s_chunkRes * s_chunkScale)/2.0, m_tallestPoint, center().z + (s_chunkRes * s_chunkScale)/2.0);}
