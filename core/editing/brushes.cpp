@@ -60,4 +60,13 @@ glm::vec3 ScreenRaycast(const ChunkRenderUnit& chunk, glm::vec2 mouse_pos, glm::
 	return RaycastChunk(chunk, ray);
 }
 
+void draw_brush_cb(const Brush& brush, std::vector<MeshVertex>& vertices, glm::vec3 center)
+{
+	// TODO:
+}
+
+const Brush DrawBrush = {
+	.draw_callback = draw_brush_cb,
+};
+
 }

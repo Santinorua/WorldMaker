@@ -7,7 +7,7 @@ namespace WorldMaker {
 
 struct Brush;
 
-using DrawCallback = void (*)(const Brush& brush, std::vector<MeshVertex>&);
+using DrawCallback = void (*)(const Brush&, std::vector<MeshVertex>&, glm::vec3 center);
 
 struct Brush {
 	float radius = 0.5;
@@ -19,8 +19,10 @@ struct Brush {
 	static float SmoothFalloff() noexcept;
 
 private:
-	static void empty_callback(const Brush&, std::vector<MeshVertex>&) {}
+	static void empty_callback(const Brush&, std::vector<MeshVertex>&, glm::vec3) {}
 };
+
+extern const Brush DrawBrush;
 
 struct Ray {
 	glm::vec3 from;
