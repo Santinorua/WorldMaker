@@ -16,6 +16,16 @@
 
 namespace WorldMaker::ChunkGeneration {
 
+ChunkRenderUnit* GetChunkAtPos(ChunkArray& chunks, glm::ivec2 pos)
+{
+	const auto& res = std::find_if(chunks.cbegin(), chunks.cend(), [pos](const std::pair<glm::ivec2, ChunkRenderUnit*>& ck) { return ck.first == pos; });
+	if (res != chunks.cend()) {
+		return res->second;
+	}
+
+	return nullptr;
+}
+
 GenerationSettings::GenerationSettings(const WorldGenerator& source)
     : generator(source), biomes(BiomeGenerator::m_biomes), features(FeatureManager::m_features),
       resolution(ChunkRenderUnit::s_chunkRes), scale(ChunkRenderUnit::s_chunkScale) {}
@@ -30,6 +40,7 @@ bool GenerateChunkData(const GenerationSettings& settings, ChunkRequest request,
     data.request = request;
     data.tallest = std::numeric_limits<double>::lowest();
     data.lowest = std::numeric_limits<double>::max();
+	data.id = (request.position.x << 16) | (request.position.y & 0xff);
     // Noise objects are private to this job, even though sampling is read-only.
     auto generator = settings.generator;
     const int cells = settings.resolution >> request.lod;
@@ -291,7 +302,7 @@ void ChunkStreamer::update(ChunkArray& chunks, const WorldGenerator& generator, 
         }
         if (found == chunks.end()) {
             chunks.push_back({data.request.position, new ChunkRenderUnit(data.vertices, data.tallest,
-                data.lowest, std::move(models), data.request.lod, &data.indices)});
+                data.lowest, std::move(models), data.request.lod, data.id, &data.indices)});
         } else {
             found->second->uploadLOD(data.vertices, data.request.lod, data.tallest, data.lowest,
                 replaceModels ? &models : nullptr, &data.indices);

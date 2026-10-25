@@ -8,6 +8,7 @@ namespace WorldMaker
 {
 	int ChunkRenderUnit::s_chunkRes = 64; // Amount of pixels per chunk
 	double ChunkRenderUnit::s_chunkScale = 64; // Amount of pixels per chunk
+	uint32_t ChunkRenderUnit::s_nextID = 1;
 
 	glm::vec3 ChunkRenderUnit::center()
 	{
@@ -53,7 +54,7 @@ namespace WorldMaker
 		m_lowestPoint = std::min({m_lowestPoint, lowest_point, m_models.lowestPoint});
 	}
 
-	ChunkRenderUnit::ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod, const std::vector<unsigned int>* indices)
+	ChunkRenderUnit::ChunkRenderUnit(std::vector<MeshVertex>& vertices, double tallestPoint, double lowestPoint, ChunkModels chunkModels, int lod, int id, const std::vector<unsigned int>* indices) : m_ID(id)
 	{
 		m_tallestPoint = tallestPoint;
 		m_lowestPoint = lowestPoint;

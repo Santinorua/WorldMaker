@@ -100,11 +100,27 @@ int main()
 		Camera::UpdateCameraTransform();
 		Camera::SetFogRenderDistance(static_cast<float>(render_distance * ChunkRenderUnit::s_chunkScale));
 
+		glm::vec2 mouse_pos = Input::GetCursorPosPix();
+
+		ChunkRenderUnit *selected_chunk = nullptr;
+		if (Input::GetMouseButtonDown(Mouse_Left)) {
+			Renderer::BeginSelectionDraw();
+			for (auto& ck : chunks) {
+				if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
+				Renderer::SelectionDrawChunkTerrain(*ck.second);
+			}
+			const glm::ivec2 res = Renderer::SelectPos(mouse_pos.x, mouse_pos.y);
+			selected_chunk = ChunkGeneration::GetChunkAtPos(chunks, res);
+			Renderer::EndSelectionDraw();
+		}
+
 		WorldWater::UpdateWaterTransform(render_distance);
+
 		Renderer::DrawWater();
 		Renderer::DrawSkybox();
 		for (auto& ck : chunks) {
-		    if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
+			if (!Camera::CanSeeBox(ck.second->minPoint(), ck.second->maxPoint()) && preferences.frustrum_culling_enabled) continue;
+
 			Renderer::DrawChunkTerrain(*ck.second);
 			Renderer::DrawChunkModels(*ck.second);
 		}
@@ -113,19 +129,12 @@ int main()
 			Renderer::DrawNoise(noise1);
 		}
 
-		if (Input::GetMouseButtonDown(Mouse_Left)) {
-			double mouse_x, mouse_y;
-			glfwGetCursorPos(Renderer::GetWindow(), &mouse_x, &mouse_y);
-
-			glm::vec2 mouse_pos = {mouse_x, mouse_y};
-
+		if (selected_chunk) {
 			glm::uvec2 screen_size = glm::uvec2{Renderer::GetWindowWidth(), Renderer::GetWindowHeight()};
 
-			for (auto& ck : chunks) {
-				glm::vec3 center = ScreenRaycast(*ck.second, mouse_pos, screen_size);
-				if (center.x != 0) {
-					printf("Ray hit at (%f, %f, %f)\n", center.x, center.y, center.z);
-				}
+			glm::vec3 center = ScreenRaycast(*selected_chunk, mouse_pos, screen_size);
+			if (center.x != 0) {
+				printf("Ray hit at (%f, %f, %f)\n", center.x, center.y, center.z);
 			}
 		}
 
@@ -139,7 +148,6 @@ int main()
 		bool redraw = ui::GenerationWindow(chunk_size, seed, render_distance, chunks, generator, chunkStreamer);
 		ui::BiomesWindow();
 		ui::FeaturesWindow();
-
 		ui::end();
 		glfwSwapBuffers(Renderer::GetWindow());
 

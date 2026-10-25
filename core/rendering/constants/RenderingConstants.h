@@ -18,5 +18,5 @@ namespace WorldMaker
 	static const unsigned int ssboAmplifier = 10; // When trying to add data to a ssbo and there is not enough space for more, change its max size
 	static const unsigned int ssboOversizeMultiplier = 50; // When trying to add data to a ssbo and this data has a bigger size than the max capacity of the ssbo, change its max size
 
-	static const unsigned int shadersAmount = 5;
+	static const unsigned int shadersAmount = 6;
 }

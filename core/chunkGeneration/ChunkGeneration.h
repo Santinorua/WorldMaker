@@ -13,6 +13,8 @@ namespace WorldMaker::ChunkGeneration {
 
 using ChunkArray = std::vector<std::pair<glm::ivec2, ChunkRenderUnit*>>;
 
+ChunkRenderUnit* GetChunkAtPos(ChunkArray& chunks, glm::ivec2 pos);
+
 // Captured on the main thread. Workers never read editable globals or touch GL.
 struct GenerationSettings {
     WorldGenerator generator;
@@ -42,6 +44,7 @@ struct ChunkData {
     std::vector<ModelInstance> models;
     double tallest = 0;
     double lowest = 0;
+	int id;
 };
 
 bool GenerateChunkData(const GenerationSettings& settings, ChunkRequest request,

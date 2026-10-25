@@ -10,7 +10,6 @@
 #include "RenderingConstants.h"
 #include "ShaderProgram.h"
 #include "ResourceManager.h"
-#include "Pointers.h"
 #include "Camera.h"
 #include "GlobalLight.h"
 #include "GPUResourceManager.h"
@@ -67,11 +66,13 @@ namespace WorldMaker
 
         s_bakeFBO.Init(2048);
 
-        s_shaderProgramsByType[ShaderProgramType::noise] = ResourceManager::LoadShaderProgram(noiseVertexShaderPath, noiseFragmentShaderPath);
-        s_shaderProgramsByType[ShaderProgramType::terrain] = ResourceManager::LoadShaderProgram(TerrainVertexShaderPath, terrainFragmentShaderPath);
-        s_shaderProgramsByType[ShaderProgramType::model] = ResourceManager::LoadShaderProgram(modelVertexShaderPath, modelFragmentShaderPath);
-        s_shaderProgramsByType[ShaderProgramType::baking] = ResourceManager::LoadShaderProgram(bakingVertexShaderPath, bakingFragmentShaderPath);
-        s_shaderProgramsByType[ShaderProgramType::skybox] = ResourceManager::LoadShaderProgram(skyboxVertexShaderPath, skyboxFragmentShaderPath);
+        s_shaderProgramsByType[static_cast<int>(ShaderProgramType::noise)] = std::make_shared<ShaderProgram>("core/rendering/shaders/NoiseVertexShader.glsl", "core/rendering/shaders/NoiseFragmentShader.glsl");
+        s_shaderProgramsByType[static_cast<int>(ShaderProgramType::terrain)] = std::make_shared<ShaderProgram>("core/rendering/shaders/TerrainVertexShader.glsl", "core/rendering/shaders/TerrainFragmentShader.glsl");
+        s_shaderProgramsByType[static_cast<int>(ShaderProgramType::model)] = std::make_shared<ShaderProgram>("core/rendering/shaders/ModelVertexShader.glsl", "core/rendering/shaders/ModelFragmentShader.glsl");
+        s_shaderProgramsByType[static_cast<int>(ShaderProgramType::baking)] = std::make_shared<ShaderProgram>("core/rendering/shaders/BakingVertexShader.glsl", "core/rendering/shaders/BakingFragmentShader.glsl");
+        s_shaderProgramsByType[static_cast<int>(ShaderProgramType::skybox)] = ResourceManager::LoadShaderProgram(skyboxVertexShaderPath, skyboxFragmentShaderPath);
+        s_shaderProgramsByType[static_cast<int>(ShaderProgramType::picking)] = std::make_shared<ShaderProgram>("core/rendering/shaders/PickingVertexShader.glsl", "core/rendering/shaders/PickingFragmentShader.glsl");
+//s_shaderProgramsByType[static_cast<int>(ShaderProgramType::water)] = std::make_shared<ShaderProgram>("core/rendering/shaders/WaterVertexShader.glsl", "core/rendering/shaders/WaterFragmentShader.glsl");
 
         WorldWater::Init();
         Skybox::Init();
@@ -81,7 +82,7 @@ namespace WorldMaker
 	void Renderer::PrepareToDrawNoise(NoiseRenderUnit& noise)
 	{
 		noise.vertexArray->bind();
-		ShaderProgramSPtr shaderProgram = Renderer::s_shaderProgramsByType[noise.shaderProgramType];
+		ShaderProgramSPtr shaderProgram = Renderer::s_shaderProgramsByType[static_cast<int>(noise.shaderProgramType)];
 		shaderProgram->bind();
 		shaderProgram->setUniform1i("u_texture", 0);
 
@@ -102,7 +103,7 @@ namespace WorldMaker
 	{
     	GLCall(glDisable(GL_DEPTH_TEST));
         GLCall(glDisable(GL_CULL_FACE));
-		ShaderProgramSPtr shaderProgram = Renderer::s_shaderProgramsByType[ShaderProgramType::baking];
+		ShaderProgramSPtr shaderProgram = Renderer::s_shaderProgramsByType[static_cast<int>(ShaderProgramType::baking)];
 		shaderProgram->bind();
         shaderProgram->setUniform1f("u_chunkSize", ChunkRenderUnit::s_chunkRes);
         shaderProgram->setUniform2f("u_chunkWorldOrigin", chunk.minPoint().x, chunk.minPoint().z);
@@ -118,7 +119,7 @@ namespace WorldMaker
 	void Renderer::DrawWater()
 	{
 	    GLCall(glDisable(GL_CULL_FACE));
-		ShaderProgramSPtr shaderProgram = s_shaderProgramsByType[ShaderProgramType::terrain];
+		ShaderProgramSPtr shaderProgram = s_shaderProgramsByType[static_cast<int>(ShaderProgramType::terrain)];
 		shaderProgram->bind();
 		ShaderProgram::s_boundShader->updateCameraData();
 		GlobalLight::LoadLightSettings();
@@ -132,7 +133,7 @@ namespace WorldMaker
 	void Renderer::DrawSkybox()
 	{
 	    GLCall(glDisable(GL_CULL_FACE));
-        ShaderProgramSPtr shaderProgram = s_shaderProgramsByType[ShaderProgramType::skybox];
+		ShaderProgramSPtr shaderProgram = s_shaderProgramsByType[static_cast<int>(ShaderProgramType::skybox)];
         shaderProgram->bind();
         ShaderProgram::s_boundShader->updateCameraData();
         Skybox::s_vertexArray->bind();
@@ -146,7 +147,7 @@ namespace WorldMaker
 	void Renderer::DrawChunkTerrain(ChunkRenderUnit& chunk)
 	{
 	    GLCall(glEnable(GL_CULL_FACE));
-	    Renderer::s_shaderProgramsByType[ShaderProgramType::terrain]->bind();
+	    Renderer::s_shaderProgramsByType[static_cast<int>(ShaderProgramType::terrain)]->bind();
 		ShaderProgram::s_boundShader->updateCameraData();
         GlobalLight::LoadLightSettings();
         GPUResourceManager::PrepareToDrawTerrain();
@@ -155,10 +156,44 @@ namespace WorldMaker
 		chunk.m_indices[chunk.m_current_lod]->bindBufferBase(SSBOType::indices);
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size()));
 	}
+
+	void Renderer::BeginSelectionDraw()
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void Renderer::EndSelectionDraw()
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void Renderer::SelectionDrawChunkTerrain(ChunkRenderUnit& chunk)
+	{
+	    GLCall(glEnable(GL_CULL_FACE));
+	    Renderer::s_shaderProgramsByType[static_cast<int>(static_cast<int>(ShaderProgramType::picking))]->bind();
+		ShaderProgram::s_boundShader->updateCameraData();
+		chunk.m_vertexArray->bind();
+		chunk.m_vertices[chunk.m_current_lod]->bindBufferBase(SSBOType::vertices);
+		chunk.m_indices[chunk.m_current_lod]->bindBufferBase(SSBOType::indices);
+		ShaderProgram::s_boundShader->setUniform1ui("u_chunkID", chunk.m_ID);
+		glDrawArrays(GL_TRIANGLES, 0, chunk.m_indices[chunk.m_current_lod]->m_data.size());
+	}
+
+	glm::ivec2 Renderer::SelectPos(int mouse_x, int mouse_y)
+	{
+		GLint viewport[4];
+		uint32_t res;
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		glReadPixels(mouse_x, viewport[3] - mouse_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res);
+		uint8_t *res_cast = reinterpret_cast<uint8_t*>(&res);
+		// FIX: Limited to 255, 255 for selection
+		return {res_cast[2], res_cast[0]};
+	}
+
 	void Renderer::DrawChunkModels(ChunkRenderUnit& chunk)
 	{
 	    GLCall(glDisable(GL_CULL_FACE));
-        Renderer::s_shaderProgramsByType[ShaderProgramType::model]->bind();
+        Renderer::s_shaderProgramsByType[static_cast<int>(ShaderProgramType::model)]->bind();
 		ShaderProgram::s_boundShader->updateCameraData();
         GlobalLight::LoadLightSettings();
 	    for (auto& [modelId, pair] : chunk.m_models.m_modelInstancesSSBO)
